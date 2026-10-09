@@ -354,3 +354,76 @@ body {
     .bottom-cta h2 { font-size: 32px; }
     .button-group-flex { flex-direction: column; gap: 25px; }
 }
+/* ==========================================================================
+   DIAGNOSTICS PAGE ADDITIONS - PREMIUM MATRIX CARD BUTTON INTERFACES
+   ========================================================================== */
+
+.diagnose-subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: #475569;
+    max-width: 600px;
+    margin: -40px auto 60px auto;
+    font-weight: 500;
+}
+
+/* 14 CATEGORY RESPONSIVE GRID MATRIX */
+.symptom-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 60px;
+}
+
+.symptom-card-button {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 35px 20px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.01);
+}
+
+.symptom-card-button:hover {
+    transform: translateY(-3px);
+    border-color: #1E3A8A;
+    box-shadow: 0 12px 24px rgba(30, 58, 138, 0.06);
+}
+
+.symptom-icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+}
+
+.symptom-card-button h4 {
+    color: #0F172A;
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.active-link {
+    color: #1E3A8A !important;
+    border-bottom: 2px solid #1E3A8A;
+    padding-bottom: 4px;
+}
+
+/* RESPONSIVE LAYOUT CONSTRAINTS FOR SMARTPHONES */
+@media (max-width: 992px) {
+    .symptom-selection-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .symptom-selection-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px;
+    }
+    .diagnose-subtitle {
+        margin: -30px auto 40px auto;
+        padding: 0 15px;
+    }
+}
