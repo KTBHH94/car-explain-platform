@@ -1,212 +1,610 @@
-/* OFFICIAL CAR EXPLAIN MASTER LIGHT THEME DESIGN PARAMS */
-:root {
-    --bg-canvas: #FFFFFF;
-    --bg-panel: #F0F4F8;
-    --bg-card: #FFFFFF;
-    --text-main: #1E2229;
-    --text-muted: #5A6578;
-    --accent-blue: #0056B3;
-    --accent-orange: #FF6B00;
-    --border-color: #D3E0EA;
-}
+---
+
+### 🎨 File 2: Your Polished Platinum `styles.css`
+
+*Open **`styles.css`** in VS Code, delete everything currently inside it, paste this master automotive stylesheet, and save (**`Cmd + S`**):*
+
+```css
+/* ==========================================================================
+   OFFICIAL CAR EXPLAIN PREMIUM AUTONOMOUS STYLE ENGINE - EXECUTIVE PLATINUM EDITION
+   ========================================================================== */
 
 body {
-    background-color: var(--bg-canvas);
-    color: var(--text-main);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #F8FAFC; /* 60% Luxury platinum base canvas - eliminates harsh blinding white */
+    color: #1E293B;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
     margin: 0;
     padding: 0;
-    line-height: 1.5;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
 }
 
-.container {
-    max-width: 960px;
+/* 4.1.11 DESKTOP VISUAL WIDTH SYSTEM */
+.site-container {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 40px;
     box-sizing: border-box;
 }
 
-/* 📱 RESPONSIVE BRAND HEADER */
+/* AUTOMOTIVE UI UTILITY BUTTONS */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.btn-primary {
+    background-color: #0056B3; /* The Restrained CarExplain Blue Accent */
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.15);
+}
+
+.btn-primary:hover {
+    background-color: #004085;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 86, 179, 0.25);
+}
+
+.btn-secondary {
+    background-color: #FFFFFF;
+    color: #0A192F;
+    border: 2px solid #0A192F;
+}
+
+.btn-secondary:hover {
+    background-color: #0A192F;
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+.btn-white {
+    background-color: #FFFFFF;
+    color: #0A192F;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.btn-white:hover {
+    background-color: #F1F5F9;
+    transform: translateY(-1px);
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 15px;
+}
+
+/* 4.1.2 STICKY BRAND HEADER PANEL */
 .site-header {
-    background-color: var(--bg-canvas);
-    border-bottom: 1px solid var(--border-color);
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #E2E8F0;
     padding: 20px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
 }
 
-.header-wrap {
+.header-flex {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
+}
+
+.logo-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .brand-logo {
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    color: var(--text-main);
+    font-size: 22px;
+    font-weight: 900;
+    color: #0A192F;
     text-decoration: none;
-    text-transform: uppercase;
+    letter-spacing: 1.5px;
 }
 
 .brand-logo span {
-    color: var(--accent-blue);
+    color: #0056B3;
 }
 
-.main-nav {
+.logo-tagline {
+    font-size: 12px;
+    color: #64748B;
+    border-left: 1px solid #CBD5E1;
+    padding-left: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.main-navigation {
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 32px;
 }
 
-.nav-item {
-    color: var(--text-muted);
+.nav-link {
+    color: #475569;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    transition: color 0.15s ease;
 }
 
-.nav-item:hover, .nav-item.active {
-    color: var(--accent-blue);
-    background-color: #E6EEF8;
+.nav-link:hover {
+    color: #0056B3;
 }
 
-/* ⚡ HERO CORE VALUE CALLOUT */
-.hero-block {
-    text-align: center;
-    padding: 55px 0 40px 0;
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
-.hero-block h1 {
-    font-size: 32px;
+.login-action {
+    color: #475569;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* 4.1.3 HERO LAYOUT CANVAS */
+.hero-section {
+    background-color: #F8FAFC; 
+    padding: 120px 0;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.hero-content .eyebrow {
+    display: block;
+    font-size: 12px;
     font-weight: 800;
-    color: var(--text-main);
-    margin: 0 0 15px 0;
+    color: #0056B3;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
 }
 
-.hero-block h1 span {
-    color: var(--accent-orange);
+.hero-content h1 {
+    font-size: 52px;
+    font-weight: 900;
+    color: #0A192F;
+    line-height: 1.15;
+    margin: 0 0 24px 0;
+    letter-spacing: -1.5px;
 }
 
-.hero-block p {
+.hero-content p {
+    font-size: 19px;
+    color: #475569;
+    margin: 0 0 40px 0;
+    line-height: 1.7;
+}
+
+.hero-cta-group {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.trust-line {
+    font-size: 13px;
+    color: #64748B;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.hero-visual {
+    display: flex;
+    justify-content: center;
+}
+
+.mockup-ui-card {
+    background-color: #FFFFFF; /* High-contrast crisp white visual lift */
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.04);
+}
+
+.mockup-header {
+    border-bottom: 1px solid #E2E8F0;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0A192F;
+    letter-spacing: 0.5px;
+}
+
+.mockup-header .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #28A745;
+}
+
+.mockup-body {
+    padding: 35px 24px;
+}
+
+.mockup-line {
+    height: 10px;
+    background-color: #F1F5F9;
+    margin-bottom: 16px;
+    border-radius: 4px;
+}
+
+.mockup-line.wide { width: 90%; }
+.mockup-line.medium { width: 65%; }
+.mockup-accent-block {
+    height: 130px;
+    background-color: #F0F5FF;
+    border-radius: 6px;
+    margin-top: 30px;
+    border: 1px dashed #D0E1FD;
+}
+
+/* 4.1.4 HORIZONTAL TRUST STRIP */
+.trust-strip {
+    background-color: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 28px 0;
+}
+
+.trust-strip-flex {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.trust-item {
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+}
+
+.trust-item span {
+    color: #28A745;
+    margin-right: 8px;
     font-size: 16px;
-    color: var(--text-muted);
-    max-width: 680px;
-    margin: 0 auto;
+}
+
+/* SECTION HEADERS */
+.section-title {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 900;
+    color: #0A192F;
+    margin-bottom: 60px;
+    letter-spacing: -0.5px;
+}
+
+/* 4.1.5 THREE STEP PRODUCT CONFIGURATION */
+.how-it-works {
+    padding: 100px 0;
+    background-color: #F8FAFC;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.step-card {
+    background-color: #FFFFFF; /* Spaced white tile highlight */
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 40px 30px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.02);
+}
+
+.step-number {
+    font-size: 36px;
+    font-weight: 900;
+    color: #CBD5E1;
+    margin-bottom: 15px;
+    font-variant-numeric: tabular-nums;
+}
+
+.step-card h3 {
+    font-size: 19px;
+    font-weight: 800;
+    color: #0A192F;
+    margin: 0 0 14px 0;
+    line-height: 1.3;
+}
+
+.step-card p {
+    font-size: 14px;
+    color: #475569;
+    margin: 0;
     line-height: 1.6;
 }
 
-/* 🔍 INTERACTIVE SELECTOR TRACKS */
-.selector-box {
-    background-color: var(--bg-panel);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 30px;
-    margin: 20px 0 40px 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+/* 4.1.6 MY GARAGE SHOWCASE PANEL */
+.garage-showcase {
+    background-color: #0A192F; 
+    color: #FFFFFF;
+    padding: 100px 0;
 }
 
-.selector-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin-top: 0;
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-.selector-subtitle {
-    font-size: 14px;
-    color: var(--text-muted);
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.symptom-grid {
+.garage-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
 }
 
-.symptom-btn {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 15px 10px;
+.garage-content h2 {
+    font-size: 40px;
+    font-weight: 900;
+    margin: 0 0 24px 0;
+    letter-spacing: -0.5px;
+}
+
+.garage-content p {
+    color: #94A3B8;
+    font-size: 17px;
+    margin: 0 0 40px 0;
+    line-height: 1.7;
+}
+
+.dashboard-mockup {
+    background-color: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 35px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.dash-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 18px;
+    margin-bottom: 30px;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.dash-row span {
+    color: #94A3B8;
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-main);
-    cursor: pointer;
+}
+
+.dash-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.metric-box {
+    background-color: #0F172A;
+    padding: 18px 12px;
+    border-radius: 6px;
     text-align: center;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    font-size: 14px;
+    border: 1px solid #1E293B;
 }
 
-.symptom-btn:hover {
-    border-color: var(--accent-blue);
-    background-color: #E6EEF8;
-    transform: translateY(-2px);
-}
-
-/* 📋 DYNAMIC ROUTING DISPLAY PANELS */
-.workflow-panel {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 25px;
-    display: none;
-}
-
-.panel-heading {
-    margin-top: 0;
-    font-size: 16px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
-}
-
-.workflow-step {
-    margin-bottom: 15px;
-}
-
-.workflow-step label {
-    display: block;
-    font-size: 13px;
+.metric-box h5 {
+    margin: 0 0 10px 0;
+    color: #64748B;
     font-weight: 700;
     text-transform: uppercase;
+    font-size: 11px;
     letter-spacing: 0.5px;
-    color: var(--accent-blue);
-    margin-bottom: 6px;
 }
 
-.workflow-select {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-canvas);
-    font-size: 14px;
-    color: var(--text-main);
-    outline: none;
-    box-sizing: border-box;
+.status-pass { color: #28A745; font-weight: 700; }
+.status-warn { color: #FF6B00; font-weight: 700; }
+
+/* 4.1.7 FOUR CORE BLOCKS OVERVIEW */
+.features-section {
+    padding: 100px 0;
+    background-color: #F8FAFC;
 }
 
-/* 📌 PRODUCTION FOOTER */
-.site-footer {
-    background-color: var(--bg-panel);
-    border-top: 1px solid var(--border-color);
-    padding: 30px 0;
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+.feature-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.01);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    border-color: #CBD5E1;
+}
+
+.feature-card h4 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0A192F;
+    margin: 0 0 14px 0;
+}
+
+.feature-card p {
+    font-size: 15px;
+    color: #475569;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* 4.1.8 HIGH TRUST SAFETY CONSOLE CONTAINER */
+.safety-section {
+    padding: 80px 0;
+    background-color: #F8FAFC;
+}
+
+.safety-box {
+    border: 1px solid #E2E8F0;
+    background-color: #FFFFFF;
+    padding: 60px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.02);
+}
+
+.safety-box h3 {
+    font-size: 24px;
+    font-weight: 900;
+    color: #0A192F;
+    margin: 0 0 40px 0;
     text-align: center;
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 60px;
+}
+
+.safety-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.safety-grid p {
+    margin: 0;
+    color: #475569;
+}
+
+.safety-grid strong {
+    display: block;
+    color: #0A192F;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+/* 4.1.9 TERMINAL FOOTER CTA ELEMENT */
+.final-cta {
+    background-color: #0A192F;
+    color: #FFFFFF;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.final-cta h2 {
+    font-size: 40px;
+    font-weight: 900;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.5px;
+}
+
+.final-cta p {
+    color: #94A3B8;
+    font-size: 19px;
+    margin: 0 0 45px 0;
+}
+
+.cta-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+.cta-link {
+color: #FFFFFF;
+text-decoration: none;
+font-weight: 700;
+font-size: 15px;
+}
+/* 4.1.10 FOOTER INFRASTRUCTURE GRAPH */
+.site-footer {
+background-color: #FFFFFF;
+border-top: 1px solid #E2E8F0;
+padding: 80px 0 40px 0;
+}
+.footer-grid {
+display: grid;
+grid-template-columns: 1.4fr 0.8fr 0.8fr;
+gap: 60px;
+padding-bottom: 60px;
+border-bottom: 1px solid #F1F5F9;
+}
+.footer-brand .footer-logo {
+font-size: 22px;
+font-weight: 900;
+color: #0A192F;
+}
+.footer-brand .footer-logo span { color: #0056B3; }
+.footer-brand p { font-size: 13px; color: #64748B; margin: 6px 0 0 0; font-weight: 500; }
+.footer-links h5 {
+font-size: 14px;
+font-weight: 800;
+color: #0A192F;
+margin: 0 0 24px 0;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.footer-links a {
+display: block;
+color: #475569;
+text-decoration: none;
+font-size: 14px;
+margin-bottom: 14px;
+font-weight: 500;
+}
+.footer-links a:hover { color: #0056B3; }
+.footer-bottom {
+padding-top: 40px;
+text-align: center;
+font-size: 12px;
+color: #94A3B8;
+line-height: 1.5;
+}
+/* 4.1.12 MOBILE RENDERING GRIDS SPEC */
+@media (max-width: 992px) {
+.hero-grid, .garage-grid {
+grid-template-columns: 1fr;
+gap: 50px;
+text-align: center;
+}
+.hero-cta-group, .cta-flex {
+justify-content: center;
+}
+.mockup-ui-card, .dashboard-mockup {
+margin: 0 auto;
+}
+}
+@media (max-width: 768px) {
+.site-container { padding: 0 24px; }
+.header-flex { flex-direction: column; gap: 20px; text-align: center; }
+.main-navigation { gap: 20px; flex-wrap: wrap; justify-content: center; }
+.header-actions { flex-direction: column; gap: 12px; width: 100%; }
+.header-actions .btn { width: 100%; box-sizing: border-box; }
+.features-grid, .steps-grid, .safety-grid, .footer-grid {
+grid-template-columns: 1fr !important;
+gap: 45px;
+}
+.hero-content h1 { font-size: 36px; }
+.hero-cta-group { flex-direction: column; }
+.cta-flex { flex-direction: column; gap: 20px; }
 }
