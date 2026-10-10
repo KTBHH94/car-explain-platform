@@ -1,25 +1,29 @@
 /* ==========================================================================
-   CAR EXPLAIN PREMIUM WEB SYSTEM - MODERN HIGH-SPACING BLUE & GREY SHEET
+   CAR EXPLAIN MASTER WEB ENGINE - PREMIUM HYPER-SPACED RESPONSIVE LAYER
    ========================================================================== */
 
+html {
+    scroll-behavior: smooth; /* 🚀 Adds high-end smooth sliding when links are clicked */
+}
+
 body {
-    background-color: #E2E8F0; /* Clean, premium grey tone workspace canvas */
+    background-color: #E2E8F0; /* Premium technical slate grey workspace canvas */
     color: #0F172A;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
-    line-height: 1.85; /* Forces direct text separation, ending clumping entirely */
+    line-height: 1.85; /* Absolute separation between individual text rows */
     -webkit-font-smoothing: antialiased;
 }
 
 .site-container {
     max-width: 1240px;
     margin: 0 auto;
-    padding: 0 60px; /* Sweeps everything comfortably away from edges */
+    padding: 0 60px; /* Comfortably sweeps content completely away from screen edges */
     box-sizing: border-box;
 }
 
-/* INTERACTIVE BUTTONS */
+/* INTERACTIVE ACTIONS & BUTTONS */
 .btn {
     display: inline-block;
     padding: 16px 32px;
@@ -68,6 +72,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
 .header-flex {
@@ -103,6 +108,7 @@ body {
     text-decoration: none;
     font-size: 14px;
     font-weight: 700;
+    transition: color 0.2s ease;
 }
 
 .nav-link:hover {
@@ -122,7 +128,7 @@ body {
     font-weight: 700;
 }
 
-/* HERO GRAPHIC POSITIONER */
+/* HERO GRAPHIC BANNER BOX */
 .hero-banner-section {
     padding: 60px 0;
     background-color: #E2E8F0;
@@ -142,12 +148,12 @@ body {
     display: block;
 }
 
-/* TEXT SPACING RULES */
+/* TEXT ELEMENT INSULATION */
 .clean-text {
     font-size: 15px;
     color: #475569;
     margin: 0;
-    line-height: 1.85; /* Complete row insulation */
+    line-height: 1.85;
 }
 
 /* HORIZONTAL CHECK STRIP */
@@ -176,7 +182,7 @@ body {
     margin-right: 10px;
 }
 
-/* COMMON ROW GEOMETRY */
+/* CONTAINER ARCHITECTURE HEADINGS */
 .section-title {
     text-align: center;
     font-size: 36px;
@@ -187,7 +193,7 @@ body {
     letter-spacing: -0.5px;
 }
 
-/* GRIDS SYSTEMS WITH LARGE GAPS */
+/* MASTER WIDESCREEN DESKTOP GRIDS */
 .grid-three-columns {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -203,13 +209,14 @@ body {
 
 .process-section {
     padding: 120px 0;
+    scroll-margin-top: 100px; /* Prevents sticky nav from covering section headers when jumping */
 }
 
 .content-card {
-    background-color: #FFFFFF; /* White cards lift out of grey background */
+    background-color: #FFFFFF; /* High-contrast white blocks lift clean out of grey canvas */
     border: 1px solid #CBD5E1;
     border-radius: 8px;
-    padding: 55px 40px; /* Mass padding inside card elements handles clumping */
+    padding: 55px 40px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01);
 }
 
@@ -226,13 +233,14 @@ body {
     margin: 0 0 18px 0;
 }
 
-/* PRODUCT SHOWCASE BREAKOUT GRID */
+/* PRODUCT FEATURE Breakout MODULE */
 .garage-feature {
-    background-color: #0B132B; /* Balanced dark element breakout layer */
+    background-color: #0B132B; /*Authoritative deep blue breakout block */
     color: #FFFFFF;
     padding: 120px 0;
     border-radius: 8px;
     margin-bottom: 120px;
+    scroll-margin-top: 100px;
 }
 
 .feature-text-block h2 {
@@ -279,10 +287,18 @@ body {
 .text-green { color: #10B981; font-weight: 800; }
 .text-orange { color: #F97316; font-weight: 800; }
 
-/* FEATURES GRID & SAFETY BLOCKS */
-.services-section { padding: 0 0 120px 0; }
+/* SERVICES GRID SECTION */
+.services-section { 
+    padding: 0 0 120px 0; 
+    scroll-margin-top: 100px;
+}
 .services-section .content-card h4 { font-size: 24px; font-weight: 900; margin: 0 0 18px 0; }
-.safety-section { padding: 0 0 120px 0; }
+
+/* SAFETY DATA PANELS */
+.safety-section { 
+    padding: 0 0 120px 0; 
+    scroll-margin-top: 100px;
+}
 
 .compliance-box {
     border: 1px solid #CBD5E1;
@@ -301,7 +317,7 @@ body {
 
 .compliance-box strong { display: block; color: #0F172A; margin-bottom: 10px; font-size: 16px; }
 
-/* BOTTOM PROFILE ACTION TERMINAL */
+/* TERMINAL ACCESS MODULE LOWER BANNER */
 .bottom-cta {
     background-color: #0B132B;
     color: #FFFFFF;
@@ -316,7 +332,7 @@ body {
 .button-group-flex { display: flex; justify-content: center; align-items: center; gap: 40px; }
 .cta-link-white { color: #FFFFFF; text-decoration: none; font-weight: 700; }
 
-/* FOOTER ARCHITECTURE MAP */
+/* MASTER CORPORATE FOOTER */
 .site-footer {
     background-color: #FFFFFF;
     border-top: 2px solid #CBD5E1;
@@ -339,91 +355,90 @@ body {
 .footer-links a { display: block; color: #475569; text-decoration: none; font-size: 14px; margin-bottom: 16px; font-weight: 600; }
 .footer-bottom { padding-top: 50px; text-align: center; font-size: 13px; color: #94A3B8; }
 
-/* PHONE OVERRIDES MODULE */
-@media (max-width: 1024px) {
-    .garage-feature, .bottom-cta { border-radius: 0; }
-}
-
-@media (max-width: 768px) {
-    .site-container { padding: 0 35px; }
-    .header-flex { flex-direction: column; gap: 25px; }
-    .main-navigation { gap: 20px; flex-wrap: wrap; justify-content: center; }
-    .header-actions { flex-direction: column; gap: 14px; width: 100%; }
-    .header-actions .btn { width: 100%; }
-    .grid-three-columns, .grid-two-columns, .footer-grid { grid-template-columns: 1fr !important; gap: 50px; }
-    .bottom-cta h2 { font-size: 32px; }
-    .button-group-flex { flex-direction: column; gap: 25px; }
-}
 /* ==========================================================================
-   DIAGNOSTICS PAGE ADDITIONS - PREMIUM MATRIX CARD BUTTON INTERFACES
+   📱 ELITE AUTOMATED MOBILE ENGINE OVERRIDES (IMPROVES PHONES DRASTICALLY)
    ========================================================================== */
 
-.diagnose-subtitle {
-    text-align: center;
-    font-size: 16px;
-    color: #475569;
-    max-width: 600px;
-    margin: -40px auto 60px auto;
-    font-weight: 500;
-}
-
-/* 14 CATEGORY RESPONSIVE GRID MATRIX */
-.symptom-selection-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin-bottom: 60px;
-}
-
-.symptom-card-button {
-    background-color: #FFFFFF;
-    border: 1px solid #CBD5E1;
-    border-radius: 6px;
-    padding: 35px 20px;
-    text-align: center;
-    text-decoration: none;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.01);
-}
-
-.symptom-card-button:hover {
-    transform: translateY(-3px);
-    border-color: #1E3A8A;
-    box-shadow: 0 12px 24px rgba(30, 58, 138, 0.06);
-}
-
-.symptom-icon {
-    font-size: 32px;
-    margin-bottom: 16px;
-}
-
-.symptom-card-button h4 {
-    color: #0F172A;
-    font-size: 16px;
-    font-weight: 800;
-    margin: 0;
-}
-
-.active-link {
-    color: #1E3A8A !important;
-    border-bottom: 2px solid #1E3A8A;
-    padding-bottom: 4px;
-}
-
-/* RESPONSIVE LAYOUT CONSTRAINTS FOR SMARTPHONES */
-@media (max-width: 992px) {
-    .symptom-selection-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-    }
+@media (max-width: 1024px) {
+    .garage-feature, .bottom-cta { border-radius: 0; } /* Cleaner edge framing on smaller laptops */
 }
 
 @media (max-width: 768px) {
-    .symptom-selection-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 16px;
+    /* 1. Expand standard screen container margins */
+    .site-container { 
+        padding: 0 24px; 
     }
-    .diagnose-subtitle {
-        margin: -30px auto 40px auto;
-        padding: 0 15px;
+
+    /* 2. Reposition crowded navigation headers into vertical layouts */
+    .header-flex { 
+        flex-direction: column; 
+        gap: 20px; 
+        padding: 10px 0;
     }
+    
+    .main-navigation { 
+        gap: 18px; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+    }
+    
+    .header-actions { 
+        flex-direction: column; 
+        gap: 12px; 
+        width: 100%; 
+    }
+    
+    /* Make actions full thumb width on mobile screens */
+    .header-actions .btn { 
+        width: 100%; 
+        box-sizing: border-box;
+    }
+
+    /* 3. Collapse squashed columns into deep vertical card blocks */
+    .grid-three-columns, 
+    .grid-two-columns, 
+    .footer-grid { 
+        grid-template-columns: 1fr !important; 
+        gap: 40px; 
+    }
+
+    /* 4. Drop card internal padding to give the core content screen width */
+    .content-card {
+        padding: 40px 24px;
+    }
+
+    .compliance-box {
+        padding: 40px 24px;
+    }
+
+    /* 5. Scale typography sizes so headings do not push layout bounds */
+    .section-title { 
+        font-size: 28px; 
+        margin-bottom: 45px; 
+    }
+    
+    .feature-text-block h2, 
+    .bottom-cta h2 { 
+        font-size: 28px; 
+    }
+
+    /* 6. Expand button stack zones */
+    .button-group-flex { 
+        flex-direction: column; 
+        gap: 20px; 
+    }
+    
+    .button-group-flex .btn {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 7. Insulate metric dash elements from layout distortion */
+.ui-mockup-box {
+padding: 24px;
+}
+.mockup-metric-grid {
+grid-template-columns: 1fr !important; /* Prevents tiny crushed grid boxes on phones */
+gap: 12px;
+}
 }
