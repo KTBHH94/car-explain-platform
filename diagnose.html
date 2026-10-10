@@ -5,99 +5,206 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Diagnostics | Car Explain Platform</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Unified Shell Design Alignments */
+        body { background-color: #E2E8F0; margin: 0; font-family: -apple-system, sans-serif; }
+        .site-container { max-width: 1240px; margin: 0 auto; padding: 0 60px; box-sizing: border-box; }
+        
+        /* 14 Category Responsive Grid Matrix */
+        .symptom-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 40px;
+        }
+        .symptom-card-button {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            padding: 35px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .symptom-card-button:hover {
+            transform: translateY(-3px);
+            border-color: #1E3A8A;
+            box-shadow: 0 12px 24px rgba(30, 58, 138, 0.08);
+        }
+        .symptom-icon { font-size: 32px; margin-bottom: 12px; }
+        .symptom-card-button h4 { color: #0F172A; font-size: 16px; font-weight: 800; margin: 0; }
+        
+        /* Interactive Question Panels */
+        .interactive-panel {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            padding: 50px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            display: none;
+        }
+        .question-group { margin-bottom: 35px; }
+        .question-group h3 { font-size: 18px; font-weight: 800; color: #0F172A; margin: 0 0 15px 0; }
+        .options-flex { display: flex; gap: 15px; flex-wrap: wrap; }
+        
+        /* Option Selection Controls */
+        .option-label {
+            background-color: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            padding: 14px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .option-label:hover { border-color: #1E3A8A; background-color: #F1F5F9; }
+        .hidden-radio { display: none; }
+        .hidden-radio:checked + .option-label {
+            background-color: #1E3A8A;
+            color: #FFFFFF;
+            border-color: #1E3A8A;
+        }
+
+        /* Results Matrix Presentation */
+        .report-box {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            padding: 50px;
+            margin-top: 40px;
+            box-shadow: 0 15px 45px rgba(15, 23, 42, 0.05);
+            display: none;
+        }
+        .report-section { border-bottom: 1px solid #E2E8F0; padding-bottom: 30px; margin-bottom: 30px; }
+        .report-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+        .report-section h3 { font-size: 14px; font-weight: 900; color: #64748B; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0; }
+        .report-value { font-size: 16px; color: #334155; margin: 0; font-weight: 500; }
+        .report-value strong { color: #0F172A; font-size: 22px; }
+
+        /* Media Viewport Responsive Modulators */
+        @media (max-width: 992px) { .symptom-selection-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .site-container { padding: 0 24px; }
+            .symptom-selection-grid { grid-template-columns: 1fr; gap: 16px; }
+            .interactive-panel, .report-box { padding: 40px 20px; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- EXECUTIVE NAV CONSOLE -->
+    <!-- MATCHING MASTER SITE HEADER -->
     <header class="site-header">
         <div class="site-container header-flex">
             <div class="logo-group">
                 <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
             </div>
             <nav class="main-navigation">
-                <a href="diagnose.html" class="nav-link active-link">Diagnostics</a>
-                <a href="#" class="nav-link">My Garage</a>
-                <a href="#" class="nav-link">Community</a>
-                <a href="#" class="nav-link">Car Research</a>
+                <a href="diagnose.html" class="nav-link">Diagnostics</a>
+                <a href="index.html#garage" class="nav-link">My Garage</a>
+                <a href="index.html#features" class="nav-link">Community</a>
+                <a href="index.html#features" class="nav-link">Car Research</a>
             </nav>
             <div class="header-actions">
                 <a href="#" class="login-action">Log In</a>
-                <a href="#" class="btn btn-primary">Get Started</a>
+                <a href="index.html" class="btn btn-primary">Get Started</a>
             </div>
         </div>
     </header>
 
-    <main>
-        <!-- DIAGNOSTICS SELECTION BLOCK -->
-        <section class="process-section">
-            <div class="site-container">
-                <h1 class="section-title">Initialize System Fault Isolation</h1>
-                <p class="diagnose-subtitle">Select the primary symptom track displaying an active anomaly to initialize dynamic parameter questions.</p>
+    <main class="site-container">
+        <!-- SELECTION MENU INTERFACE LAYER -->
+        <section id="symptom-menu-section" class="process-section">
+            <h1 class="section-title">Initialize System Fault Isolation</h1>
+            <p class="diagnose-subtitle" style="text-align:center; color:#475569; margin:-40px 0 50px 0;">Select the primary symptom track displaying an active anomaly to initialize dynamic parameter questions.</p>
 
-                <!-- 14 BLUEPRINT SYMPTOM CATEGORIES GRID -->
-                <div class="symptom-selection-grid">
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">🔊</div>
-                        <h4>Unusual Noise</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">⚠️</div>
-                        <h4>Warning Light</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">🔑</div>
-                        <h4>Starting Problem</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">🛑</div>
-                        <h4>Braking System</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">🔄</div>
-                        <h4>Steering &amp; Control</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">📳</div>
-                        <h4>Vibration Anomaly</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">🌡️</div>
-                        <h4>Engine Overheating</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">💧</div>
-                        <h4>Fluid Leakage</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">⚡</div>
-                        <h4>Electrical Problem</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">⚙️</div>
-                        <h4>Engine Performance</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">🕹️</div>
-                        <h4>Clutch &amp; Gearbox</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">⭕</div>
-                        <h4>Tyres &amp; Wheels</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">⛓️</div>
-                        <h4>Suspension Track</h4>
-                    </a>
-                    <a href="#" class="symptom-card-button">
-                        <div class="symptom-icon">❓</div>
-                        <h4>Other Unspecified</h4>
-                    </a>
+            <div class="symptom-selection-grid">
+                <div onclick="openNoiseTrack()" class="symptom-card-button"><div class="symptom-icon">🔊</div><h4>Unusual Noise</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">⚠️</div><h4>Warning Light</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">🔑</div><h4>Starting Problem</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">🛑</div><h4>Braking System</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">🔄</div><h4>Steering &amp; Control</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">📳</div><h4>Vibration Anomaly</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">🌡️</div><h4>Engine Overheating</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">💧</div><h4>Fluid Leakage</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">⚡</div><h4>Electrical Problem</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">⚙️</div><h4>Engine Performance</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">🕹️</div><h4>Clutch &amp; Gearbox</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">⭕</div><h4>Tyres &amp; Wheels</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">⛓️</div><h4>Suspension Track</h4></div>
+                <div class="symptom-card-button"><div class="symptom-icon">❓</div><h4>Other Unspecified</h4></div>
+            </div>
+        </section>
+        <!-- INTERACTIVE QUESTION CONSOLE -->
+        <section id="noise-question-panel" class="interactive-panel">
+            <h2 style="font-size:26px; font-weight:900; margin:0 0 10px 0; text-transform:uppercase;">Noise Parameter Isolation</h2>
+            <p style="color:#64748B; margin:0 0 40px 0; font-size:15px;">Configure the physical behavior attributes of the vehicle fault below.</p>
+
+            <form id="diagForm">
+                <div class="question-group">
+                    <h3>1. Where is the noise coming from?</h3>
+                    <div class="options-flex">
+                        <input type="radio" name="where" id="w1" value="Front" class="hidden-radio"><label for="w1" class="option-label">Front Axle / Wheels</label>
+                        <input type="radio" name="where" id="w2" value="Rear" class="hidden-radio"><label for="w2" class="option-label">Rear Axle / Wheels</label>
+                        <input type="radio" name="where" id="w3" value="Engine" class="hidden-radio"><label for="w3" class="option-label">Engine Bay</label>
+                        <input type="radio" name="where" id="w4" value="Underneath" class="hidden-radio"><label for="w4" class="option-label">Underneath the Car</label>
+                    </div>
                 </div>
+
+                <div class="question-group">
+                    <h3>2. What type of sound is it?</h3>
+                    <div class="options-flex">
+                        <input type="radio" name="type" id="t1" value="Grinding" class="hidden-radio"><label for="t1" class="option-label">Heavy Grinding Metal</label>
+                        <input type="radio" name="type" id="t2" value="Squeaking" class="hidden-radio"><label for="t2" class="option-label">High-Pitched Squeaking</label>
+                        <input type="radio" name="type" id="t3" value="Knocking" class="hidden-radio"><label for="t3" class="option-label">Dull Knocking Thud</label>
+                        <input type="radio" name="type" id="t4" value="Clicking" class="hidden-radio"><label for="t4" class="option-label">Sharp Repetitive Clicking</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <h3>3. When does the sound occur actively?</h3>
+                    <div class="options-flex">
+                        <input type="radio" name="when" id="wh1" value="Braking" class="hidden-radio"><label for="wh1" class="option-label">Only When Applying Brakes</label>
+                        <input type="radio" name="when" id="wh2" value="Turning" class="hidden-radio"><label for="wh2" class="option-label">Only When Turning the Wheel</label>
+                        <input type="radio" name="when" id="wh3" value="Bumps" class="hidden-radio"><label for="wh3" class="option-label">Going Over Speed Bumps</label>
+                        <input type="radio" name="when" id="wh4" value="Constant" class="hidden-radio"><label for="wh4" class="option-label">Constant / Speed Related</label>
+                    </div>
+                </div>
+
+                <div style="margin-top:50px; display:flex; gap:20px;">
+                    <button type="button" onclick="runAnalysisProtocol()" class="btn btn-primary" style="border:none; cursor:pointer;">Generate System Evaluation Report</button>
+                    <button type="button" onclick="resetToMenu()" class="btn btn-white" style="cursor:pointer;">← Back to Tracks</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- SAVED EVALUATION MATRIX REPORT LAYOUT -->
+        <section id="analysis-report-box" class="report-box">
+            <h2 style="font-size:28px; font-weight:900; margin:0 0 35px 0; text-transform:uppercase; border-bottom:2px solid #0F172A; padding-bottom:15px;">System Evaluation Matrix</h2>
+            <div class="report-section">
+                <h3>Potential System Malfunctions</h3>
+                <p class="report-value"><strong id="resultPossibility">Gathering metrics...</strong></p>
+            </div>
+            <div class="report-section">
+                <h3>Technical Framework Interpretation</h3>
+                <p id="resultExplanation" class="clean-text">Analyzing parameters...</p>
+            </div>
+            <div class="report-section">
+                <h3>Action &amp; Workshop Protocol</h3>
+                <p id="resultAction" class="report-value" style="font-weight:700; color:#1E3A8A;">Verifying safety threshold...</p>
+            </div>
+            <div style="margin-top:40px;">
+                <button type="button" onclick="resetToMenu()" class="btn btn-primary" style="border:none; cursor:pointer;">Run Another Isolation Check</button>
             </div>
         </section>
     </main>
 
-    <!-- FOOTER -->
+    <!-- MATCHING MASTER MULTI-COLUMN CORPORATE FOOTER -->
     <footer class="site-footer">
         <div class="site-container footer-grid">
             <div class="footer-brand">
@@ -107,9 +214,9 @@
             <div class="footer-links">
                 <h5>Services</h5>
                 <a href="diagnose.html">Fault Finder</a>
-                <a href="#">Garage Logs</a>
-                <a href="#">Quote Checker</a>
-                <a href="#">Car Research</a>
+                <a href="index.html#garage">Garage Logs</a>
+                <a href="index.html#features">Quote Checker</a>
+                <a href="index.html#features">Car Research</a>
             </div>
             <div class="footer-links">
                 <h5>Legal &amp; Policy</h5>
@@ -120,9 +227,59 @@
             </div>
         </div>
         <div class="site-container footer-bottom">
-            <p>&copy; 2026 Car Explain. All rights reserved. Platform outputs are reference guides only.</p>
+            <p>&copy; 2026 Car Explain. All rights reserved. Platform outputs are for reference guides only and do not replace professional garage verification.</p>
         </div>
     </footer>
 
+    <script>
+        function openNoiseTrack() {
+            document.getElementById('symptom-menu-section').style.display = 'none';
+            document.getElementById('noise-question-panel').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+        function resetToMenu() {
+            document.getElementById('noise-question-panel').style.display = 'none';
+            document.getElementById('analysis-report-box').style.display = 'none';
+            document.getElementById('symptom-menu-section').style.display = 'block';
+            document.getElementById('diagForm').reset();
+            window.scrollTo(0,0);
+        }
+        function runAnalysisProtocol() {
+            const where = document.querySelector('input[name="where"]:checked')?.value;
+            const type = document.querySelector('input[name="type"]:checked')?.value;
+            const when = document.querySelector('input[name="when"]:checked')?.value;
+
+            if(!where || !type || !when) {
+                alert('Please select an option for all 3 parameter questions to run diagnostics safely.');
+                return;
+            }
+
+            let mainFault = "Unspecified Component Wear";
+            let explanation = "Your symptoms point toward general mechanical movement discrepancies. Monitor the sound progression closely.";
+            let advice = "Book an assessment with a mechanic for structural verification.";
+
+            if (where === "Front" && type === "Grinding" && when === "Braking") {
+                mainFault = "Worn Front Brake Pads & Discs (Critical Friction Depletion)";
+                explanation = "A metallic grinding noise localized to the front axle during brake application indicates that the friction pads have worn away entirely. The metal backing plates are pressing directly against the brake discs.";
+                advice = "🚨 SAFETY CRITICAL WARNING: Stop driving immediately. Operating the vehicle without friction material will warp the steel brake discs, significantly extend stopping distances, and risk total hydraulic caliper lock failure.";
+            } else if (where === "Front" && type === "Clicking" && when === "Turning") {
+                mainFault = "Failing Constant Velocity (CV) Joint Matrix";
+                explanation = "Repetitive clicking sounds radiating from the front wheel assemblies while turning tightly indicate worn ball bearings or torn protective rubber boots inside your driveshaft CV joints.";
+                advice = "Urgency Level - Inspection Required Soon: Avoid hard acceleration while fully turning the steering lock. Schedule an inspection at a professional garage within the next 100 miles to prevent complete driveshaft snapping.";
+            } else if (where === "Underneath" && type === "Knocking" && when === "Bumps") {
+                mainFault = "Worn Suspension Stabilizer Drop Links or Rubber Bushings";
+                explanation = "Heavy knocking sounds underneath the vehicle when rolling over speed restrictions reveal excessive play in your anti-roll bar mount tracks or loose trailing arms.";
+                advice = "Urgency Level - Routine Workshop Check: The vehicle is structurally stable to navigate, but component wear will cause premature tyre shoulder degradation. Ask your garage to check your chassis linkages during your next routine service.";
+            }
+
+            document.getElementById('resultPossibility').innerText = mainFault;
+            document.getElementById('resultExplanation').innerText = explanation;
+            document.getElementById('resultAction').innerText = advice;
+
+            document.getElementById('noise-question-panel').style.display = 'none';
+            document.getElementById('analysis-report-box').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+    </script>
 </body>
 </html>
