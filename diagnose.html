@@ -125,7 +125,7 @@
 
             <div class="symptom-selection-grid">
                 <div onclick="openNoiseTrack()" class="symptom-card-button"><div class="symptom-icon">🔊</div><h4>Unusual Noise</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">⚠️</div><h4>Warning Light</h4></div>
+                <div onclick="openWarningLightTrack()" class="symptom-card-button"><div class="symptom-icon">⚠️</div><h4>Warning Light</h4></div>
                 <div class="symptom-card-button"><div class="symptom-icon">🔑</div><h4>Starting Problem</h4></div>
                 <div class="symptom-card-button"><div class="symptom-icon">🛑</div><h4>Braking System</h4></div>
                 <div class="symptom-card-button"><div class="symptom-icon">🔄</div><h4>Steering &amp; Control</h4></div>
@@ -140,6 +140,46 @@
                 <div class="symptom-card-button"><div class="symptom-icon">❓</div><h4>Other Unspecified</h4></div>
             </div>
         </section>
+           
+        <!-- INTERACTIVE WARNING LIGHT QUESTION PANEL -->
+        <section id="warning-light-question-panel" class="interactive-panel">
+            <h2 style="font-size:26px; font-weight:900; margin:0 0 10px 0; text-transform:uppercase;">Dash Indicator Parameter Isolation</h2>
+            <p style="color:#64748B; margin:0 0 40px 0; font-size:15px;">Configure the color illumination and active behaviors of your warning symbol fault below.</p>
+
+            <form id="warningForm">
+                <div class="question-group">
+                    <h3>1. What color is the active dashboard illumination indicator light?</h3>
+                    <div class="options-flex">
+                        <input type="radio" name="lightColor" id="c1" value="Red" class="hidden-radio"><label for="c1" class="option-label" style="border-left: 4px solid #EF4444;">Illuminated Red Symbol</label>
+                        <input type="radio" name="lightColor" id="c2" value="Amber" class="hidden-radio"><label for="c2" class="option-label" style="border-left: 4px solid #F59E0B;">Illuminated Amber / Yellow</label>
+                        <input type="radio" name="lightColor" id="c3" value="BlueGreen" class="hidden-radio"><label for="c3" class="option-label" style="border-left: 4px solid #10B981;">Illuminated Blue / Green</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <h3>2. What is the live behavior performance pattern of the light?</h3>
+                    <div class="options-flex">
+                        <input type="radio" name="lightBehavior" id="b1" value="Solid" class="hidden-radio"><label for="b1" class="option-label">Solid Static Continuous Glow</label>
+                        <input type="radio" name="lightBehavior" id="b2" value="Flashing" class="hidden-radio"><label for="b2" class="option-label">Rapid Intermittent Flashing / Blinking</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <h3>3. Are there accompanying engine mechanical powertrain symptoms present?</h3>
+                    <div class="options-flex">
+                        <input type="radio" name="lightSymptoms" id="s1" value="Limpmode" class="hidden-radio"><label for="s1" class="option-label">Severe Power Loss / Limp Mode Triggered</label>
+                        <input type="radio" name="lightSymptoms" id="s2" value="Overheating" class="hidden-radio"><label for="s2" class="option-label">Temperature Dial High / Smoke Evident</label>
+                        <input type="radio" name="lightSymptoms" id="s3" value="None" class="hidden-radio"><label for="s3" class="option-label">No Observable Performance Loss Detriment</label>
+                    </div>
+                </div>
+
+                <div style="margin-top:50px; display:flex; gap:20px;">
+                    <button type="button" onclick="runWarningLightAnalysis()" class="btn btn-primary" style="border:none; cursor:pointer;">Generate System Evaluation Report</button>
+                    <button type="button" onclick="resetToMenu()" class="btn btn-white" style="cursor:pointer;">← Back to Tracks</button>
+                </div>
+            </form>
+        </section>
+
         <!-- INTERACTIVE QUESTION CONSOLE -->
         <section id="noise-question-panel" class="interactive-panel">
             <h2 style="font-size:26px; font-weight:900; margin:0 0 10px 0; text-transform:uppercase;">Noise Parameter Isolation</h2>
@@ -231,19 +271,30 @@
         </div>
     </footer>
 
-    <script>
+        <script>
         function openNoiseTrack() {
             document.getElementById('symptom-menu-section').style.display = 'none';
             document.getElementById('noise-question-panel').style.display = 'block';
             window.scrollTo(0,0);
         }
+
+        // Toggles the Warning Light UI panel cleanly
+        function openWarningLightTrack() {
+            document.getElementById('symptom-menu-section').style.display = 'none';
+            document.getElementById('warning-light-question-panel').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+
         function resetToMenu() {
             document.getElementById('noise-question-panel').style.display = 'none';
+            document.getElementById('warning-light-question-panel').style.display = 'none';
             document.getElementById('analysis-report-box').style.display = 'none';
             document.getElementById('symptom-menu-section').style.display = 'block';
             document.getElementById('diagForm').reset();
+            document.getElementById('warningForm').reset();
             window.scrollTo(0,0);
         }
+
         function runAnalysisProtocol() {
             const where = document.querySelector('input[name="where"]:checked')?.value;
             const type = document.querySelector('input[name="type"]:checked')?.value;
@@ -272,14 +323,49 @@
                 advice = "Urgency Level - Routine Workshop Check: The vehicle is structurally stable to navigate, but component wear will cause premature tyre shoulder degradation. Ask your garage to check your chassis linkages during your next routine service.";
             }
 
-            document.getElementById('resultPossibility').innerText = mainFault;
-            document.getElementById('resultExplanation').innerText = explanation;
-            document.getElementById('resultAction').innerText = advice;
+            displayReport(mainFault, explanation, advice);
+        }
+
+        function runWarningLightAnalysis() {
+            const color = document.querySelector('input[name="lightColor"]:checked')?.value;
+            const behavior = document.querySelector('input[name="lightBehavior"]:checked')?.value;
+            const symptoms = document.querySelector('input[name="lightSymptoms"]:checked')?.value;
+
+            if(!color || !behavior || !symptoms) {
+                alert('Please select an option for all 3 dashboard parameters to evaluate safely.');
+                return;
+            }
+
+            let mainFault = "Active System Warning Logged";
+            let explanation = "A dashboard indicator code has been stored in the central vehicle ECU module. An OBD2 network scanning check tool must read the data registry array.";
+            let advice = "Schedule a standard diagnostic code scan checkup process with your local automotive workshop center.";
+
+            // Critical evaluation tree engine rules (Blueprint Section 7.4)
+            if (color === "Red" && behavior === "Solid" && symptoms === "Overheating") {
+                mainFault = "Critical Engine Thermal Runaway Overheating Alert";
+                explanation = "A solid red temperature metric indicator or cooling warning symbol accompanied by heat spikes means your engine blocks have lost coolant pressure or suffered complete water pump impeller damage.";
+                advice = "🚨 EMERGENCY ROADSIDE FAULT CRITICAL: Pull over and shut off your motor assembly instantly inside a safe hard shoulder lane. Continuing operation will blow the head gasket seal profile or warp engine cylinder blocks entirely.";
+            } else if (color === "Amber" && behavior === "Flashing" && symptoms === "Limpmode") {
+                mainFault = "Active Cylinder Misfire Anomaly (Catalytic Converter At Risk)";
+                explanation = "A blinking or flashing Amber check engine system layout indicator warning accompanied by limp mode drop-outs means raw hydrocarbon fuel matrix layers are passing directly into the exhaust streams unburned.";
+                advice = "Urgency Warning Level - Extreme Catalyst Risk: Avoid high rev conditions or trailing heavy loads. Drive directly to the closest technical diagnostics garage immediate center to avoid structural converter meltdown.";
+            } else if (color === "BlueGreen") {
+                mainFault = "Normal Auxiliary Operations Confirmation Status Indicator";
+                explanation = "Blue or green control lights (such as cruise control icons, dynamic lane keep assistants, or cold engine system reminders) indicate operating confirmation parameters, not component failures.";
+                advice = "System Running Metrics Perfect: This is an information layer only. Your vehicle operations parameters are performing normally without registered mechanical defects.";
+            }
+
+            displayReport(mainFault, explanation, advice);
+        }
+
+        function displayReport(fault, expl, adv) {
+            document.getElementById('resultPossibility').innerText = fault;
+            document.getElementById('resultExplanation').innerText = expl;
+            document.getElementById('resultAction').innerText = adv;
 
             document.getElementById('noise-question-panel').style.display = 'none';
+            document.getElementById('warning-light-question-panel').style.display = 'none';
             document.getElementById('analysis-report-box').style.display = 'block';
             window.scrollTo(0,0);
         }
     </script>
-</body>
-</html>
