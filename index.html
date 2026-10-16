@@ -3,41 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Explain | Vehicle Diagnostics & Garage Records</title>
+    <title>CarExplain | Vehicle Diagnostics &amp; Garage Records</title>
+    <meta name="description" content="CarExplain — UK-first platform to understand your car, keep its history and know what to ask before you pay.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- SITE HEADER NAVIGATION -->
+    <!-- ================= SITE HEADER ================= -->
     <header class="site-header">
         <div class="site-container header-flex">
             <div class="logo-group">
                 <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
             </div>
-            <nav class="main-navigation">
-               <a href="diagnose.html" class="nav-link">Diagnostics</a>
-                <a href="#" class="nav-link">My Garage</a>
-                <a href="#" class="nav-link">Community</a>
-                <a href="#" class="nav-link">Car Research</a>
+            <nav class="main-navigation" aria-label="Primary navigation">
+                <a href="diagnose.html" class="nav-link">Diagnostics</a>
+                <a href="#garage" class="nav-link">My Garage</a>
+                <a href="#features" class="nav-link">Community</a>
+                <a href="#features" class="nav-link">Car Research</a>
             </nav>
             <div class="header-actions">
-                <a href="#" class="login-action">Log In</a>
-                <a href="#" class="btn btn-primary">Get Started</a>
+                <a href="diagnose.html" class="login-action">Log In</a>
+                <a href="diagnose.html" class="btn btn-primary">Get Started</a>
             </div>
         </div>
     </header>
 
     <main>
-        <!-- HERO BANNER OVERVIEW -->
+
+        <!-- ================= HERO BANNER ================= -->
         <section class="hero-banner-section">
             <div class="site-container">
                 <div class="banner-wrapper">
-                    <img src="hero-banner.png" alt="Car Explain Banner" class="master-banner-img">
+                    <img src="hero-banner.png" alt="CarExplain — Know Before You Pay" class="master-banner-img">
                 </div>
             </div>
         </section>
 
-        <!-- VALUE STRIP -->
+        <!-- ================= VALUE STRIP ================= -->
         <section class="info-strip">
             <div class="site-container info-strip-flex">
                 <div class="info-item"><span>✓</span> Diagnose Component Faults</div>
@@ -47,8 +49,8 @@
             </div>
         </section>
 
-        <!-- THREE STEP PROCESS -->
-        <section class="process-section">
+        <!-- ================= HOW IT WORKS ================= -->
+        <section class="process-section" id="how">
             <div class="site-container">
                 <h2 class="section-title">How It Works</h2>
                 <div class="grid-three-columns">
@@ -71,13 +73,13 @@
             </div>
         </section>
 
-        <!-- PRODUCT FEATURE: MY GARAGE -->
-        <section class="garage-feature">
+        <!-- ================= MY GARAGE FEATURE ================= -->
+        <section class="garage-feature" id="garage">
             <div class="site-container grid-two-columns">
                 <div class="feature-text-block">
                     <h2>Your Complete Digital Garage</h2>
                     <p class="clean-text">Manage multiple vehicles under one master profile. Save your diagnostic logs, real-world garage fixes, MOT advisory histories, and previous pricing quotes in a single chronological timeline.</p>
-                    <a href="#" class="btn btn-white">Create Your Garage</a>
+                    <a href="diagnose.html" class="btn btn-white">Create Your Garage</a>
                 </div>
                 <div class="feature-visual-block">
                     <div class="ui-mockup-box">
@@ -92,8 +94,8 @@
             </div>
         </section>
 
-        <!-- FOUR CORE SERVICE SYSTEMS -->
-        <section class="services-section">
+        <!-- ================= PLATFORM FEATURES ================= -->
+        <section class="services-section" id="features">
             <div class="site-container">
                 <h2 class="section-title">Platform Features</h2>
                 <div class="grid-two-columns">
@@ -107,7 +109,7 @@
                     </div>
                     <div class="content-card">
                         <h4>Quote Reviewer</h4>
-                        <p class="clean-text">Break down workshop estimates line by line to understand parts costs, labor times, and VAT totals.</p>
+                        <p class="clean-text">Break down workshop estimates line by line to understand parts costs, labour times, and VAT totals.</p>
                     </div>
                     <div class="content-card">
                         <h4>Car Purchase Finder</h4>
@@ -117,8 +119,8 @@
             </div>
         </section>
 
-        <!-- ADVISORY GUARDRAILS -->
-        <section class="safety-section">
+        <!-- ================= SAFETY / GUARDRAILS ================= -->
+        <section class="safety-section" id="safety">
             <div class="site-container compliance-box">
                 <h3>Platform Rules &amp; Advice Thresholds</h3>
                 <div class="grid-two-columns">
@@ -130,43 +132,44 @@
             </div>
         </section>
 
-        <!-- BOTTOM CALL TO ACTION -->
+        <!-- ================= BOTTOM CTA ================= -->
         <section class="bottom-cta">
             <div class="site-container">
                 <h2>Take Control of Your Maintenance Costs</h2>
                 <p class="clean-text">Track your vehicle issues with precision and eliminate diagnostic confusion before talking to mechanics.</p>
                 <div class="button-group-flex">
-                    <a href="#" class="btn btn-primary btn-large">Run Fault Check</a>
-                    <a href="#" class="cta-link-white">Set Up Profile →</a>
+                    <a href="diagnose.html" class="btn btn-primary btn-large">Run Fault Check</a>
+                    <a href="diagnose.html" class="cta-link-white">Set Up Profile →</a>
                 </div>
             </div>
         </section>
+
     </main>
 
-    <!-- PLATFORM FOOTER -->
+    <!-- ================= FOOTER ================= -->
     <footer class="site-footer">
         <div class="site-container footer-grid">
             <div class="footer-brand">
                 <span class="footer-logo">CAR<span>EXPLAIN</span></span>
-                <p>UK AUTOMOTIVE NETWORK</p>
+                <p>KNOW BEFORE YOU PAY</p>
             </div>
             <div class="footer-links">
                 <h5>Services</h5>
-                <a href="#">Fault Finder</a>
-                <a href="#">Garage Logs</a>
-                <a href="#">Quote Checker</a>
-                <a href="#">Car Research</a>
+                <a href="diagnose.html">Fault Finder</a>
+                <a href="#garage">Garage Logs</a>
+                <a href="#features">Quote Checker</a>
+                <a href="#features">Car Research</a>
             </div>
             <div class="footer-links">
                 <h5>Legal &amp; Policy</h5>
-                <a href="#">Privacy Protocol</a>
+                <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Use</a>
                 <a href="#">AI Disclaimer</a>
                 <a href="#">Support Contact</a>
             </div>
         </div>
         <div class="site-container footer-bottom">
-            <p>&copy; 2026 Car Explain. All rights reserved. Platform outputs are for reference guides only and do not replace professional garage verification.</p>
+            <p>&copy; 2026 CarExplain. Reference guidance only — it does not replace professional garage verification.</p>
         </div>
     </footer>
 

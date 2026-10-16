@@ -1,371 +1,1251 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Diagnostics | Car Explain Platform</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Unified Shell Design Alignments */
-        body { background-color: #E2E8F0; margin: 0; font-family: -apple-system, sans-serif; }
-        .site-container { max-width: 1240px; margin: 0 auto; padding: 0 60px; box-sizing: border-box; }
-        
-        /* 14 Category Responsive Grid Matrix */
-        .symptom-selection-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            margin-top: 40px;
-        }
-        .symptom-card-button {
-            background-color: #FFFFFF;
-            border: 1px solid #CBD5E1;
-            border-radius: 8px;
-            padding: 35px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: block;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .symptom-card-button:hover {
-            transform: translateY(-3px);
-            border-color: #1E3A8A;
-            box-shadow: 0 12px 24px rgba(30, 58, 138, 0.08);
-        }
-        .symptom-icon { font-size: 32px; margin-bottom: 12px; }
-        .symptom-card-button h4 { color: #0F172A; font-size: 16px; font-weight: 800; margin: 0; }
-        
-        /* Interactive Question Panels */
-        .interactive-panel {
-            background-color: #FFFFFF;
-            border: 1px solid #CBD5E1;
-            border-radius: 8px;
-            padding: 50px;
-            margin-top: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-            display: none;
-        }
-        .question-group { margin-bottom: 35px; }
-        .question-group h3 { font-size: 18px; font-weight: 800; color: #0F172A; margin: 0 0 15px 0; }
-        .options-flex { display: flex; gap: 15px; flex-wrap: wrap; }
-        
-        /* Option Selection Controls */
-        .option-label {
-            background-color: #F8FAFC;
-            border: 1px solid #CBD5E1;
-            padding: 14px 24px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #475569;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .option-label:hover { border-color: #1E3A8A; background-color: #F1F5F9; }
-        .hidden-radio { display: none; }
-        .hidden-radio:checked + .option-label {
-            background-color: #1E3A8A;
-            color: #FFFFFF;
-            border-color: #1E3A8A;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What's Wrong With My Car? | CarExplain</title>
+<meta name="description" content="CarExplain structured car symptom checker with adaptive questions, safety checks and plain-English guidance.">
+<style>
+:root{
+  --navy:#0f172a; --blue:#1e3a8a; --blue2:#2563eb; --slate:#475569;
+  --muted:#64748b; --line:#dbe3ee; --bg:#f4f7fb; --white:#fff;
+  --green:#047857; --green-bg:#ecfdf5; --amber:#b45309; --amber-bg:#fffbeb;
+  --red:#b91c1c; --red-bg:#fef2f2;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--navy);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
 
-        /* Results Matrix Presentation */
-        .report-box {
-            background-color: #FFFFFF;
-            border: 1px solid #CBD5E1;
-            border-radius: 8px;
-            padding: 50px;
-            margin-top: 40px;
-            box-shadow: 0 15px 45px rgba(15, 23, 42, 0.05);
-            display: none;
-        }
-        .report-section { border-bottom: 1px solid #E2E8F0; padding-bottom: 30px; margin-bottom: 30px; }
-        .report-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-        .report-section h3 { font-size: 14px; font-weight: 900; color: #64748B; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0; }
-        .report-value { font-size: 16px; color: #334155; margin: 0; font-weight: 500; }
-        .report-value strong { color: #0F172A; font-size: 22px; }
+/* ---------- HEADER (matches index.html) ---------- */
+.site-header{
+  background:#fff;
+  border-bottom:2px solid #cbd5e1;
+  padding:26px 0;
+  position:sticky;
+  top:0;
+  z-index:20;
+  box-shadow:0 4px 20px rgba(0,0,0,.02);
+}
+.site-container{max-width:1240px;margin:0 auto;padding:0 28px}
+.header-flex{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand-logo,.footer-logo{font-size:22px;font-weight:900;letter-spacing:-.7px;text-decoration:none}
+.brand-logo{color:var(--navy)}
+.footer-logo{color:#fff}
+.brand-logo span,.footer-logo span{color:var(--blue2)}
+.main-navigation{display:flex;gap:26px}
+.nav-link{font-size:14px;font-weight:700;color:var(--slate);text-decoration:none}
+.nav-link:hover{color:var(--blue2)}
+.header-actions{display:flex;align-items:center;gap:16px}
+.login-action{font-size:14px;font-weight:700;text-decoration:none;color:var(--slate)}
+.login-action:hover{color:var(--blue2)}
 
-        /* Media Viewport Responsive Modulators */
-        @media (max-width: 992px) { .symptom-selection-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) {
-            .site-container { padding: 0 24px; }
-            .symptom-selection-grid { grid-template-columns: 1fr; gap: 16px; }
-            .interactive-panel, .report-box { padding: 40px 20px; }
-        }
-    </style>
+/* ---------- BUTTONS ---------- */
+.btn{border:0;border-radius:8px;padding:12px 18px;font-weight:800;transition:.18s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#172e70;transform:translateY(-1px)}
+.btn-secondary{background:#fff;border:1px solid var(--line);color:var(--navy)}
+.btn-secondary:hover{border-color:var(--blue2)}
+.btn-danger{background:#fff;border:1px solid #fecaca;color:var(--red)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+main{padding:58px 0 80px}
+.hero{text-align:center;max-width:900px;margin:0 auto 38px}
+.eyebrow{display:inline-block;background:#e8eefc;color:var(--blue);font-size:12px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;padding:7px 11px;border-radius:999px}
+.hero h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:16px 0 14px;letter-spacing:-1.6px}
+.hero p{font-size:17px;color:var(--slate);max-width:760px;margin:0 auto}
+
+.context-card,.wizard,.report,.safety-card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 35px rgba(15,23,42,.05)}
+.context-card{padding:24px;margin-bottom:30px}
+.context-card h2{font-size:19px;margin:0 0 5px}
+.context-card p{color:var(--muted);margin:0 0 20px;font-size:14px}
+.context-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.field label{display:block;font-size:12px;font-weight:800;color:var(--slate);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:11px 12px;background:#fff;color:var(--navy);outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+
+.track-header{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:42px 0 16px}
+.track-header h2{margin:0;font-size:23px}
+.track-header p{margin:0;color:var(--muted);font-size:14px}
+.track-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.track{border:1px solid var(--line);background:#fff;border-radius:12px;padding:22px 15px;text-align:left;min-height:130px;transition:.18s ease}
+.track:hover{transform:translateY(-3px);border-color:#9fb4df;box-shadow:0 12px 28px rgba(15,23,42,.08)}
+.track .icon{font-size:28px;margin-bottom:10px}
+.track strong{display:block;font-size:15px}
+.track small{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+
+.wizard{display:none;padding:30px;max-width:900px;margin:30px auto 0}
+.wizard-top{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:20px}
+.progress-wrap{flex:1}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:7px}
+.progress{height:8px;background:#e8edf4;border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;background:var(--blue2);width:0;transition:.25s}
+.track-title{font-size:12px;font-weight:900;color:var(--blue);text-transform:uppercase;letter-spacing:1px}
+.question-number{font-size:13px;color:var(--muted);font-weight:800}
+.question h2{font-size:27px;line-height:1.2;margin:8px 0 9px}
+.question-help{color:var(--slate);margin:0 0 20px;font-size:14px}
+.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.option{border:1px solid #cbd5e1;background:#fff;border-radius:10px;padding:16px;text-align:left;min-height:76px;display:flex;gap:12px;align-items:flex-start;transition:.15s}
+.option:hover{border-color:#7896d1;background:#f8faff}
+.option.selected{border-color:var(--blue2);background:#eef4ff;box-shadow:0 0 0 2px rgba(37,99,235,.08)}
+.option .letter{width:27px;height:27px;border-radius:50%;background:#edf2f7;display:grid;place-items:center;font-size:12px;font-weight:900;flex:0 0 auto}
+.option.selected .letter{background:var(--blue2);color:#fff}
+.option strong{display:block;font-size:14px}
+.option span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.textarea{width:100%;min-height:145px;border:1px solid #cbd5e1;border-radius:10px;padding:14px;resize:vertical}
+.wizard-actions{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:28px;padding-top:20px}
+.wizard-actions .right{display:flex;gap:10px}
+.status-note{font-size:12px;color:var(--muted)}
+
+.report{display:none;margin:32px auto 0;max-width:1000px;overflow:hidden}
+.report-head{padding:30px;background:var(--navy);color:#fff}
+.report-head .eyebrow{background:rgba(255,255,255,.13);color:#fff}
+.report-head h2{font-size:31px;line-height:1.1;margin:12px 0 7px}
+.report-head p{margin:0;color:#dbe7ff}
+.report-body{padding:28px}
+.alert{padding:16px;border-radius:10px;margin-bottom:22px;border:1px solid}
+.alert.red{background:var(--red-bg);border-color:#fecaca;color:#7f1d1d}
+.alert.amber{background:var(--amber-bg);border-color:#fde68a;color:#78350f}
+.alert.green{background:var(--green-bg);border-color:#a7f3d0;color:#065f46}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.report-section{border:1px solid var(--line);border-radius:12px;padding:20px;background:#fff}
+.report-section.full{grid-column:1/-1}
+.report-section h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:0 0 10px}
+.report-section h4{margin:15px 0 7px;font-size:14px}
+.report-section p{margin:0;color:#334155}
+.report-section ul{margin:8px 0 0;padding-left:20px;color:#334155}
+.possibility{font-size:21px;font-weight:900;color:var(--navy)}
+.confidence{display:inline-flex;margin-top:10px;padding:5px 9px;border-radius:999px;background:#eef2ff;color:var(--blue);font-size:11px;font-weight:900}
+.summary-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.summary-list li{padding:9px 11px;background:#f8fafc;border-radius:8px;font-size:13px}
+.report-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+
+/* ---------- FOOTER (matches index.html) ---------- */
+footer{background:var(--navy);color:#fff;padding:50px 0 24px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:35px}
+.footer-brand p,.footer-links a{color:#94a3b8;font-size:13px}
+.footer-links{display:grid;gap:8px;align-content:start}
+.footer-links h4{margin:0 0 5px}
+.footer-links a{text-decoration:none}
+.footer-links a:hover{color:#fff}
+.footer-bottom{border-top:1px solid #263247;margin-top:30px;padding-top:18px;color:#64748b;font-size:12px}
+.hidden{display:none!important}
+
+@media(max-width:1000px){
+  .track-grid{grid-template-columns:repeat(3,1fr)}
+  .context-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:760px){
+  .main-navigation{display:none}
+  .site-container{padding:0 18px}
+  main{padding-top:35px}
+  .context-grid,.track-grid,.option-grid,.report-grid{grid-template-columns:1fr}
+  .report-section.full{grid-column:auto}
+  .wizard{padding:20px}
+  .wizard-top{align-items:flex-start}
+  .header-actions .login-action{display:none}
+  .footer-grid{grid-template-columns:1fr}
+  .track{min-height:0}
+}
+</style>
 </head>
 <body>
 
-    <!-- MATCHING MASTER SITE HEADER -->
-    <header class="site-header">
-        <div class="site-container header-flex">
-            <div class="logo-group">
-                <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
-            </div>
-            <nav class="main-navigation">
-                <a href="diagnose.html" class="nav-link">Diagnostics</a>
-                <a href="index.html#garage" class="nav-link">My Garage</a>
-                <a href="index.html#features" class="nav-link">Community</a>
-                <a href="index.html#features" class="nav-link">Car Research</a>
-            </nav>
-            <div class="header-actions">
-                <a href="#" class="login-action">Log In</a>
-                <a href="index.html" class="btn btn-primary">Get Started</a>
-            </div>
+<header class="site-header">
+  <div class="site-container header-flex">
+    <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
+    <nav class="main-navigation" aria-label="Primary navigation">
+      <a class="nav-link" href="diagnose.html">Diagnostics</a>
+      <a class="nav-link" href="index.html#garage">My Garage</a>
+      <a class="nav-link" href="index.html#features">Community</a>
+      <a class="nav-link" href="index.html#features">Car Research</a>
+    </nav>
+    <div class="header-actions">
+      <a class="login-action" href="#">Log In</a>
+      <a class="btn btn-primary" href="#menu">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main class="site-container">
+  <section class="hero">
+    <span class="eyebrow">CarExplain Diagnostic Assistant</span>
+    <h1>What's Wrong With My Car?</h1>
+    <p>Answer a few structured questions about what you can see, hear and feel. CarExplain narrows down plausible causes, checks for safety-critical symptoms and explains what a garage may investigate — without pretending to physically diagnose the vehicle.</p>
+  </section>
+
+  <section class="context-card" aria-labelledby="vehicle-heading">
+    <h2 id="vehicle-heading">Vehicle context <span style="font-weight:500;color:#64748b">(optional)</span></h2>
+    <p>Adding these details makes the eventual explanation more useful. You can leave anything blank if you do not know it.</p>
+    <div class="context-grid">
+      <div class="field"><label for="make">Make</label><input id="make" placeholder="e.g. Ford"></div>
+      <div class="field"><label for="model">Model</label><input id="model" placeholder="e.g. Fiesta"></div>
+      <div class="field"><label for="year">Year</label><input id="year" inputmode="numeric" placeholder="e.g. 2018"></div>
+      <div class="field"><label for="fuel">Fuel</label><select id="fuel"><option value="">Not sure</option><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option><option>Other</option></select></div>
+      <div class="field"><label for="gearbox">Gearbox</label><select id="gearbox"><option value="">Not sure</option><option>Manual</option><option>Automatic</option><option>CVT</option><option>Other</option></select></div>
+    </div>
+  </section>
+
+  <section id="menu">
+    <div class="track-header">
+      <div>
+        <h2>Choose the symptom that best matches</h2>
+        <p>The question path changes according to your answers.</p>
+      </div>
+    </div>
+    <div class="track-grid" id="trackGrid"></div>
+  </section>
+
+  <section class="wizard" id="wizard" aria-live="polite">
+    <div class="wizard-top">
+      <div class="progress-wrap">
+        <div class="progress-label"><span id="progressText">Question 1</span><span id="progressPct">0%</span></div>
+        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+      <button class="btn btn-secondary" type="button" id="cancelBtn">Cancel</button>
+    </div>
+    <div class="question">
+      <div class="track-title" id="trackTitle"></div>
+      <div class="question-number" id="questionNumber"></div>
+      <h2 id="questionText"></h2>
+      <p class="question-help" id="questionHelp"></p>
+      <div id="questionBody"></div>
+    </div>
+    <div class="wizard-actions">
+      <span class="status-note" id="statusNote">Choose an answer to continue.</span>
+      <div class="right">
+        <button class="btn btn-secondary" type="button" id="backBtn">← Back</button>
+        <button class="btn btn-primary" type="button" id="nextBtn" disabled>Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="report" id="report" aria-live="polite">
+    <div class="report-head">
+      <span class="eyebrow">Diagnostic report</span>
+      <h2 id="reportTitle">Analysis complete</h2>
+      <p id="reportSub"></p>
+    </div>
+    <div class="report-body">
+      <div id="safetyAlert"></div>
+      <div class="report-grid">
+        <div class="report-section full">
+          <h3>What you told us</h3>
+          <ul class="summary-list" id="reportSummary"></ul>
         </div>
-    </header>
-
-    <main class="site-container">
-        <!-- SELECTION MENU INTERFACE LAYER -->
-        <section id="symptom-menu-section" class="process-section">
-            <h1 class="section-title">Initialize System Fault Isolation</h1>
-            <p class="diagnose-subtitle" style="text-align:center; color:#475569; margin:-40px 0 50px 0;">Select the primary symptom track displaying an active anomaly to initialize dynamic parameter questions.</p>
-
-            <div class="symptom-selection-grid">
-                <div onclick="openNoiseTrack()" class="symptom-card-button"><div class="symptom-icon">🔊</div><h4>Unusual Noise</h4></div>
-                <div onclick="openWarningLightTrack()" class="symptom-card-button"><div class="symptom-icon">⚠️</div><h4>Warning Light</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">🔑</div><h4>Starting Problem</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">🛑</div><h4>Braking System</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">🔄</div><h4>Steering &amp; Control</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">📳</div><h4>Vibration Anomaly</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">🌡️</div><h4>Engine Overheating</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">💧</div><h4>Fluid Leakage</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">⚡</div><h4>Electrical Problem</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">⚙️</div><h4>Engine Performance</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">🕹️</div><h4>Clutch &amp; Gearbox</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">⭕</div><h4>Tyres &amp; Wheels</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">⛓️</div><h4>Suspension Track</h4></div>
-                <div class="symptom-card-button"><div class="symptom-icon">❓</div><h4>Other Unspecified</h4></div>
-            </div>
-        </section>
-           
-        <!-- INTERACTIVE WARNING LIGHT QUESTION PANEL -->
-        <section id="warning-light-question-panel" class="interactive-panel">
-            <h2 style="font-size:26px; font-weight:900; margin:0 0 10px 0; text-transform:uppercase;">Dash Indicator Parameter Isolation</h2>
-            <p style="color:#64748B; margin:0 0 40px 0; font-size:15px;">Configure the color illumination and active behaviors of your warning symbol fault below.</p>
-
-            <form id="warningForm">
-                <div class="question-group">
-                    <h3>1. What color is the active dashboard illumination indicator light?</h3>
-                    <div class="options-flex">
-                        <input type="radio" name="lightColor" id="c1" value="Red" class="hidden-radio"><label for="c1" class="option-label" style="border-left: 4px solid #EF4444;">Illuminated Red Symbol</label>
-                        <input type="radio" name="lightColor" id="c2" value="Amber" class="hidden-radio"><label for="c2" class="option-label" style="border-left: 4px solid #F59E0B;">Illuminated Amber / Yellow</label>
-                        <input type="radio" name="lightColor" id="c3" value="BlueGreen" class="hidden-radio"><label for="c3" class="option-label" style="border-left: 4px solid #10B981;">Illuminated Blue / Green</label>
-                    </div>
-                </div>
-
-                <div class="question-group">
-                    <h3>2. What is the live behavior performance pattern of the light?</h3>
-                    <div class="options-flex">
-                        <input type="radio" name="lightBehavior" id="b1" value="Solid" class="hidden-radio"><label for="b1" class="option-label">Solid Static Continuous Glow</label>
-                        <input type="radio" name="lightBehavior" id="b2" value="Flashing" class="hidden-radio"><label for="b2" class="option-label">Rapid Intermittent Flashing / Blinking</label>
-                    </div>
-                </div>
-
-                <div class="question-group">
-                    <h3>3. Are there accompanying engine mechanical powertrain symptoms present?</h3>
-                    <div class="options-flex">
-                        <input type="radio" name="lightSymptoms" id="s1" value="Limpmode" class="hidden-radio"><label for="s1" class="option-label">Severe Power Loss / Limp Mode Triggered</label>
-                        <input type="radio" name="lightSymptoms" id="s2" value="Overheating" class="hidden-radio"><label for="s2" class="option-label">Temperature Dial High / Smoke Evident</label>
-                        <input type="radio" name="lightSymptoms" id="s3" value="None" class="hidden-radio"><label for="s3" class="option-label">No Observable Performance Loss Detriment</label>
-                    </div>
-                </div>
-
-                <div style="margin-top:50px; display:flex; gap:20px;">
-                    <button type="button" onclick="runWarningLightAnalysis()" class="btn btn-primary" style="border:none; cursor:pointer;">Generate System Evaluation Report</button>
-                    <button type="button" onclick="resetToMenu()" class="btn btn-white" style="cursor:pointer;">← Back to Tracks</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- INTERACTIVE QUESTION CONSOLE -->
-        <section id="noise-question-panel" class="interactive-panel">
-            <h2 style="font-size:26px; font-weight:900; margin:0 0 10px 0; text-transform:uppercase;">Noise Parameter Isolation</h2>
-            <p style="color:#64748B; margin:0 0 40px 0; font-size:15px;">Configure the physical behavior attributes of the vehicle fault below.</p>
-
-            <form id="diagForm">
-                <div class="question-group">
-                    <h3>1. Where is the noise coming from?</h3>
-                    <div class="options-flex">
-                        <input type="radio" name="where" id="w1" value="Front" class="hidden-radio"><label for="w1" class="option-label">Front Axle / Wheels</label>
-                        <input type="radio" name="where" id="w2" value="Rear" class="hidden-radio"><label for="w2" class="option-label">Rear Axle / Wheels</label>
-                        <input type="radio" name="where" id="w3" value="Engine" class="hidden-radio"><label for="w3" class="option-label">Engine Bay</label>
-                        <input type="radio" name="where" id="w4" value="Underneath" class="hidden-radio"><label for="w4" class="option-label">Underneath the Car</label>
-                    </div>
-                </div>
-
-                <div class="question-group">
-                    <h3>2. What type of sound is it?</h3>
-                    <div class="options-flex">
-                        <input type="radio" name="type" id="t1" value="Grinding" class="hidden-radio"><label for="t1" class="option-label">Heavy Grinding Metal</label>
-                        <input type="radio" name="type" id="t2" value="Squeaking" class="hidden-radio"><label for="t2" class="option-label">High-Pitched Squeaking</label>
-                        <input type="radio" name="type" id="t3" value="Knocking" class="hidden-radio"><label for="t3" class="option-label">Dull Knocking Thud</label>
-                        <input type="radio" name="type" id="t4" value="Clicking" class="hidden-radio"><label for="t4" class="option-label">Sharp Repetitive Clicking</label>
-                    </div>
-                </div>
-
-                <div class="question-group">
-                    <h3>3. When does the sound occur actively?</h3>
-                    <div class="options-flex">
-                        <input type="radio" name="when" id="wh1" value="Braking" class="hidden-radio"><label for="wh1" class="option-label">Only When Applying Brakes</label>
-                        <input type="radio" name="when" id="wh2" value="Turning" class="hidden-radio"><label for="wh2" class="option-label">Only When Turning the Wheel</label>
-                        <input type="radio" name="when" id="wh3" value="Bumps" class="hidden-radio"><label for="wh3" class="option-label">Going Over Speed Bumps</label>
-                        <input type="radio" name="when" id="wh4" value="Constant" class="hidden-radio"><label for="wh4" class="option-label">Constant / Speed Related</label>
-                    </div>
-                </div>
-
-                <div style="margin-top:50px; display:flex; gap:20px;">
-                    <button type="button" onclick="runAnalysisProtocol()" class="btn btn-primary" style="border:none; cursor:pointer;">Generate System Evaluation Report</button>
-                    <button type="button" onclick="resetToMenu()" class="btn btn-white" style="cursor:pointer;">← Back to Tracks</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- SAVED EVALUATION MATRIX REPORT LAYOUT -->
-        <section id="analysis-report-box" class="report-box">
-            <h2 style="font-size:28px; font-weight:900; margin:0 0 35px 0; text-transform:uppercase; border-bottom:2px solid #0F172A; padding-bottom:15px;">System Evaluation Matrix</h2>
-            <div class="report-section">
-                <h3>Potential System Malfunctions</h3>
-                <p class="report-value"><strong id="resultPossibility">Gathering metrics...</strong></p>
-            </div>
-            <div class="report-section">
-                <h3>Technical Framework Interpretation</h3>
-                <p id="resultExplanation" class="clean-text">Analyzing parameters...</p>
-            </div>
-            <div class="report-section">
-                <h3>Action &amp; Workshop Protocol</h3>
-                <p id="resultAction" class="report-value" style="font-weight:700; color:#1E3A8A;">Verifying safety threshold...</p>
-            </div>
-            <div style="margin-top:40px;">
-                <button type="button" onclick="resetToMenu()" class="btn btn-primary" style="border:none; cursor:pointer;">Run Another Isolation Check</button>
-            </div>
-        </section>
-    </main>
-
-    <!-- MATCHING MASTER MULTI-COLUMN CORPORATE FOOTER -->
-    <footer class="site-footer">
-        <div class="site-container footer-grid">
-            <div class="footer-brand">
-                <span class="footer-logo">CAR<span>EXPLAIN</span></span>
-                <p>UK AUTOMOTIVE NETWORK</p>
-            </div>
-            <div class="footer-links">
-                <h5>Services</h5>
-                <a href="diagnose.html">Fault Finder</a>
-                <a href="index.html#garage">Garage Logs</a>
-                <a href="index.html#features">Quote Checker</a>
-                <a href="index.html#features">Car Research</a>
-            </div>
-            <div class="footer-links">
-                <h5>Legal &amp; Policy</h5>
-                <a href="#">Privacy Protocol</a>
-                <a href="#">Terms of Use</a>
-                <a href="#">AI Disclaimer</a>
-                <a href="#">Support Contact</a>
-            </div>
+        <div class="report-section">
+          <h3>More likely possibility</h3>
+          <div class="possibility" id="reportLikely"></div>
+          <span class="confidence" id="reportConfidence"></span>
         </div>
-        <div class="site-container footer-bottom">
-            <p>&copy; 2026 Car Explain. All rights reserved. Platform outputs are for reference guides only and do not replace professional garage verification.</p>
+        <div class="report-section">
+          <h3>Other possibilities</h3>
+          <p id="reportOther"></p>
         </div>
-    </footer>
+        <div class="report-section full">
+          <h3>Why this is being suggested</h3>
+          <p id="reportWhy"></p>
+        </div>
+        <div class="report-section">
+          <h3>What you can safely note</h3>
+          <p id="reportCheck"></p>
+        </div>
+        <div class="report-section">
+          <h3>What a garage may inspect</h3>
+          <p id="reportGarage"></p>
+        </div>
+        <div class="report-section full">
+          <h3>Urgency</h3>
+          <p id="reportUrgency"></p>
+        </div>
+        <div class="report-section full">
+          <h3>Important limitation</h3>
+          <p id="reportLimit">This is a structured information tool, not a physical vehicle inspection. Several faults can produce similar symptoms, and the actual cause may require inspection, testing or diagnostic equipment.</p>
+        </div>
+      </div>
+      <div class="report-actions">
+        <button class="btn btn-primary" type="button" id="againBtn">Run another check</button>
+        <button class="btn btn-secondary" type="button" id="printBtn">Print / Save report</button>
+      </div>
+    </div>
+  </section>
+</main>
 
-        <script>
-        function openNoiseTrack() {
-            document.getElementById('symptom-menu-section').style.display = 'none';
-            document.getElementById('noise-question-panel').style.display = 'block';
-            window.scrollTo(0,0);
-        }
+<footer>
+  <div class="site-container footer-grid">
+    <div class="footer-brand">
+      <span class="footer-logo">CAR<span>EXPLAIN</span></span>
+      <p>KNOW BEFORE YOU PAY</p>
+    </div>
+    <div class="footer-links">
+      <h4>Services</h4>
+      <a href="diagnose.html">Fault Finder</a>
+      <a href="index.html#garage">Garage Logs</a>
+      <a href="index.html#features">Quote Checker</a>
+      <a href="index.html#features">Car Research</a>
+    </div>
+    <div class="footer-links">
+      <h4>Legal &amp; Policy</h4>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">AI Disclaimer</a>
+      <a href="#">Support</a>
+    </div>
+  </div>
+  <div class="site-container footer-bottom">© 2026 CarExplain. Reference guidance only — it does not replace professional garage verification.</div>
+</footer>
 
-        // Toggles the Warning Light UI panel cleanly
-        function openWarningLightTrack() {
-            document.getElementById('symptom-menu-section').style.display = 'none';
-            document.getElementById('warning-light-question-panel').style.display = 'block';
-            window.scrollTo(0,0);
-        }
+<script>
+"use strict";
 
-        function resetToMenu() {
-            document.getElementById('noise-question-panel').style.display = 'none';
-            document.getElementById('warning-light-question-panel').style.display = 'none';
-            document.getElementById('analysis-report-box').style.display = 'none';
-            document.getElementById('symptom-menu-section').style.display = 'block';
-            document.getElementById('diagForm').reset();
-            document.getElementById('warningForm').reset();
-            window.scrollTo(0,0);
-        }
+const TRACKS = [
+  {id:"noise", icon:"🔊", title:"Unusual noise", desc:"Grinding, clicking, squealing, knocking or rattling"},
+  {id:"warning-light", icon:"⚠️", title:"Warning light", desc:"Dashboard warning or indicator"},
+  {id:"starting", icon:"🔑", title:"Starting problem", desc:"Won't start, slow crank or stalls"},
+  {id:"braking", icon:"🛑", title:"Braking", desc:"Pedal, stopping, pulling or brake noise"},
+  {id:"steering", icon:"🔄", title:"Steering & control", desc:"Heavy, loose, pulling or unusual steering"},
+  {id:"vibration", icon:"📳", title:"Vibration", desc:"Shaking through wheel, seat or body"},
+  {id:"overheating", icon:"🌡️", title:"Overheating", desc:"Temperature rising, steam or coolant loss"},
+  {id:"leakage", icon:"💧", title:"Fluid leak", desc:"Puddles, drips, smell or fluid loss"},
+  {id:"electrical", icon:"⚡", title:"Electrical", desc:"Lights, battery, screens or power loss"},
+  {id:"performance", icon:"⚙️", title:"Engine performance", desc:"Misfire, poor power, smoke or rough idle"},
+  {id:"gearbox", icon:"🕹️", title:"Clutch & gearbox", desc:"Slipping, crunching or gear selection"},
+  {id:"wheels", icon:"⭕", title:"Tyres & wheels", desc:"Wear, pressure, damage or wheel symptoms"},
+  {id:"suspension", icon:"⛓️", title:"Suspension", desc:"Bouncing, leaning or knocking over bumps"},
+  {id:"other", icon:"❓", title:"Other", desc:"A problem that doesn't fit another category"}
+];
 
-        function runAnalysisProtocol() {
-            const where = document.querySelector('input[name="where"]:checked')?.value;
-            const type = document.querySelector('input[name="type"]:checked')?.value;
-            const when = document.querySelector('input[name="when"]:checked')?.value;
+const Q = (id, track, text, help, options, extra={}) => ({id,track,text,help,options,...extra});
+const O = (value, text, detail="", extra={}) => ({value,text,detail,...extra});
 
-            if(!where || !type || !when) {
-                alert('Please select an option for all 3 parameter questions to run diagnostics safely.');
-                return;
-            }
+const QUESTIONS = [
+  // NOISE
+  Q("NS1","noise","Where is the noise loudest?","Think about the area rather than trying to identify a component yourself.",[
+    O("engine","Under the bonnet / engine bay","The sound is strongest around the engine or accessory area."),
+    O("front","Front wheel or front axle area","The sound appears to come from the front running gear."),
+    O("rear","Rear wheel, exhaust or boot area","The sound seems to come from the rear of the vehicle."),
+    O("underbody","Under the cabin / underneath","The source seems lower down under the vehicle."),
+    O("inside","Inside the cabin","The noise is mainly heard inside the passenger compartment."),
+    O("unsure","I'm not sure","That's fine — the remaining questions can still narrow it down.")
+  ]),
+  Q("NS2","noise","What does the noise sound like?","Choose the closest description; you do not need to know the mechanical term.",[
+    O("grind","Metallic grinding or scraping","A harsh rubbing or grinding sound."),
+    O("click","Repeated clicking or snapping","A regular click that may change with movement."),
+    O("squeal","High-pitched squeal or screech","A sharp squeal, often more noticeable under braking or acceleration."),
+    O("knock","Knock, clunk or heavy thud","A deeper impact-like sound."),
+    O("hum","Humming, droning or growling","A continuous road-speed-related sound."),
+    O("rattle","Loose rattle or buzzing","Something sounds loose or vibrates."),
+    O("whine","Whining or high-pitched mechanical noise","A rising/falling mechanical whine.")
+  ]),
+  Q("NS3","noise","When is it most noticeable?","The timing is often more useful than the location alone.",[
+    O("braking","When braking","It appears mainly while the brakes are being used."),
+    O("turning","When steering or cornering","It changes when the vehicle turns."),
+    O("accelerating","When accelerating","It is linked to applying engine power."),
+    O("bumps","Over bumps or rough roads","It is triggered by suspension movement."),
+    O("speed","At particular road speeds","It changes as vehicle speed changes."),
+    O("idle","At idle / while stationary","It can be reproduced without the car moving."),
+    O("constant","Most of the time","It does not have a clear trigger.")
+  ],{condition:()=>true}),
+  Q("NS4","noise","Does it change when you turn the steering wheel?","Only answer yes if the sound clearly changes during steering.",[
+    O("yes","Yes","It gets louder, faster or changes character when steering."),
+    O("no","No","Steering does not noticeably change it."),
+    O("unsure","Not sure","You haven't been able to establish a pattern.")
+  ]),
+  Q("NS5","noise","Have you also noticed anything else?","Select the closest overall picture.",[
+    O("none","No other obvious symptom","No warning light, vibration, pulling, smell or fluid loss."),
+    O("vibration","Vibration or shaking","You can feel a vibration as well as hear the noise."),
+    O("pulling","The car pulls to one side","The vehicle does not track normally."),
+    O("warning","A warning light","A dashboard warning appeared with the noise."),
+    O("fluid","A fluid leak or wet patch","You have seen fluid underneath or around the vehicle."),
+    O("smoke","Smoke or burning smell","There is visible smoke or a strong burning smell.")
+  ]),
 
-            let mainFault = "Unspecified Component Wear";
-            let explanation = "Your symptoms point toward general mechanical movement discrepancies. Monitor the sound progression closely.";
-            let advice = "Book an assessment with a mechanic for structural verification.";
+  // WARNING LIGHT
+  Q("WL1","warning-light","What colour is the warning light?","A red warning generally deserves more immediate attention than an amber informational/service warning.",[
+    O("red","Red","Potentially urgent depending on the symbol and symptoms."),
+    O("amber","Amber / yellow","Often indicates a fault or system requiring attention."),
+    O("greenblue","Green / blue","Usually an information or system-status indicator."),
+    O("unsure","I'm not sure","You can describe the symbol in the next question.")
+  ]),
+  Q("WL2","warning-light","Which symbol is closest?","If you can, compare the shape with the dashboard symbol rather than relying on its colour.",[
+    O("oil","Oil can","Looks like an oil can / oil pressure symbol."),
+    O("brake","Brake / circle with !","Brake system or parking-brake style symbol."),
+    O("battery","Battery","Battery/charging system symbol."),
+    O("engine","Engine outline","Engine-shaped check-engine/MIL symbol."),
+    O("temperature","Thermometer","Coolant/engine temperature warning."),
+    O("tyre","Tyre with !","Tyre pressure monitoring warning."),
+    O("steering","Steering wheel","Power steering/steering assistance warning."),
+    O("other","Something else","Another warning symbol.")
+  ]),
+  Q("WL3","warning-light","Is the light flashing or steady?","A flashing engine warning can indicate an active fault that needs prompt attention.",[
+    O("flashing","Flashing","The symbol repeatedly turns on and off."),
+    O("steady","Steady","It remains continuously illuminated."),
+    O("unsure","Not sure","You haven't observed it long enough.")
+  ]),
+  Q("WL4","warning-light","Does the car drive normally?","Consider whether power, braking, steering or engine behaviour has changed.",[
+    O("normal","Yes, broadly normal","No obvious change in how it drives."),
+    O("reduced","Power is reduced / feels different","The vehicle feels restricted or unusually weak."),
+    O("rough","Engine runs roughly / shakes","The engine is uneven, misfiring or struggling."),
+    O("safety","Braking or steering feels different","A safety-critical control feels abnormal."),
+    O("not_driving","I have stopped driving","The vehicle is stationary because of the warning.")
+  ]),
 
-            if (where === "Front" && type === "Grinding" && when === "Braking") {
-                mainFault = "Worn Front Brake Pads & Discs (Critical Friction Depletion)";
-                explanation = "A metallic grinding noise localized to the front axle during brake application indicates that the friction pads have worn away entirely. The metal backing plates are pressing directly against the brake discs.";
-                advice = "🚨 SAFETY CRITICAL WARNING: Stop driving immediately. Operating the vehicle without friction material will warp the steel brake discs, significantly extend stopping distances, and risk total hydraulic caliper lock failure.";
-            } else if (where === "Front" && type === "Clicking" && when === "Turning") {
-                mainFault = "Failing Constant Velocity (CV) Joint Matrix";
-                explanation = "Repetitive clicking sounds radiating from the front wheel assemblies while turning tightly indicate worn ball bearings or torn protective rubber boots inside your driveshaft CV joints.";
-                advice = "Urgency Level - Inspection Required Soon: Avoid hard acceleration while fully turning the steering lock. Schedule an inspection at a professional garage within the next 100 miles to prevent complete driveshaft snapping.";
-            } else if (where === "Underneath" && type === "Knocking" && when === "Bumps") {
-                mainFault = "Worn Suspension Stabilizer Drop Links or Rubber Bushings";
-                explanation = "Heavy knocking sounds underneath the vehicle when rolling over speed restrictions reveal excessive play in your anti-roll bar mount tracks or loose trailing arms.";
-                advice = "Urgency Level - Routine Workshop Check: The vehicle is structurally stable to navigate, but component wear will cause premature tyre shoulder degradation. Ask your garage to check your chassis linkages during your next routine service.";
-            }
+  // STARTING
+  Q("ST1","starting","What happens when you try to start the car?","This first split separates a failure to crank from a normal crank with no start.",[
+    O("click","Silence or a click","The engine does not turn over normally."),
+    O("slow","It cranks slowly","The starter turns the engine, but noticeably slowly."),
+    O("crank","It cranks at normal speed but doesn't start","The engine turns over but does not fire."),
+    O("stall","It starts briefly then stalls","It fires and then stops again."),
+    O("starts","It starts, but something is clearly wrong","It starts but runs poorly or behaves abnormally.")
+  ]),
+  Q("ST2","starting","What happens to the dashboard/cabin lights during cranking?","A major drop in brightness can be useful evidence about the vehicle's electrical supply.",[
+    O("dark","They go very dim or go out","There is a large apparent electrical drop."),
+    O("steady","They stay fairly steady","There is little obvious change."),
+    O("unsure","I'm not sure","You haven't noticed.")
+  ]),
+  Q("ST3","starting","When does the problem happen most?","Some faults are temperature-dependent.",[
+    O("cold","First start when cold","Especially after sitting overnight."),
+    O("hot","After the engine is hot","It is mainly a warm restart problem."),
+    O("always","Any time","It happens regardless of temperature."),
+    O("intermittent","Only sometimes","There is no consistent pattern.")
+  ]),
+  Q("ST4","starting","Have you noticed any other symptom?","Choose the strongest additional clue.",[
+    O("battery","Battery warning / electrical symptoms","Other electrical behaviour is abnormal."),
+    O("fuel","Fuel smell or suspected fuel issue","There is an unusual fuel-related symptom."),
+    O("smoke","Smoke from the exhaust","Smoke appears during or after starting."),
+    O("rough","Rough running after it starts","It starts but runs unevenly."),
+    O("none","Nothing else obvious","No other strong clue.")
+  ]),
 
-            displayReport(mainFault, explanation, advice);
-        }
+  // BRAKING
+  Q("BR1","braking","How does the brake pedal feel?","Do not test braking aggressively just to answer this question.",[
+    O("spongy","Soft, spongy or sinking","The pedal travels unusually far or feels soft.",{safety:true}),
+    O("hard","Very hard to press","It takes much more force than normal."),
+    O("pulse","Pulsates or shakes","The pedal pushes back or vibrates during braking."),
+    O("normal_long","Feels normal but stopping takes longer","Pedal feel seems normal but braking performance is reduced.",{safety:true}),
+    O("normal","Feels normal","No obvious change in pedal feel.")
+  ]),
+  Q("BR2","braking","Does the vehicle pull left or right under braking?","A strong pull can indicate uneven braking force.",[
+    O("left","Pulls left","You need steering correction while braking."),
+    O("right","Pulls right","You need steering correction while braking."),
+    O("no","No","It stays broadly straight."),
+    O("unsure","Not sure","You have not noticed.")
+  ]),
+  Q("BR3","braking","Is there an unusual brake noise?","Grinding is more concerning than a light occasional squeal.",[
+    O("grind","Metallic grinding","Harsh metal-on-metal style noise.",{safety:true}),
+    O("squeal","High-pitched squeal","Sharp squeaking/screeching."),
+    O("click","Clicking or knocking","A mechanical click or knock."),
+    O("none","No unusual noise","No obvious brake noise.")
+  ]),
+  Q("BR4","braking","Did anything change suddenly?","A sudden change can matter more than a gradual wear symptom.",[
+    O("sudden","Yes, suddenly","It appeared over one drive or after an event."),
+    O("gradual","No, gradually","It has developed over time."),
+    O("unsure","Not sure","You cannot establish when it began.")
+  ]),
 
-        function runWarningLightAnalysis() {
-            const color = document.querySelector('input[name="lightColor"]:checked')?.value;
-            const behavior = document.querySelector('input[name="lightBehavior"]:checked')?.value;
-            const symptoms = document.querySelector('input[name="lightSymptoms"]:checked')?.value;
+  // STEERING
+  Q("SC1","steering","What is the main steering problem?","Describe the steering behaviour rather than trying to name the part.",[
+    O("heavy","Very heavy or difficult to turn","Much more effort is required."),
+    O("pulling","Pulls or drifts to one side","The car does not naturally track straight."),
+    O("loose","Loose or excessive play","The wheel can move before the car responds."),
+    O("noise","Groaning/clicking while turning","There is an unusual sound during steering."),
+    O("vibration","Steering wheel shakes","The wheel vibrates or shudders."),
+    O("none","Something else","Another steering-control problem.")
+  ]),
+  Q("SC2","steering","Did it begin after an impact or pothole?","A recent impact can be an important clue for steering or wheel alignment issues.",[
+    O("yes","Yes, after a pothole/kerb/impact","The timing is closely related."),
+    O("startup","It appeared when starting the car","It was present immediately after startup."),
+    O("gradual","No, it developed gradually","There was no obvious event."),
+    O("unsure","Not sure","You don't know.")
+  ]),
+  Q("SC3","steering","Are any dashboard warnings present?","Especially note steering, stability or tyre-related warnings.",[
+    O("yes","Yes","A warning is also present."),
+    O("no","No","No related warning is visible."),
+    O("unsure","Not sure","You haven't checked.")
+  ]),
 
-            if(!color || !behavior || !symptoms) {
-                alert('Please select an option for all 3 dashboard parameters to evaluate safely.');
-                return;
-            }
+  // VIBRATION
+  Q("VB1","vibration","Where do you feel the vibration most strongly?","The location can help distinguish wheel/tyre symptoms from engine or driveline symptoms.",[
+    O("wheel","Steering wheel","Mostly through your hands."),
+    O("seat","Seat or floor","Mostly through your body."),
+    O("whole","Whole vehicle","The whole car shakes or booms."),
+    O("pedal","Pedals","The vibration is particularly noticeable through a pedal.")
+  ]),
+  Q("VB2","vibration","At what point is it most noticeable?","Think about when it begins rather than how severe it feels.",[
+    O("speed","A particular road speed","It becomes obvious at a certain speed range."),
+    O("acceleration","Under acceleration","It appears when engine/driveline load increases."),
+    O("braking","Under braking","It appears when slowing down."),
+    O("idle","While stationary/idling","It can happen without the car moving."),
+    O("bumps","Over bumps","It is triggered by road movement.")
+  ]),
+  Q("VB3","vibration","Is there any related tyre/wheel symptom?","A recent wheel or tyre event can be relevant.",[
+    O("tyre","Tyre damage/pressure issue","There is visible damage or pressure loss."),
+    O("recent","Wheel/tyre recently changed","A wheel or tyre was recently fitted."),
+    O("pull","Car also pulls","The vehicle does not track normally."),
+    O("none","No obvious related issue","Nothing else noticed.")
+  ]),
 
-            let mainFault = "Active System Warning Logged";
-            let explanation = "A dashboard indicator code has been stored in the central vehicle ECU module. An OBD2 network scanning check tool must read the data registry array.";
-            let advice = "Schedule a standard diagnostic code scan checkup process with your local automotive workshop center.";
+  // OVERHEATING
+  Q("OH1","overheating","What is the temperature gauge/warning doing?","If the engine is currently overheating, prioritise stopping safely rather than continuing to diagnose while driving.",[
+    O("red","Gauge is in the red","Temperature is at/near the maximum.",{safety:true}),
+    O("warning","Temperature warning is illuminated","A temperature warning is active.",{safety:true}),
+    O("spike","Temperature rises in traffic","It becomes worse at low speed or while stationary."),
+    O("normal","Gauge looks normal","You suspect overheating from another symptom.")
+  ]),
+  Q("OH2","overheating","Is there steam, hissing or obvious coolant loss?","Never open a hot cooling-system cap.",[
+    O("steam","Steam/hissing is visible","There may be hot pressurised coolant.",{safety:true}),
+    O("low","Coolant level appears very low","The reservoir is below its normal level."),
+    O("leak","Visible coolant leak","You can see coloured coolant or wetness."),
+    O("none","None noticed","No obvious steam or leak.")
+  ]),
+  Q("OH3","overheating","When is the problem worst?","This helps distinguish different cooling-system patterns.",[
+    O("traffic","Slow traffic / idling","It worsens when stationary."),
+    O("load","Hard acceleration or hills","It worsens under load."),
+    O("always","Most of the time","It does not have a clear trigger."),
+    O("after","After stopping","Heat appears to build after the drive.")
+  ]),
 
-            // Critical evaluation tree engine rules (Blueprint Section 7.4)
-            if (color === "Red" && behavior === "Solid" && symptoms === "Overheating") {
-                mainFault = "Critical Engine Thermal Runaway Overheating Alert";
-                explanation = "A solid red temperature metric indicator or cooling warning symbol accompanied by heat spikes means your engine blocks have lost coolant pressure or suffered complete water pump impeller damage.";
-                advice = "🚨 EMERGENCY ROADSIDE FAULT CRITICAL: Pull over and shut off your motor assembly instantly inside a safe hard shoulder lane. Continuing operation will blow the head gasket seal profile or warp engine cylinder blocks entirely.";
-            } else if (color === "Amber" && behavior === "Flashing" && symptoms === "Limpmode") {
-                mainFault = "Active Cylinder Misfire Anomaly (Catalytic Converter At Risk)";
-                explanation = "A blinking or flashing Amber check engine system layout indicator warning accompanied by limp mode drop-outs means raw hydrocarbon fuel matrix layers are passing directly into the exhaust streams unburned.";
-                advice = "Urgency Warning Level - Extreme Catalyst Risk: Avoid high rev conditions or trailing heavy loads. Drive directly to the closest technical diagnostics garage immediate center to avoid structural converter meltdown.";
-            } else if (color === "BlueGreen") {
-                mainFault = "Normal Auxiliary Operations Confirmation Status Indicator";
-                explanation = "Blue or green control lights (such as cruise control icons, dynamic lane keep assistants, or cold engine system reminders) indicate operating confirmation parameters, not component failures.";
-                advice = "System Running Metrics Perfect: This is an information layer only. Your vehicle operations parameters are performing normally without registered mechanical defects.";
-            }
+  // LEAKAGE
+  Q("LK1","leakage","What does the fluid look or smell like?","Never taste or deliberately touch an unknown vehicle fluid.",[
+    O("oil","Dark brown/black and oily","Thick/slippery fluid."),
+    O("coolant","Coloured coolant","Often pink, orange, green or another coolant colour depending on vehicle."),
+    O("water","Clear water with little/no smell","May be condensation, especially after air conditioning use."),
+    O("fuel","Strong petrol/diesel smell","Fuel odour is a significant safety clue.",{safety:true}),
+    O("brake","Clear/yellowish fluid around a brake area","Brake-fluid leakage can affect braking.",{safety:true}),
+    O("other","Other/unknown","The fluid doesn't match these descriptions.")
+  ]),
+  Q("LK2","leakage","Where is the puddle relative to the car?","Use the approximate location rather than crawling underneath the vehicle.",[
+    O("front","Front / engine area","Towards the front of the vehicle."),
+    O("middle","Middle / cabin area","Around the centre or under the cabin."),
+    O("rear","Rear / fuel tank area","Towards the back."),
+    O("wheel","Near a wheel","Close to a wheel or brake area."),
+    O("unsure","Not sure","You cannot locate it accurately.")
+  ]),
+  Q("LK3","leakage","Is the leak getting worse?","A rapidly increasing leak changes the urgency.",[
+    O("large","Large or rapidly increasing","The puddle is growing quickly."),
+    O("small","Small occasional drip","Only a small amount is seen."),
+    O("unknown","Not sure","You haven't monitored it."),
+    O("none","It may not be a leak","You suspect condensation or another harmless source.")
+  ]),
 
-            displayReport(mainFault, explanation, advice);
-        }
+  // ELECTRICAL
+  Q("EL1","electrical","What electrical behaviour is failing?","Choose the closest group of symptoms.",[
+    O("dead","Vehicle is completely dead","No normal electrical power."),
+    O("lights","Lights are dim/flickering","Exterior or interior lights are affected."),
+    O("cabin","Windows/radio/screens/locking affected","Convenience electronics are affected."),
+    O("start","Starting/electrical power is affected","Electrical symptoms occur around starting."),
+    O("single","One component only","A single electrical item has failed.")
+  ]),
+  Q("EL2","electrical","Did several systems fail at the same time?","Multiple simultaneous failures can point toward a shared power, fuse, relay or ground issue.",[
+    O("yes","Yes, several systems","Multiple unrelated systems changed together."),
+    O("no","No, one system","Only one circuit/component is affected."),
+    O("unsure","Not sure","You haven't checked all systems.")
+  ]),
+  Q("EL3","electrical","Is there a battery/charging warning?","A charging warning combined with dimming or loss of electrical power deserves prompt attention.",[
+    O("yes","Yes","Battery/charging warning is present."),
+    O("no","No","No charging warning."),
+    O("unsure","Not sure","You have not seen/identified the warning.")
+  ]),
 
-        function displayReport(fault, expl, adv) {
-            document.getElementById('resultPossibility').innerText = fault;
-            document.getElementById('resultExplanation').innerText = expl;
-            document.getElementById('resultAction').innerText = adv;
+  // PERFORMANCE
+  Q("EP1","performance","What is the main engine behaviour?","Choose the behaviour you can actually observe.",[
+    O("misfire","Hesitation, stuttering or jerking","The engine feels uneven, especially under acceleration."),
+    O("power","Reduced power","It struggles to accelerate or climb hills."),
+    O("idle","Rough/uneven idle","It shakes or feels close to stalling."),
+    O("smoke","Unusual exhaust smoke","Smoke is the main concern."),
+    O("stall","Cuts out/stalls","The engine stops unexpectedly.")
+  ]),
+  Q("EP2","performance","What colour is the exhaust smoke, if any?","Smoke colour is a clue, not a diagnosis by itself.",[
+    O("black","Black/dark smoke","Especially under acceleration."),
+    O("blue","Blue/blue-grey smoke","May indicate oil being burned."),
+    O("white","Persistent dense white smoke","Different from normal brief condensation."),
+    O("none","No unusual smoke","No obvious smoke."),
+    O("unsure","Not sure","You cannot identify the colour.")
+  ]),
+  Q("EP3","performance","Is a warning light present?","A diagnostic scan may provide important additional evidence.",[
+    O("flashing","Flashing engine warning","The engine warning is flashing.",{safety:true}),
+    O("steady","Steady engine warning","The engine warning remains on."),
+    O("none","No warning","No relevant warning."),
+    O("other","Another warning","A different warning is present.")
+  ]),
 
-            document.getElementById('noise-question-panel').style.display = 'none';
-            document.getElementById('warning-light-question-panel').style.display = 'none';
-            document.getElementById('analysis-report-box').style.display = 'block';
-            window.scrollTo(0,0);
-        }
-    </script>
+  // GEARBOX
+  Q("GB1","gearbox","What happens with the transmission?","For an automatic, choose the closest shift behaviour; for a manual, choose the clutch/gear behaviour.",[
+    O("slip","Engine revs rise but road speed doesn't follow","A classic slipping-type symptom."),
+    O("crunch","Gears are difficult to select / crunch","Gear selection is physically difficult or noisy."),
+    O("jerk","Automatic shifts are harsh or abnormal","The transmission changes gear aggressively or unpredictably."),
+    O("pop","Gear jumps/pops out","A selected gear does not stay engaged."),
+    O("clutch","Clutch pedal feels unusual","The pedal or bite point has changed.")
+  ]),
+  Q("GB2","gearbox","If manual, where does the clutch bite?","Skip mentally if your car is automatic.",[
+    O("high","Very high","The bite is near the top of pedal travel."),
+    O("low","Very low","The bite is near the floor."),
+    O("normal","Around the middle","No obvious change."),
+    O("auto","Automatic / not applicable","This question doesn't apply.")
+  ]),
+  Q("GB3","gearbox","Did the problem appear suddenly?","A sudden change may indicate a new fault or failure event.",[
+    O("yes","Yes","It appeared suddenly."),
+    O("gradual","No, gradually","It has developed over time."),
+    O("after","After a repair/service","It appeared after recent work."),
+    O("unsure","Not sure","You don't know.")
+  ]),
+
+  // WHEELS
+  Q("TW1","wheels","What is the main tyre/wheel problem?","Visible structural damage should be treated more seriously than ordinary wear.",[
+    O("bulge","Bulge/bubble in sidewall","A visible lump or bubble is present.",{safety:true}),
+    O("wear","Uneven tread wear","One area/shoulder is wearing faster."),
+    O("pressure","Repeated pressure loss","The tyre needs frequent inflation."),
+    O("damage","Cut, crack or obvious damage","There is visible physical damage."),
+    O("vibration","Wheel/tyre vibration","The main symptom is shaking."),
+    O("none","Something else","Another wheel/tyre concern.")
+  ]),
+  Q("TW2","wheels","Was there a recent pothole, kerb impact or tyre change?","Recent wheel events can be useful context.",[
+    O("pothole","Pothole/kerb impact","The symptom followed an impact."),
+    O("tyrechange","Recent tyre/wheel work","A tyre or wheel was recently fitted."),
+    O("no","No recent event","Nothing obvious happened."),
+    O("unsure","Not sure","You don't know.")
+  ]),
+  Q("TW3","wheels","Is the vehicle pulling or vibrating?","These symptoms can help separate tyre wear from alignment/balance concerns.",[
+    O("pull","Pulling/drifting","The car doesn't track straight."),
+    O("vibrate","Vibrating","The wheel/body shakes."),
+    O("both","Both","There is pulling and vibration."),
+    O("neither","Neither","No obvious pulling or vibration.")
+  ]),
+
+  // SUSPENSION
+  Q("SS1","suspension","What does the car do over bumps?","Think about the vehicle's movement after a bump, not the sound alone.",[
+    O("bounce","Keeps bouncing/rocking","The body continues moving after a bump."),
+    O("lean","One corner sits lower","The car looks uneven or leans."),
+    O("knock","Sharp knock/clunk","A mechanical knock is heard."),
+    O("harsh","Very harsh ride","Road imperfections feel unusually severe."),
+    O("noise","Squeak/creak","A squeak or creak occurs over movement.")
+  ]),
+  Q("SS2","suspension","Where is the symptom strongest?","Approximate location is enough.",[
+    O("front","Front","The front axle area."),
+    O("rear","Rear","The rear axle area."),
+    O("onecorner","One particular corner","A single corner appears affected."),
+    O("whole","Whole vehicle","It affects the whole car.")
+  ]),
+  Q("SS3","suspension","Did it follow a pothole, kerb strike or other impact?","A recent impact can be relevant to suspension and wheel alignment.",[
+    O("yes","Yes","The timing is related."),
+    O("no","No","It developed without an obvious impact."),
+    O("unsure","Not sure","You don't know.")
+  ]),
+
+  // OTHER
+  Q("OT1","other","Which description is closest?","Use this route when the issue does not fit another category.",[
+    O("odour","Sweet/chemical smell through the vents","An unusual smell enters the cabin."),
+    O("locking","Central locking/keyless entry problem","Doors do not lock/unlock as expected."),
+    O("interior","Interior equipment problem","A cabin feature is behaving unexpectedly."),
+    O("general","General car question","You want an explanation rather than a specific fault path.")
+  ]),
+  Q("OT2","other","How serious does it appear?","Use your best judgement based on what you can safely observe.",[
+    O("normal","Car otherwise drives normally","No major safety or performance change."),
+    O("changed","Something about driving has changed","Handling, power or braking is different."),
+    O("stopped","I have stopped driving","The issue feels unsafe or severe.")
+  ])
+];
+
+const SAFETY_RULES = [
+  {track:"braking", ids:["BR1"], values:["spongy","normal_long"], level:"red", text:"A soft/sinking brake pedal or noticeably longer stopping distance can indicate reduced braking performance. Do not continue driving if braking is not dependable; arrange appropriate professional assistance."},
+  {track:"braking", ids:["BR3"], values:["grind"], level:"red", text:"Metallic brake grinding can indicate significant brake wear or another brake fault. Treat this as a safety issue and avoid driving until the braking system has been assessed."},
+  {track:"overheating", ids:["OH1"], values:["red","warning"], level:"red", text:"An active overheating warning or gauge in the red is a stop-driving symptom. Safely stop and switch the engine off. Do not open a hot cooling-system cap."},
+  {track:"overheating", ids:["OH2"], values:["steam"], level:"red", text:"Visible steam or hissing from a hot cooling system can involve pressurised coolant. Do not open the coolant cap while hot; allow the vehicle to cool and seek appropriate assistance."},
+  {track:"leakage", ids:["LK1"], values:["fuel"], level:"red", text:"A suspected fuel leak is a fire hazard. Do not smoke or create ignition sources around the vehicle and do not drive it until the leak has been assessed."},
+  {track:"leakage", ids:["LK1"], values:["brake"], level:"red", text:"A suspected brake-fluid leak can reduce braking performance. Treat it as a safety-critical issue and arrange professional assessment rather than driving normally."},
+  {track:"wheels", ids:["TW1"], values:["bulge"], level:"red", text:"A tyre sidewall bulge indicates possible structural damage. Do not rely on the tyre at normal road speeds; arrange replacement/appropriate professional assistance."},
+  {track:"performance", ids:["EP3"], values:["flashing"], level:"amber", text:"A flashing engine warning can accompany an active misfire or other fault that may cause further damage. Avoid hard acceleration and seek prompt professional assessment."},
+  {track:"steering", ids:["SC1"], values:["heavy","loose"], level:"red", text:"A major change in steering effort or excessive steering play can affect vehicle control. If steering is not dependable, do not continue driving normally."},
+  {track:"warning-light", ids:["WL1"], values:["red"], level:"amber", text:"A red dashboard warning may indicate an immediate safety or mechanical problem. The exact symbol and symptoms determine the response; if braking, steering, oil pressure or temperature are involved, stop safely."}
+];
+
+const TRACK_LABEL = Object.fromEntries(TRACKS.map(t=>[t.id,t.title]));
+
+const STATE = {
+  track:null, index:0, answers:{}, history:[], active:[]
+};
+
+function $(id){return document.getElementById(id)}
+
+function renderTracks(){
+  $("trackGrid").innerHTML = TRACKS.map(t => `
+    <button class="track" type="button" data-track="${t.id}" aria-label="Start ${t.title} diagnostic">
+      <div class="icon">${t.icon}</div>
+      <strong>${escapeHtml(t.title)}</strong>
+      <small>${escapeHtml(t.desc)}</small>
+    </button>
+  `).join("");
+  document.querySelectorAll("[data-track]").forEach(btn=>{
+    btn.addEventListener("click",()=>startTrack(btn.dataset.track));
+  });
+}
+
+function startTrack(track){
+  STATE.track=track;
+  STATE.index=0;
+  STATE.answers={};
+  STATE.history=[];
+  STATE.active=QUESTIONS.filter(q=>q.track===track);
+  $("menu").classList.add("hidden");
+  $("report").style.display="none";
+  $("wizard").style.display="block";
+  $("trackTitle").textContent=TRACK_LABEL[track];
+  window.scrollTo({top:$("wizard").offsetTop-90,behavior:"smooth"});
+  renderQuestion();
+}
+
+function renderQuestion(){
+  STATE.active=QUESTIONS.filter(q=>q.track===STATE.track && (!q.condition || q.condition(STATE.answers)));
+  if(STATE.index>=STATE.active.length){finish();return;}
+
+  const q=STATE.active[STATE.index];
+  $("questionNumber").textContent=`Step ${STATE.index+1} of ${STATE.active.length}`;
+  $("progressText").textContent=`Question ${STATE.index+1} of ${STATE.active.length}`;
+  const pct=Math.round((STATE.index/Math.max(1,STATE.active.length))*100);
+  $("progressPct").textContent=`${pct}%`;
+  $("progressBar").style.width=`${pct}%`;
+  $("questionText").textContent=q.text;
+  $("questionHelp").textContent=q.help||"";
+  $("statusNote").textContent=STATE.answers[q.id] ? "Answer selected." : "Choose an answer to continue.";
+  $("nextBtn").disabled=!STATE.answers[q.id];
+
+  if(q.type==="text"){
+    $("questionBody").innerHTML=`<textarea class="textarea" id="freeText" placeholder="Add any useful detail..."></textarea>`;
+    $("freeText").value=STATE.answers[q.id]||"";
+    $("freeText").addEventListener("input",e=>{
+      STATE.answers[q.id]=e.target.value;
+      $("nextBtn").disabled=false;
+    });
+  }else{
+    $("questionBody").innerHTML=`<div class="option-grid">${q.options.map((o,i)=>`
+      <button type="button" class="option ${STATE.answers[q.id]===o.value?"selected":""}" data-value="${escapeAttr(o.value)}">
+        <span class="letter">${String.fromCharCode(65+i)}</span>
+        <span><strong>${escapeHtml(o.text)}</strong><span>${escapeHtml(o.detail||"")}</span></span>
+      </button>`).join("")}</div>`;
+    $("questionBody").querySelectorAll(".option").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        STATE.answers[q.id]=btn.dataset.value;
+        $("questionBody").querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+        btn.classList.add("selected");
+        $("nextBtn").disabled=false;
+        $("statusNote").textContent="Answer selected.";
+        setTimeout(()=>{ if(STATE.answers[q.id]===btn.dataset.value) nextQuestion(); },140);
+      });
+    });
+  }
+  $("backBtn").disabled=STATE.index===0;
+}
+
+function nextQuestion(){
+  if(!STATE.active[STATE.index]) return;
+  const q=STATE.active[STATE.index];
+  if(!STATE.answers[q.id] && q.type!=="text") return;
+  STATE.history.push(STATE.index);
+  STATE.index++;
+  renderQuestion();
+}
+
+function previousQuestion(){
+  if(STATE.index===0)return;
+  STATE.index=Math.max(0,STATE.history.pop() ?? STATE.index-1);
+  renderQuestion();
+}
+
+function cancel(){
+  STATE.track=null;STATE.answers={};STATE.index=0;STATE.history=[];
+  $("wizard").style.display="none";
+  $("report").style.display="none";
+  $("menu").classList.remove("hidden");
+  window.scrollTo({top:$("menu").offsetTop-90,behavior:"smooth"});
+}
+
+function getVehicleContext(){
+  const vals={make:$("make").value.trim(),model:$("model").value.trim(),year:$("year").value.trim(),fuel:$("fuel").value,gearbox:$("gearbox").value};
+  const bits=[];
+  if(vals.make||vals.model) bits.push([vals.make,vals.model].filter(Boolean).join(" "));
+  if(vals.year)bits.push(vals.year);
+  if(vals.fuel)bits.push(vals.fuel);
+  if(vals.gearbox)bits.push(vals.gearbox);
+  return bits.join(" • ");
+}
+
+function selectedText(qid){
+  const q=QUESTIONS.find(x=>x.id===qid);
+  const v=STATE.answers[qid];
+  if(!q || !v)return "";
+  const o=q.options?.find(x=>x.value===v);
+  return o?o.text:v;
+}
+
+function safetyAssessment(){
+  let found=[];
+  for(const rule of SAFETY_RULES){
+    if(rule.track!==STATE.track)continue;
+    if(rule.ids.some(id=>rule.values.includes(STATE.answers[id]))) found.push(rule);
+  }
+  return found;
+}
+
+function infer(){
+  const a=STATE.answers;
+  let result={
+    likely:"Several causes remain possible",
+    other:"The available answers do not uniquely identify a component.",
+    why:"The symptoms overlap between multiple vehicle systems. The safest interpretation is to use the pattern of symptoms to decide what should be checked next rather than treating one component as confirmed.",
+    check:"Note when the symptom occurs, whether it changes with speed, braking, steering or engine load, and whether any new warning light, smell, smoke or fluid loss appears.",
+    garage:"A garage may start with a visual inspection, road-test or basic diagnostic checks, then test the components suggested by the symptom pattern.",
+    urgency:"Routine / monitor if the vehicle is otherwise safe and operating normally.",
+    confidence:"Low — more evidence would be needed"
+  };
+
+  const set=(likely,other,why,check,garage,urgency,confidence="Moderate — symptom pattern provides useful clues")=>{
+    Object.assign(result,{likely,other,why,check,garage,urgency,confidence});
+  };
+
+  switch(STATE.track){
+    case "noise":
+      if(a.NS2==="grind" && a.NS1==="front"){
+        set("Brake or front running-gear friction deserves priority",
+          "Possible brake friction/material wear, a wheel bearing or another rotating component.",
+          "A harsh grinding sound from the front area can come from components rotating with the wheels, including the braking system. The timing under braking, steering and road speed is important.",
+          "Do not deliberately reproduce a grinding noise at speed. Note whether it occurs only during braking and whether there is vibration, pulling or a warning light.",
+          "Brake discs/pads, caliper operation, wheel bearing condition and other front rotating components may be inspected.",
+          "Prompt inspection; urgent if braking performance is reduced or the grinding is severe.");
+      } else if(a.NS2==="click" && a.NS4==="yes"){
+        set("A CV joint or another steering-related rotating component is one possibility",
+          "Other possibilities include a suspension/steering joint, wheel-area component or another source that changes with cornering.",
+          "Repeated clicking that changes while steering is a useful pattern because some rotating joints become more noticeable when the steering angle changes.",
+          "Note whether the sound is worse on left or right turns and whether it occurs under acceleration. Do not crawl underneath a running vehicle.",
+          "The garage may inspect CV boots/joints, wheel bearings, steering/suspension joints and the condition of nearby components.",
+          "Inspection soon; avoid unnecessary high-speed driving if the noise is worsening.");
+      } else if(a.NS2==="knock" && a.NS3==="bumps"){
+        set("Suspension or underbody movement is a plausible source",
+          "Possible worn/broken suspension linkage, mount, bush or another loose component.",
+          "A knock that is specifically triggered by bumps is more consistent with something moving as the suspension travels than with a constant engine noise.",
+          "Note whether the knock is front/rear and whether the vehicle also pulls, leans or feels unstable.",
+          "The garage may inspect suspension joints, bushes, links, mounts, springs, dampers and underbody components.",
+          "Inspection soon, especially if handling has changed.");
+      } else if(a.NS2==="hum" && a.NS3==="speed"){
+        set("A rotating wheel/tyre or bearing-related source is possible",
+          "Tyre wear, wheel balance, wheel bearing or another rotating component can produce a speed-related hum.",
+          "A sound that follows road speed rather than engine RPM points attention toward components whose rotation follows the wheels.",
+          "Note the speed range, whether the sound changes on different road surfaces and whether steering changes it.",
+          "The garage may inspect tyre condition, wheel balance, wheel bearings and other rotating components.",
+          "Inspection soon if the sound is new or worsening.");
+      } else if(a.NS3==="idle" || a.NS3==="accelerating" && a.NS1==="engine"){
+        set("An engine or accessory-drive noise is possible",
+          "Potential sources include an accessory, belt-driven component, engine mount or internal engine component.",
+          "A noise that can be reproduced while stationary points away from wheel-speed-only components and toward the engine or accessories.",
+          "Note whether the sound follows engine RPM and whether any warning light, oil warning, smoke or burning smell appears.",
+          "A garage may listen with the engine running, inspect belts/accessories and check fluid levels and diagnostic data.",
+          "Prompt inspection if the noise is severe, sudden or accompanied by a warning light.");
+      }
+      break;
+
+    case "warning-light":
+      if(a.WL2==="oil" && a.WL1==="red"){
+        set("Low engine oil pressure or an oil-pressure system fault needs urgent assessment",
+          "A sensor/switch or wiring fault can also trigger the warning, so the exact cause must be tested.",
+          "The oil-pressure warning is important because adequate oil pressure is required to protect the engine's moving parts.",
+          "If the warning is active, safely stop and switch the engine off. Do not assume the light is only a sensor problem.",
+          "The garage may check the oil level and condition, inspect for leaks and use appropriate diagnostic/pressure testing to establish whether pressure is actually low.",
+          "Urgent — do not continue driving with an active oil-pressure warning.");
+      } else if(a.WL2==="temperature"){
+        set("A cooling-system or engine-temperature fault is possible",
+          "Low coolant, a cooling-system leak, thermostat/fan issues or a sensor fault are among the possibilities.",
+          "The temperature symbol is linked to engine thermal management. The meaning becomes more urgent if the gauge rises, steam appears or coolant is being lost.",
+          "If the engine is overheating, stop safely and let it cool. Never open a hot cooling-system cap.",
+          "The garage may check coolant level/leaks, temperature readings, fan operation and other cooling-system components.",
+          "Urgent if the engine is overheating; otherwise prompt investigation.");
+      } else if(a.WL2==="battery"){
+        set("Charging-system or battery-related fault is possible",
+          "Alternator output, battery condition, drive belt or electrical connections can all contribute.",
+          "A battery-shaped warning while the engine is running generally relates to the charging system rather than simply the battery's stored charge.",
+          "If the warning is accompanied by dimming lights or loss of electrical functions, avoid unnecessary driving and seek assistance.",
+          "The garage may test battery condition, charging voltage/current, connections and alternator/belt operation.",
+          "Prompt; urgent if electrical power is rapidly deteriorating.");
+      } else if(a.WL2==="brake"){
+        set("Brake-system warning requires identification before normal driving",
+          "The exact cause depends on the symbol, parking brake status, fluid level and any change in pedal feel.",
+          "Brake warnings can have simple causes, but they can also indicate a reduction in braking-system performance.",
+          "Check whether the parking brake is fully released and note any change in pedal feel. Do not drive if braking feels unsafe.",
+          "A garage may inspect brake fluid, pads/discs, hydraulic components and the warning-system circuitry.",
+          "Urgent if the brake pedal or stopping performance is abnormal.");
+      } else if(a.WL3==="flashing" && a.WL2==="engine"){
+        set("An active engine fault such as a misfire is possible",
+          "Other engine-management faults can also make the warning flash.",
+          "A flashing engine warning is more concerning than a steady warning because some faults can cause further damage if the vehicle is driven hard.",
+          "Avoid hard acceleration and arrange prompt professional assessment, particularly if the engine is shaking or losing power.",
+          "A garage may retrieve fault codes and then test the ignition, fuelling, air-management and emissions systems indicated by the data.",
+          "Prompt/urgent depending on how the engine is running.");
+      }
+      break;
+
+    case "starting":
+      if(a.ST1==="click" || a.ST2==="dark"){
+        set("Battery, battery connection or starter-circuit problem is plausible",
+          "A weak battery, poor connection, starter/solenoid issue or another high-current electrical fault can cause this pattern.",
+          "Silence/clicking with major dashboard dimming suggests the starting circuit may not be receiving or delivering enough current.",
+          "Note whether the lights are dim before starting and whether the symptom changes after the vehicle has been driven. Do not repeatedly attempt to start for long periods.",
+          "The garage may test battery condition, voltage drop under load, terminals/grounds and starter operation.",
+          "Prompt; arrange assistance if the vehicle is stranded.");
+      } else if(a.ST1==="slow"){
+        set("Low battery capacity or high-resistance starting circuit is possible",
+          "Battery condition, connections, starter load or cold-temperature effects can contribute.",
+          "A noticeably slow crank means the engine is not being turned at the expected speed.",
+          "Record whether it is worse when cold and whether the dashboard lights dim heavily during cranking.",
+          "The garage may perform a battery load test and inspect charging, starter current draw and high-current connections.",
+          "Prompt if recurring.");
+      } else if(a.ST1==="crank"){
+        set("The engine is cranking but another requirement for starting may be missing",
+          "Possible areas include fuel delivery, ignition, engine-speed sensing, immobiliser/security or engine-management control.",
+          "Normal cranking tells us the starter can turn the engine, but it does not prove that fuel, ignition and control signals are all present.",
+          "Note warning lights, fuel smell, whether the issue is hot/cold dependent and whether it ever starts briefly.",
+          "A garage may check stored fault codes, engine-speed data and the fuel/ignition systems appropriate to the vehicle.",
+          "Prompt if the vehicle will not start.");
+      } else if(a.ST1==="stall"){
+        set("An engine-management, fuel/air or electrical control issue is possible",
+          "The cause could range from an intermittent sensor/control fault to fuel delivery or air-management problems.",
+          "Starting briefly and then stalling indicates that the engine can initially fire but cannot maintain stable operation.",
+          "Note whether it restarts immediately, whether it happens hot or cold and whether any warning light appears.",
+          "A garage may check fault codes and live data, then investigate fuel, ignition and air-management systems.",
+          "Prompt investigation, especially if it stalls in traffic.");
+      }
+      break;
+
+    case "braking":
+      if(a.BR1==="spongy" || a.BR1==="normal_long"){
+        set("Reduced braking performance or hydraulic-system fault needs to be ruled out",
+          "Possible causes include air/fluid problems, hydraulic faults or other brake-system issues.",
+          "A soft pedal or longer stopping distance means the vehicle may not respond as expected when braking.",
+          "Do not test this aggressively on the road. If braking is not dependable, stop using the vehicle and arrange professional help.",
+          "A garage may inspect the hydraulic system, brake fluid, pads/discs, calipers and related components.",
+          "Urgent — braking is safety-critical.");
+      } else if(a.BR1==="pulse"){
+        set("Brake judder or vibration is possible",
+          "Disc/rotor condition, wheel/tyre issues or another brake/wheel-related cause may produce pulsation.",
+          "A repeated vibration through the pedal during braking is a useful pattern, but it does not identify one component by itself.",
+          "Note whether the vibration occurs only from higher speeds and whether the steering wheel also shakes.",
+          "The garage may inspect discs, pads, calipers, wheel condition and run appropriate braking checks.",
+          "Prompt inspection.");
+      } else if(a.BR2==="left" || a.BR2==="right"){
+        set("Uneven braking force is possible",
+          "A sticking/seized brake component, tyre issue or another side-to-side problem can cause pulling.",
+          "A strong directional change under braking suggests the braking forces may not be balanced between sides.",
+          "Avoid unnecessary driving if the pull is strong or unpredictable.",
+          "A garage may compare braking performance side-to-side and inspect calipers, pads, discs, hoses and wheel/tyre condition.",
+          "Prompt/urgent depending on severity.");
+      }
+      break;
+
+    case "steering":
+      if(a.SC1==="heavy"){
+        set("Power-steering assistance or a steering-system fault is possible",
+          "Electrical assistance, hydraulic assistance where fitted, low voltage or mechanical resistance can contribute.",
+          "A major change in steering effort is significant because it affects vehicle control.",
+          "Do not continue normal driving if steering becomes difficult or unpredictable.",
+          "The garage may check warning codes, power-assistance operation, relevant fluid where applicable and mechanical steering components.",
+          "Urgent if the steering is substantially harder than normal.");
+      } else if(a.SC1==="pulling"){
+        set("Wheel alignment, tyre condition or steering/suspension geometry may be involved",
+          "Road camber can also cause mild drift, so the pattern needs to be assessed rather than assuming an alignment fault.",
+          "Persistent pulling on a reasonably flat road is a useful clue, particularly if it began after a pothole or kerb impact.",
+          "Check tyre pressures when the tyres are cold and note whether there is visible tyre damage. Avoid diagnosing alignment by eye.",
+          "A garage may inspect tyres and suspension and measure wheel alignment.",
+          "Inspection soon; sooner after an impact.");
+      } else if(a.SC1==="loose"){
+        set("Steering play needs prompt mechanical assessment",
+          "Possible sources include steering joints, linkage, rack-related components or other front-end wear.",
+          "Excessive play can affect how accurately the vehicle responds to steering input.",
+          "Do not continue driving if the play is severe or the vehicle feels unstable.",
+          "A garage may inspect steering joints, rack/linkage and front suspension components for play.",
+          "Prompt/urgent depending on severity.");
+      }
+      break;
+
+    case "vibration":
+      if(a.VB2==="speed" && a.VB1==="wheel"){
+        set("Wheel/tyre balance, tyre condition or another rotating front-end issue is plausible",
+          "Wheel alignment, wheel damage or bearing-related issues can also produce similar symptoms.",
+          "A vibration that appears at a particular road speed and is felt through the steering wheel points attention toward the wheel/tyre/front rotating assembly.",
+          "Note the approximate speed range and whether the vibration changes when accelerating or braking.",
+          "A garage may check tyre condition, wheel balance, wheel runout and relevant bearings/suspension components.",
+          "Inspection soon.");
+      } else if(a.VB2==="acceleration"){
+        set("A load-related driveline or engine-running issue is possible",
+          "Engine misfire, engine mounts, driveshaft/CV components or other driveline parts can create acceleration-related vibration.",
+          "A vibration that appears mainly when power is applied gives a different pattern from a simple constant wheel-speed vibration.",
+          "Note whether the engine also feels uneven and whether the vibration disappears when you lift off the accelerator.",
+          "A garage may inspect engine running, mounts and driveline components appropriate to the vehicle.",
+          "Prompt if severe or worsening.");
+      } else if(a.VB2==="braking"){
+        set("Brake-related vibration is possible",
+          "Brake disc condition, wheel/tyre condition or suspension play can all contribute.",
+          "The braking trigger is the strongest clue in the answers provided.",
+          "Note whether the steering wheel, pedal or whole car is shaking.",
+          "A garage may inspect brakes, wheel/tyre condition and front-end components.",
+          "Prompt inspection.");
+      }
+      break;
+
+    case "overheating":
+      if(a.OH1==="red" || a.OH2==="steam"){
+        set("Cooling-system fault with overheating risk",
+          "Coolant loss, a leak, thermostat/fan problems or other cooling-system faults are possible.",
+          "The combination of high temperature and/or steam means the engine may not be shedding heat safely.",
+          "Stop safely, switch the engine off and allow it to cool. Never open a hot coolant cap.",
+          "A garage may pressure-test the cooling system, inspect coolant circulation, fans, thermostat and related components, and check for evidence of overheating damage.",
+          "Urgent — avoid driving an overheating vehicle.");
+      } else if(a.OH1==="spike"){
+        set("Cooling performance may be marginal at low speed",
+          "Cooling fan operation, coolant level, radiator airflow or another cooling-system issue may be involved.",
+          "A temperature rise in traffic that improves at speed can indicate that cooling performance changes with airflow or fan operation.",
+          "Do not continue if the gauge reaches the red zone or a temperature warning appears.",
+          "A garage may check fan operation, coolant level/leaks, radiator airflow and temperature control components.",
+          "Prompt investigation.");
+      }
+      break;
+
+    case "leakage":
+      if(a.LK1==="fuel"){
+        set("Possible fuel leak",
+          "The exact source could be a fuel line, connection, tank/filler area or another fuel-system component.",
+          "A strong petrol/diesel smell is more important than the exact puddle colour because fuel presents a fire risk.",
+          "Do not smoke, create sparks or drive the vehicle until the leak has been assessed.",
+          "A garage may trace the fuel system for the source and check connections/lines appropriate to the vehicle.",
+          "Urgent — fire hazard.");
+      } else if(a.LK1==="brake"){
+        set("Possible brake-fluid leak",
+          "A leak could come from a hose, caliper, line or another hydraulic component.",
+          "Brake fluid loss can reduce hydraulic braking performance.",
+          "Do not rely on the vehicle for normal driving if brake-fluid loss is suspected.",
+          "A garage may trace the hydraulic circuit and inspect the affected brake components.",
+          "Urgent — braking system safety issue.");
+      } else if(a.LK1==="oil"){
+        set("Engine or drivetrain oil leak is possible",
+          "The exact source depends on where the fluid appears and what component sits above that location.",
+          "Dark oily fluid is consistent with used engine oil, but other lubricants can look similar.",
+          "Avoid touching unknown fluids and monitor whether the leak is increasing. If an oil-pressure warning appears, stop driving.",
+          "A garage may clean/inspect the area and trace the leak to its source.",
+          "Prompt if persistent or worsening.");
+      } else if(a.LK1==="coolant"){
+        set("Coolant leak is possible",
+          "Hoses, radiator, expansion tank, water pump or other cooling components can leak.",
+          "Coloured coolant under the vehicle together with a falling coolant level can reduce the cooling system's ability to control engine temperature.",
+          "Never open the cooling system while hot. Monitor for overheating and arrange inspection.",
+          "A garage may pressure-test the cooling system and inspect hoses, radiator, pump and connections.",
+          "Prompt; urgent if overheating occurs.");
+      }
+      break;
+
+    case "electrical":
+      if(a.EL1==="dead"){
+        set("Battery, main power connection or primary electrical supply problem is possible",
+          "A discharged/failed battery, poor terminal/ground connection, main fuse or another supply fault can produce a dead vehicle.",
+          "When many electrical systems fail together, a shared power source is more plausible than many independent component failures.",
+          "Avoid repeatedly trying to start the vehicle. If safe, note whether any lights work at all.",
+          "A garage or recovery technician may test battery state, connections, main fuses and voltage supply.",
+          "Prompt; arrange assistance if stranded.");
+      } else if(a.EL3==="yes" || a.EL1==="lights"){
+        set("Charging-system fault is possible",
+          "Alternator output, battery condition, drive belt or electrical connections may be involved.",
+          "Dim/flickering electrical systems together with a charging warning can indicate that the vehicle is no longer being supplied normally while running.",
+          "If power is deteriorating, avoid unnecessary driving because the vehicle may eventually lose electrical power.",
+          "A garage may test charging output, battery condition, connections and alternator/belt operation.",
+          "Prompt.");
+      } else if(a.EL2==="yes"){
+        set("A shared electrical supply, fuse, relay or ground issue is possible",
+          "The exact circuit depends on which systems failed together.",
+          "Several unrelated functions failing at once makes a common electrical feed more plausible.",
+          "Note exactly which systems stopped and whether they returned after restarting the car.",
+          "A garage may inspect relevant fuses, relays, grounds and supply circuits before replacing individual components.",
+          "Prompt if multiple safety systems are affected.");
+      }
+      break;
+
+    case "performance":
+      if(a.EP3==="flashing"){
+        set("Active engine fault such as a misfire is possible",
+          "Fuel, ignition, air-management or sensor faults can produce similar symptoms.",
+          "A flashing engine warning is a stronger escalation signal than a steady light, particularly if the engine is shaking or losing power.",
+          "Avoid hard acceleration and arrange prompt professional assessment.",
+          "A garage may retrieve fault codes and then test the system identified by the stored data.",
+          "Prompt/urgent depending on how the engine is running.");
+      } else if(a.EP1==="misfire"){
+        set("Engine misfire or air/fuel/ignition issue is possible",
+          "Ignition components, fuelling, intake/air metering and engine-management faults can all cause hesitation.",
+          "Stuttering under load suggests the engine is not producing power consistently.",
+          "Note whether it occurs cold/hot, under acceleration only and whether a warning light appears.",
+          "A garage may use diagnostic codes/live data and then inspect ignition, fuelling and air-management components.",
+          "Prompt if persistent or worsening.");
+      } else if(a.EP1==="power"){
+        set("Engine power-management fault is possible",
+          "Air intake, fuelling, turbocharging where fitted, exhaust restriction or electronic control can contribute.",
+          "Reduced power has many possible causes, so the vehicle's warning lights and diagnostic data are particularly useful.",
+          "Avoid assuming the car is safe to drive hard simply because it still moves.",
+          "A garage may scan for fault codes and inspect the systems indicated by the vehicle's data.",
+          "Prompt investigation.");
+      } else if(a.EP2==="blue"){
+        set("Oil may be entering the combustion process",
+          "Engine wear, turbocharger-related issues or other oil-control problems can produce blue/blue-grey smoke.",
+          "Persistent blue smoke is different from normal condensation and warrants investigation.",
+          "Note when the smoke occurs and whether oil level is falling. Do not deliberately rev the engine to create smoke.",
+          "A garage may inspect oil consumption, intake/exhaust components and engine condition.",
+          "Prompt investigation.");
+      } else if(a.EP2==="white"){
+        set("Persistent white exhaust smoke needs investigation",
+          "Coolant entering the combustion process is one possibility, although condensation and other causes can look similar.",
+          "Persistent dense smoke that does not clear is more significant than a brief vapour cloud on a cold day.",
+          "Note coolant level, engine temperature and whether the smoke continues once warm.",
+          "A garage may inspect cooling-system condition and engine-related evidence appropriate to the vehicle.",
+          "Prompt; urgent if overheating accompanies it.");
+      }
+      break;
+
+    case "gearbox":
+      if(a.GB1==="slip"){
+        set("Clutch or transmission slip is possible",
+          "On a manual this may involve clutch friction components; automatic vehicles can have different causes.",
+          "Engine RPM rising without a proportional increase in road speed is a classic slip pattern.",
+          "Avoid repeatedly testing the symptom with hard acceleration.",
+          "A garage may assess clutch operation or transmission condition depending on the gearbox type.",
+          "Prompt inspection.");
+      } else if(a.GB1==="crunch"){
+        set("Gear-selection or clutch-release problem is possible",
+          "Clutch operation, synchronisers, linkage or transmission components can produce difficult/crunching gear selection.",
+          "Difficulty selecting gears, especially with grinding/crunching, suggests the transmission is not engaging normally.",
+          "Avoid forcing the gear lever into position.",
+          "A garage may check clutch release, hydraulic operation where fitted, linkage and gearbox condition.",
+          "Prompt.");
+      } else if(a.GB1==="jerk"){
+        set("Automatic transmission shift-control issue is possible",
+          "Fluid condition, control electronics, adaptation or internal transmission problems can all cause harsh shifts.",
+          "A sudden change in shift quality is useful information but does not identify the internal cause.",
+          "Note which gear changes are affected and whether a warning appears.",
+          "A garage may scan the transmission control system and inspect relevant fluid/operation.",
+          "Prompt.");
+      }
+      break;
+
+    case "wheels":
+      if(a.TW1==="bulge"){
+        set("Tyre structural damage is possible",
+          "A sidewall bulge can indicate internal structural damage and should not be treated as cosmetic.",
+          "The tyre casing carries the vehicle's load and pressure; visible deformation is a significant warning sign.",
+          "Do not continue normal driving on a tyre with a structural bulge. Arrange appropriate replacement/assistance.",
+          "A tyre professional can inspect the tyre and wheel and determine the correct replacement.",
+          "Urgent — potential tyre failure.");
+      } else if(a.TW1==="wear"){
+        set("Uneven tyre wear may be related to alignment, suspension or tyre-pressure issues",
+          "Wheel alignment, worn suspension components, incorrect pressures or tyre characteristics can contribute.",
+          "The location and pattern of the wear are more useful than the fact of uneven wear alone.",
+          "Check pressures against the vehicle manufacturer's specification when tyres are cold and arrange inspection if wear is pronounced.",
+          "A garage/tyre specialist may inspect tread pattern, pressures, alignment and suspension.",
+          "Inspection soon.");
+      } else if(a.TW1==="pressure"){
+        set("A slow puncture, valve issue or wheel/tyre sealing problem is possible",
+          "A puncture, valve, bead seal or wheel damage can cause recurring pressure loss.",
+          "Repeated pressure loss should not simply be solved by repeatedly adding air without finding the cause.",
+          "Check the pressure before driving and avoid driving on a significantly underinflated tyre.",
+          "A tyre professional may inspect the tread, valve, bead and wheel for the source of the leak.",
+          "Prompt.");
+      }
+      break;
+
+    case "suspension":
+      if(a.SS1==="bounce"){
+        set("Worn damper/shock absorber performance is possible",
+          "Other suspension faults can also affect body movement.",
+          "A car that continues to bounce after a bump may not be controlling suspension movement as effectively as intended.",
+          "Note whether one corner is worse and whether tyre contact/handling feels abnormal.",
+          "A garage may inspect dampers, springs, bushes and other suspension components.",
+          "Inspection soon.");
+      } else if(a.SS1==="lean"){
+        set("A spring or other suspension-height problem is possible",
+          "A broken/weak spring or another suspension component can alter ride height.",
+          "One corner sitting lower than the others is a physical clue worth inspecting.",
+          "Avoid loading the vehicle heavily until it has been assessed if the height difference is substantial.",
+          "A garage may inspect springs, dampers, mounts and suspension height.",
+          "Prompt.");
+      } else if(a.SS1==="knock"){
+        set("Suspension linkage, bush or mount wear is possible",
+          "There are several components that can knock as the suspension moves.",
+          "A sharp knock over bumps suggests movement that should be located rather than assuming one particular component.",
+          "Note whether it occurs on small bumps, large bumps, steering inputs or braking.",
+          "A garage may inspect suspension joints, bushes, links, mounts and springs for play or damage.",
+          "Inspection soon.");
+      }
+      break;
+
+    case "other":
+      if(a.OT1==="odour"){
+        set("Cabin heater/cooling-system or another HVAC-related source is possible",
+          "Coolant smell, HVAC moisture, electrical smells and other sources can overlap.",
+          "The smell's character and whether the windows mist, the carpet becomes damp or coolant level changes are useful clues.",
+          "Do not ignore a strong burning/electrical smell. If smoke appears, stop safely and switch off the vehicle.",
+          "A garage may inspect the HVAC system, coolant system and relevant electrical components.",
+          "Prompt if persistent or strong.");
+      } else if(a.OT1==="locking"){
+        set("Central-locking/keyless entry electrical or actuator issue is possible",
+          "A key fob battery, vehicle battery, fuse, actuator, receiver or wiring fault can produce similar symptoms.",
+          "Door-locking faults often require separating a key/fob issue from the vehicle-side locking system.",
+          "Note whether the physical key works and whether all doors or only one are affected.",
+          "A garage may test the key/fob, vehicle battery, fuses, locking actuators and control system.",
+          "Routine unless a door cannot be secured safely.");
+      }
+      break;
+  }
+
+  return result;
+}
+
+function finish(){
+  $("wizard").style.display="none";
+  const result=infer();
+  const safety=safetyAssessment();
+  const vehicle=getVehicleContext();
+
+  $("report").style.display="block";
+  $("reportTitle").textContent=`${TRACK_LABEL[STATE.track]} assessment`;
+  $("reportSub").textContent=vehicle ? `Vehicle context: ${vehicle}` : "Based on the answers you provided.";
+  $("reportLikely").textContent=result.likely;
+  $("reportConfidence").textContent=result.confidence;
+  $("reportOther").textContent=result.other;
+  $("reportWhy").textContent=result.why;
+  $("reportCheck").textContent=result.check;
+  $("reportGarage").textContent=result.garage;
+  $("reportUrgency").textContent=result.urgency;
+
+  $("reportSummary").innerHTML=QUESTIONS
+    .filter(q=>q.track===STATE.track && STATE.answers[q.id])
+    .map(q=>`<li><strong>${escapeHtml(q.text)}</strong><br>${escapeHtml(selectedText(q.id))}</li>`).join("");
+
+  if(safety.length){
+    const strongest=safety.some(x=>x.level==="red")?"red":"amber";
+    $("safetyAlert").innerHTML=`<div class="alert ${strongest}"><strong>${strongest==="red"?"Safety warning":"Safety note"}</strong><br>${escapeHtml(safety.map(x=>x.text).join(" "))}</div>`;
+  }else{
+    $("safetyAlert").innerHTML=`<div class="alert green"><strong>No immediate safety escalation was triggered by these answers.</strong><br>This does not prove the vehicle is safe; it only means the answers did not match the built-in escalation rules.</div>`;
+  }
+
+  $("progressBar").style.width="100%";
+  $("progressPct").textContent="100%";
+  window.scrollTo({top:$("report").offsetTop-90,behavior:"smooth"});
+}
+
+function printReport(){window.print()}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function escapeAttr(s){return escapeHtml(s).replace(/`/g,"&#096;")}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  renderTracks();
+  $("nextBtn").addEventListener("click",nextQuestion);
+  $("backBtn").addEventListener("click",previousQuestion);
+  $("cancelBtn").addEventListener("click",cancel);
+  $("againBtn").addEventListener("click",cancel);
+  $("printBtn").addEventListener("click",printReport);
+});
+</script>
+</body>
+</html>

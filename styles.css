@@ -1,444 +1,390 @@
 /* ==========================================================================
-   CAR EXPLAIN MASTER WEB ENGINE - PREMIUM HYPER-SPACED RESPONSIVE LAYER
+   CAR EXPLAIN — MASTER STYLESHEET
+   Shared palette used by index.html and diagnose.html
    ========================================================================== */
 
-html {
-    scroll-behavior: smooth; /* 🚀 Adds high-end smooth sliding when links are clicked */
+:root{
+  --navy:#0f172a;
+  --blue:#1e3a8a;
+  --blue2:#2563eb;
+  --slate:#475569;
+  --muted:#64748b;
+  --line:#dbe3ee;
+  --bg:#f4f7fb;
+  --white:#ffffff;
+  --green:#047857;
+  --green-bg:#ecfdf5;
+  --amber:#b45309;
+  --amber-bg:#fffbeb;
+  --red:#b91c1c;
+  --red-bg:#fef2f2;
 }
 
+html { scroll-behavior: smooth; }
+
 body {
-    background-color: #E2E8F0; /* Premium technical slate grey workspace canvas */
-    color: #0F172A;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    line-height: 1.85; /* Absolute separation between individual text rows */
-    -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+  color: var(--navy);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
 }
 
 .site-container {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 60px; /* Comfortably sweeps content completely away from screen edges */
-    box-sizing: border-box;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 60px;
+  box-sizing: border-box;
 }
 
-/* INTERACTIVE ACTIONS & BUTTONS */
+/* BUTTONS */
 .btn {
-    display: inline-block;
-    padding: 16px 32px;
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none;
-    border-radius: 4px;
-    text-align: center;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: all 0.2s ease-in-out;
+  display: inline-block;
+  padding: 16px 32px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  border-radius: 4px;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.2s ease-in-out;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .btn-primary {
-    background-color: #1E3A8A; /* Balanced technical corporate blue */
-    color: #FFFFFF;
-    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+  background-color: var(--blue);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
 }
-
 .btn-primary:hover {
-    background-color: #172554;
-    transform: translateY(-2px);
+  background-color: #172554;
+  transform: translateY(-2px);
 }
 
 .btn-white {
-    background-color: #FFFFFF;
-    color: #0F172A;
-    border: 1px solid #CBD5E1;
+  background-color: var(--white);
+  color: var(--navy);
+  border: 1px solid #cbd5e1;
 }
-
 .btn-white:hover {
-    background-color: #F8FAFC;
-    transform: translateY(-2px);
+  background-color: #f8fafc;
+  transform: translateY(-2px);
 }
 
 .btn-large {
-    padding: 20px 40px;
-    font-size: 14px;
+  padding: 20px 40px;
+  font-size: 14px;
 }
 
-/* TOP CONSOLE NAVIGATION */
+/* HEADER */
 .site-header {
-    background-color: #FFFFFF;
-    border-bottom: 2px solid #CBD5E1;
-    padding: 26px 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  background-color: var(--white);
+  border-bottom: 2px solid #cbd5e1;
+  padding: 26px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
-
 .header-flex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-
-.logo-group {
-    display: flex;
-    align-items: center;
-}
-
+.logo-group { display: flex; align-items: center; }
 .brand-logo {
-    font-size: 24px;
-    font-weight: 900;
-    color: #0F172A;
-    text-decoration: none;
-    letter-spacing: 2px;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--navy);
+  text-decoration: none;
+  letter-spacing: 2px;
 }
+.brand-logo span { color: var(--blue); }
 
-.brand-logo span {
-    color: #1E3A8A;
-}
-
-.main-navigation {
-    display: flex;
-    gap: 40px;
-}
-
+.main-navigation { display: flex; gap: 40px; }
 .nav-link {
-    color: #475569;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 700;
-    transition: color 0.2s ease;
+  color: var(--slate);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  transition: color 0.2s ease;
 }
+.nav-link:hover { color: var(--blue); }
 
-.nav-link:hover {
-    color: #1E3A8A;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 35px;
-}
-
+.header-actions { display: flex; align-items: center; gap: 35px; }
 .login-action {
-    color: #475569;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 700;
+  color: var(--slate);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
 }
+.login-action:hover { color: var(--blue); }
 
-/* HERO GRAPHIC BANNER BOX */
-.hero-banner-section {
-    padding: 60px 0;
-    background-color: #E2E8F0;
-}
-
+/* HERO BANNER */
+.hero-banner-section { padding: 60px 0; background-color: var(--bg); }
 .banner-wrapper {
-    width: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 25px 55px rgba(15, 23, 42, 0.15);
-    border: 1px solid #94A3B8;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 25px 55px rgba(15, 23, 42, 0.15);
+  border: 1px solid #94a3b8;
 }
+.master-banner-img { width: 100%; height: auto; display: block; }
 
-.master-banner-img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* TEXT ELEMENT INSULATION */
+/* TEXT */
 .clean-text {
-    font-size: 15px;
-    color: #475569;
-    margin: 0;
-    line-height: 1.85;
+  font-size: 15px;
+  color: var(--slate);
+  margin: 0;
+  line-height: 1.85;
 }
 
-/* HORIZONTAL CHECK STRIP */
+/* INFO STRIP */
 .info-strip {
-    background-color: #FFFFFF;
-    border-bottom: 2px solid #CBD5E1;
-    padding: 32px 0;
+  background-color: var(--white);
+  border-bottom: 2px solid #cbd5e1;
+  padding: 32px 0;
 }
-
 .info-strip-flex {
-    display: flex;
-    justify-content: space-between;
-    gap: 30px;
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
 }
-
 .info-item {
-    font-size: 13px;
-    font-weight: 800;
-    color: #334155;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
+.info-item span { color: var(--blue); margin-right: 10px; }
 
-.info-item span {
-    color: #1E3A8A;
-    margin-right: 10px;
-}
-
-/* CONTAINER ARCHITECTURE HEADINGS */
+/* SECTION HEADINGS */
 .section-title {
-    text-align: center;
-    font-size: 36px;
-    font-weight: 900;
-    color: #0F172A;
-    margin-bottom: 70px;
-    text-transform: uppercase;
-    letter-spacing: -0.5px;
+  text-align: center;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 70px;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
 }
 
-/* MASTER WIDESCREEN DESKTOP GRIDS */
+/* GRIDS */
 .grid-three-columns {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 50px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 50px;
 }
-
 .grid-two-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
 }
 
-.process-section {
-    padding: 120px 0;
-    scroll-margin-top: 100px; /* Prevents sticky nav from covering section headers when jumping */
-}
+.process-section { padding: 120px 0; scroll-margin-top: 100px; }
 
 .content-card {
-    background-color: #FFFFFF; /* High-contrast white blocks lift clean out of grey canvas */
-    border: 1px solid #CBD5E1;
-    border-radius: 8px;
-    padding: 55px 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01);
+  background-color: var(--white);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 55px 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01);
 }
-
 .card-number {
-    font-size: 40px;
-    font-weight: 900;
-    color: #94A3B8;
-    margin-bottom: 20px;
+  font-size: 40px;
+  font-weight: 900;
+  color: #94a3b8;
+  margin-bottom: 20px;
 }
+.content-card h3 { font-size: 22px; font-weight: 900; margin: 0 0 18px 0; }
 
-.content-card h3 {
-    font-size: 22px;
-    font-weight: 900;
-    margin: 0 0 18px 0;
-}
-
-/* PRODUCT FEATURE Breakout MODULE */
+/* GARAGE FEATURE — dark navy block */
 .garage-feature {
-    background-color: #0B132B; /*Authoritative deep blue breakout block */
-    color: #FFFFFF;
-    padding: 120px 0;
-    border-radius: 8px;
-    margin-bottom: 120px;
-    scroll-margin-top: 100px;
+  background-color: var(--navy);
+  color: var(--white);
+  padding: 120px 0;
+  border-radius: 8px;
+  margin-bottom: 120px;
+  scroll-margin-top: 100px;
 }
-
 .feature-text-block h2 {
-    font-size: 42px;
-    font-weight: 900;
-    margin: 0 0 24px 0;
+  font-size: 42px;
+  font-weight: 900;
+  margin: 0 0 24px 0;
 }
-
 .feature-text-block .clean-text {
-    color: #94A3B8;
-    font-size: 17px;
-    margin: 0 0 45px 0;
+  color: #94a3b8;
+  font-size: 17px;
+  margin: 0 0 45px 0;
 }
-
 .ui-mockup-box {
-    background-color: #1E293B;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 45px;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 45px;
 }
-
 .mockup-row {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 20px;
-    margin-bottom: 40px;
-    font-size: 22px;
-    font-weight: 900;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 20px;
+  margin-bottom: 40px;
+  font-size: 22px;
+  font-weight: 900;
 }
-
-.mockup-row span { color: #64748B; font-size: 14px; }
+.mockup-row span { color: #64748b; font-size: 14px; }
 .mockup-metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-
 .metric-tile {
-    background-color: #0F172A;
-    padding: 22px 15px;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 14px;
+  background-color: var(--navy);
+  padding: 22px 15px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+}
+.metric-tile h5 {
+  margin: 0 0 12px 0;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.text-green { color: #10b981; font-weight: 800; }
+.text-orange { color: #f97316; font-weight: 800; }
+
+/* SERVICES */
+.services-section { padding: 0 0 120px 0; scroll-margin-top: 100px; }
+.services-section .content-card h4 {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0 0 18px 0;
 }
 
-.metric-tile h5 { margin: 0 0 12px 0; color: #475569; text-transform: uppercase; font-size: 11px; }
-.text-green { color: #10B981; font-weight: 800; }
-.text-orange { color: #F97316; font-weight: 800; }
-
-/* SERVICES GRID SECTION */
-.services-section { 
-    padding: 0 0 120px 0; 
-    scroll-margin-top: 100px;
-}
-.services-section .content-card h4 { font-size: 24px; font-weight: 900; margin: 0 0 18px 0; }
-
-/* SAFETY DATA PANELS */
-.safety-section { 
-    padding: 0 0 120px 0; 
-    scroll-margin-top: 100px;
-}
-
+/* SAFETY */
+.safety-section { padding: 0 0 120px 0; scroll-margin-top: 100px; }
 .compliance-box {
-    border: 1px solid #CBD5E1;
-    background-color: #FFFFFF;
-    padding: 70px;
-    border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background-color: var(--white);
+  padding: 70px;
+  border-radius: 8px;
 }
-
 .compliance-box h3 {
-    text-align: center;
-    font-size: 26px;
-    font-weight: 900;
-    margin: 0 0 50px 0;
-    text-transform: uppercase;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0 0 50px 0;
+  text-transform: uppercase;
+}
+.compliance-box strong {
+  display: block;
+  color: var(--navy);
+  margin-bottom: 10px;
+  font-size: 16px;
 }
 
-.compliance-box strong { display: block; color: #0F172A; margin-bottom: 10px; font-size: 16px; }
-
-/* TERMINAL ACCESS MODULE LOWER BANNER */
+/* BOTTOM CTA */
 .bottom-cta {
-    background-color: #0B132B;
-    color: #FFFFFF;
-    padding: 110px 0;
-    text-align: center;
-    border-radius: 8px;
-    margin-bottom: 100px;
+  background-color: var(--navy);
+  color: var(--white);
+  padding: 110px 0;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 100px;
 }
-
 .bottom-cta h2 { font-size: 42px; font-weight: 900; margin: 0 0 20px 0; }
-.bottom-cta .clean-text { color: #94A3B8; font-size: 19px; margin: 0 0 50px 0; }
-.button-group-flex { display: flex; justify-content: center; align-items: center; gap: 40px; }
-.cta-link-white { color: #FFFFFF; text-decoration: none; font-weight: 700; }
+.bottom-cta .clean-text { color: #94a3b8; font-size: 19px; margin: 0 0 50px 0; }
+.button-group-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+.cta-link-white {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 700;
+}
+.cta-link-white:hover { color: #93c5fd; }
 
-/* MASTER CORPORATE FOOTER */
+/* FOOTER — dark navy, matches diagnose.html */
 .site-footer {
-    background-color: #FFFFFF;
-    border-top: 2px solid #CBD5E1;
-    padding: 90px 0 50px 0;
+  background-color: var(--navy);
+  border-top: 2px solid #1e293b;
+  padding: 90px 0 50px 0;
+  color: var(--white);
 }
-
 .footer-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr;
-    gap: 80px;
-    padding-bottom: 60px;
-    border-bottom: 1px solid #E2E8F0;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 80px;
+  padding-bottom: 60px;
+  border-bottom: 1px solid #263247;
+}
+.footer-brand .footer-logo {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: 2px;
+}
+.footer-brand .footer-logo span { color: var(--blue2); }
+.footer-brand p {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 10px 0 0 0;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.footer-links h5 {
+  font-size: 13px;
+  font-weight: 900;
+  margin: 0 0 28px 0;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.footer-links a {
+  display: block;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  transition: color .2s ease;
+}
+.footer-links a:hover { color: var(--white); }
+.footer-bottom {
+  padding-top: 50px;
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
 }
 
-.footer-brand .footer-logo { font-size: 24px; font-weight: 900; }
-.footer-brand .footer-logo span { color: #1E3A8A; }
-.footer-brand p { font-size: 11px; color: #64748B; margin: 10px 0 0 0; font-weight: 800; letter-spacing: 1px; }
-
-.footer-links h5 { font-size: 13px; font-weight: 900; margin: 0 0 28px 0; text-transform: uppercase; }
-.footer-links a { display: block; color: #475569; text-decoration: none; font-size: 14px; margin-bottom: 16px; font-weight: 600; }
-.footer-bottom { padding-top: 50px; text-align: center; font-size: 13px; color: #94A3B8; }
-
-/* ==========================================================================
-   📱 ELITE AUTOMATED MOBILE ENGINE OVERRIDES (IMPROVES PHONES DRASTICALLY)
-   ========================================================================== */
-
+/* RESPONSIVE */
 @media (max-width: 1024px) {
-    .garage-feature, .bottom-cta { border-radius: 0; } /* Cleaner edge framing on smaller laptops */
+  .garage-feature, .bottom-cta { border-radius: 0; }
 }
 
 @media (max-width: 768px) {
-    /* 1. Expand standard screen container margins */
-    .site-container { 
-        padding: 0 24px; 
-    }
-
-    /* 2. Reposition crowded navigation headers into vertical layouts */
-    .header-flex { 
-        flex-direction: column; 
-        gap: 20px; 
-        padding: 10px 0;
-    }
-    
-    .main-navigation { 
-        gap: 18px; 
-        flex-wrap: wrap; 
-        justify-content: center; 
-    }
-    
-    .header-actions { 
-        flex-direction: column; 
-        gap: 12px; 
-        width: 100%; 
-    }
-    
-    /* Make actions full thumb width on mobile screens */
-    .header-actions .btn { 
-        width: 100%; 
-        box-sizing: border-box;
-    }
-
-    /* 3. Collapse squashed columns into deep vertical card blocks */
-    .grid-three-columns, 
-    .grid-two-columns, 
-    .footer-grid { 
-        grid-template-columns: 1fr !important; 
-        gap: 40px; 
-    }
-
-    /* 4. Drop card internal padding to give the core content screen width */
-    .content-card {
-        padding: 40px 24px;
-    }
-
-    .compliance-box {
-        padding: 40px 24px;
-    }
-
-    /* 5. Scale typography sizes so headings do not push layout bounds */
-    .section-title { 
-        font-size: 28px; 
-        margin-bottom: 45px; 
-    }
-    
-    .feature-text-block h2, 
-    .bottom-cta h2 { 
-        font-size: 28px; 
-    }
-
-    /* 6. Expand button stack zones */
-    .button-group-flex { 
-        flex-direction: column; 
-        gap: 20px; 
-    }
-    
-    .button-group-flex .btn {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    /* 7. Insulate metric dash elements from layout distortion */
-.ui-mockup-box {
-padding: 24px;
-}
-.mockup-metric-grid {
-grid-template-columns: 1fr !important; /* Prevents tiny crushed grid boxes on phones */
-gap: 12px;
-}
+  .site-container { padding: 0 24px; }
+  .header-flex { flex-direction: column; gap: 20px; padding: 10px 0; }
+  .main-navigation { gap: 18px; flex-wrap: wrap; justify-content: center; }
+  .header-actions { flex-direction: column; gap: 12px; width: 100%; }
+  .header-actions .btn { width: 100%; box-sizing: border-box; }
+  .grid-three-columns, .grid-two-columns, .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px;
+  }
+  .content-card { padding: 40px 24px; }
+  .compliance-box { padding: 40px 24px; }
+  .section-title { font-size: 28px; margin-bottom: 45px; }
+  .feature-text-block h2, .bottom-cta h2 { font-size: 28px; }
+  .button-group-flex { flex-direction: column; gap: 20px; }
+  .button-group-flex .btn { width: 100%; box-sizing: border-box; }
+  .ui-mockup-box { padding: 24px; }
+  .mockup-metric-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .info-strip-flex { flex-direction: column; gap: 15px; }
 }
