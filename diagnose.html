@@ -158,7 +158,7 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
     <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
     <nav class="main-navigation" aria-label="Primary navigation">
       <a class="nav-link" href="diagnose.html">Diagnostics</a>
-      <a class="nav-link" href="index.html#garage">My Garage</a>
+      <a class="nav-link" href="garage.html">My Garage</a>
       <a class="nav-link" href="index.html#features">Community</a>
       <a class="nav-link" href="index.html#features">Car Research</a>
     </nav>
@@ -265,8 +265,10 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
           <p id="reportLimit">This is a structured information tool, not a physical vehicle inspection. Several faults can produce similar symptoms, and the actual cause may require inspection, testing or diagnostic equipment.</p>
         </div>
       </div>
+      
       <div class="report-actions">
-        <button class="btn btn-primary" type="button" id="againBtn">Run another check</button>
+        <button class="btn btn-primary" type="button" id="saveReportBtn" style="display:none;">Save report to Garage</button>
+        <button class="btn btn-secondary" type="button" id="againBtn">Run another check</button>
         <button class="btn btn-secondary" type="button" id="printBtn">Print / Save report</button>
       </div>
     </div>
@@ -282,7 +284,7 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
     <div class="footer-links">
       <h4>Services</h4>
       <a href="diagnose.html">Fault Finder</a>
-      <a href="index.html#garage">Garage Logs</a>
+      <a href="garage.html">Garage Logs</a>
       <a href="index.html#features">Quote Checker</a>
       <a href="index.html#features">Car Research</a>
     </div>
@@ -1229,6 +1231,15 @@ function finish(){
     $("safetyAlert").innerHTML=`<div class="alert green"><strong>No immediate safety escalation was triggered by these answers.</strong><br>This does not prove the vehicle is safe; it only means the answers did not match the built-in escalation rules.</div>`;
   }
 
+  // Show the Save button if we are connected to a specific vehicle
+  const saveBtn = $("saveReportBtn");
+  if (window.currentDiagnosingCarId) {
+    saveBtn.style.display = "inline-flex";
+    saveBtn.textContent = `Save to ${window.currentDiagnosingCarName}`;
+  } else {
+    saveBtn.style.display = "none";
+  }
+
   $("progressBar").style.width="100%";
   $("progressPct").textContent="100%";
   window.scrollTo({top:$("report").offsetTop-90,behavior:"smooth"});
@@ -1245,6 +1256,71 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("cancelBtn").addEventListener("click",cancel);
   $("againBtn").addEventListener("click",cancel);
   $("printBtn").addEventListener("click",printReport);
+});
+
+/* ---------- CONNECT TO GARAGE & SAVE REPORT ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const vehicleId = urlParams.get("vehicle");
+  
+  if (vehicleId) {
+    try {
+      const savedCars = JSON.parse(localStorage.getItem("carxplain_garage_v1") || "[]");
+      const car = savedCars.find(c => c.id === vehicleId);
+      
+      if (car) {
+        const hero = document.querySelector(".hero");
+        const banner = document.createElement("div");
+        banner.style.cssText = "background:#e8eefc; border:1px solid #bfdbfe; padding:16px 20px; border-radius:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;";
+        banner.innerHTML = `
+          <div>
+            <div style="font-size:12px; font-weight:900; color:#1e3a8a; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Diagnosing:</div>
+            <div style="font-size:20px; font-weight:900; color:#0f172a;">${car.make} ${car.model}</div>
+          </div>
+          <a href="garage.html" style="font-size:13px; font-weight:700; color:#1e3a8a; text-decoration:none;">← Back to Garage</a>
+        `;
+        hero.after(banner);
+        
+        const contextCard = document.querySelector(".context-card");
+        if (contextCard) contextCard.style.display = "none";
+        
+        window.currentDiagnosingCarId = vehicleId;
+        window.currentDiagnosingCarName = `${car.make} ${car.model}`;
+      }
+    } catch(e) {
+      console.warn("Could not load car details:", e);
+    }
+  }
+
+  // Handle saving the report
+  const saveBtn = document.getElementById("saveReportBtn");
+  if(saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      if (!window.currentDiagnosingCarId) return;
+
+      const result = infer(); 
+      
+      const newProblem = {
+        id: "p_" + Date.now().toString(36),
+        vehicleId: window.currentDiagnosingCarId,
+        date: new Date().toISOString(),
+        title: TRACK_LABEL[STATE.track], 
+        likely: result.likely,
+        urgency: result.urgency
+      };
+
+      try {
+        const savedProblems = JSON.parse(localStorage.getItem("carxplain_problems_v1") || "[]");
+        savedProblems.unshift(newProblem);
+        localStorage.setItem("carxplain_problems_v1", JSON.stringify(savedProblems));
+        
+        alert("Report saved to your garage!");
+        window.location.href = `garage.html`; // Take them back to the garage
+      } catch(e) {
+        alert("Could not save report. Your browser might be blocking local storage.");
+      }
+    });
+  }
 });
 </script>
 </body>

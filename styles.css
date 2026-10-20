@@ -388,3 +388,59 @@ body {
   .mockup-metric-grid { grid-template-columns: 1fr !important; gap: 12px; }
   .info-strip-flex { flex-direction: column; gap: 15px; }
 }
+/* ---------- TEXT HERO (above the banner) ---------- */
+.text-hero{
+  padding: 60px 0 30px;
+  text-align: center;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.text-hero .eyebrow{
+  display: inline-block;
+  background: #e8eefc;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 7px 11px;
+  border-radius: 999px;
+}
+
+.text-hero h1{
+  font-size: clamp(34px, 5.5vw, 58px);
+  line-height: 1.05;
+  margin: 18px 0 16px;
+  letter-spacing: -1.6px;
+  color: var(--navy);
+}
+
+.text-hero p{
+  font-size: 17px;
+  color: var(--slate);
+  max-width: 720px;
+  margin: 0 auto 34px;
+  line-height: 1.7;
+}
+
+.hero-cta-row{
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.hero-trust{
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.hero-trust span{
+  color: var(--blue);
+  font-weight: 900;
+  margin: 0 6px;
+}

@@ -1,177 +1,188 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarExplain | Vehicle Diagnostics &amp; Garage Records</title>
-    <meta name="description" content="CarExplain — UK-first platform to understand your car, keep its history and know what to ask before you pay.">
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarExplain — Know Before You Pay</title>
+<meta name="description" content="Understand your car before you pay for repairs. Structured diagnostics, digital garage, and repair history for UK drivers.">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- ================= SITE HEADER ================= -->
-    <header class="site-header">
-        <div class="site-container header-flex">
-            <div class="logo-group">
-                <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
-            </div>
-            <nav class="main-navigation" aria-label="Primary navigation">
-                <a href="diagnose.html" class="nav-link">Diagnostics</a>
-                <a href="#garage" class="nav-link">My Garage</a>
-                <a href="#features" class="nav-link">Community</a>
-                <a href="#features" class="nav-link">Car Research</a>
-            </nav>
-            <div class="header-actions">
-                <a href="diagnose.html" class="login-action">Log In</a>
-                <a href="diagnose.html" class="btn btn-primary">Get Started</a>
-            </div>
+<!-- ================= SITE HEADER ================= -->
+<header class="site-header">
+  <div class="site-container header-flex">
+    <div class="logo-group">
+      <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
+    </div>
+    <nav class="main-navigation" aria-label="Primary navigation">
+      <a href="diagnose.html" class="nav-link">Diagnostics</a>
+      <a href="garage.html" class="nav-link">My Garage</a>
+      <a href="#features" class="nav-link">Community</a>
+      <a href="#features" class="nav-link">Car Research</a>
+    </nav>
+    <div class="header-actions">
+      <a href="diagnose.html" class="login-action">Log In</a>
+      <a href="garage.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ================= TEXT HERO ================= -->
+  <section class="text-hero">
+    <span class="eyebrow">Car Explain — Know Before You Pay</span>
+    <h1>Understand your car before you pay for repairs.</h1>
+    <p>Describe what your car is doing, answer a few guided questions, and receive a clear, structured analysis of potential causes — plus exactly what to discuss with a garage.</p>
+    <div class="hero-cta-row">
+      <a href="diagnose.html" class="btn btn-primary btn-large">Check What's Wrong With My Car</a>
+      <a href="garage.html" class="btn btn-white btn-large">Explore My Garage</a>
+    </div>
+    <p class="hero-trust">AI-assisted guidance <span>•</span> Structured diagnostics <span>•</span> Built for UK drivers</p>
+  </section>
+
+  <!-- ================= BANNER IMAGE ================= -->
+  <section class="hero-banner-section">
+    <div class="site-container">
+      <div class="banner-wrapper">
+        <img src="hero-banner.png" alt="CarExplain — Know Before You Pay" class="master-banner-img">
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VALUE STRIP ================= -->
+  <section class="info-strip">
+    <div class="site-container info-strip-flex">
+      <div class="info-item"><span>✓</span> Diagnose Component Faults</div>
+      <div class="info-item"><span>✓</span> Track Complete Service History</div>
+      <div class="info-item"><span>✓</span> Verify Repair Quotes</div>
+      <div class="info-item"><span>✓</span> Research Your Next Vehicle</div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section class="process-section" id="how">
+    <div class="site-container">
+      <h2 class="section-title">How It Works</h2>
+      <div class="grid-three-columns">
+        <div class="content-card">
+          <div class="card-number">01</div>
+          <h3>Select Vehicle Symptoms</h3>
+          <p class="clean-text">Choose your problem category and describe exactly what your vehicle is doing right now.</p>
         </div>
-    </header>
-
-    <main>
-
-        <!-- ================= HERO BANNER ================= -->
-        <section class="hero-banner-section">
-            <div class="site-container">
-                <div class="banner-wrapper">
-                    <img src="hero-banner.png" alt="CarExplain — Know Before You Pay" class="master-banner-img">
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= VALUE STRIP ================= -->
-        <section class="info-strip">
-            <div class="site-container info-strip-flex">
-                <div class="info-item"><span>✓</span> Diagnose Component Faults</div>
-                <div class="info-item"><span>✓</span> Track Complete Service History</div>
-                <div class="info-item"><span>✓</span> Verify Repair Quotes</div>
-                <div class="info-item"><span>✓</span> Research Your Next Vehicle</div>
-            </div>
-        </section>
-
-        <!-- ================= HOW IT WORKS ================= -->
-        <section class="process-section" id="how">
-            <div class="site-container">
-                <h2 class="section-title">How It Works</h2>
-                <div class="grid-three-columns">
-                    <div class="content-card">
-                        <div class="card-number">01</div>
-                        <h3>Select Vehicle Symptoms</h3>
-                        <p class="clean-text">Choose your problem category and describe exactly what your vehicle is doing right now.</p>
-                    </div>
-                    <div class="content-card">
-                        <div class="card-number">02</div>
-                        <h3>Answer Guided Questions</h3>
-                        <p class="clean-text">Our tool asks precise follow-up questions tailored to your car profile to narrow down the fault.</p>
-                    </div>
-                    <div class="content-card">
-                        <div class="card-number">03</div>
-                        <h3>Get Your Breakdown Report</h3>
-                        <p class="clean-text">Receive an instant overview showing probable issues, fix urgency metrics, and exact advice for the garage.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= MY GARAGE FEATURE ================= -->
-        <section class="garage-feature" id="garage">
-            <div class="site-container grid-two-columns">
-                <div class="feature-text-block">
-                    <h2>Your Complete Digital Garage</h2>
-                    <p class="clean-text">Manage multiple vehicles under one master profile. Save your diagnostic logs, real-world garage fixes, MOT advisory histories, and previous pricing quotes in a single chronological timeline.</p>
-                    <a href="diagnose.html" class="btn btn-white">Create Your Garage</a>
-                </div>
-                <div class="feature-visual-block">
-                    <div class="ui-mockup-box">
-                        <div class="mockup-row"><strong>Citroën DS3 Dashboard</strong> <span>Active Status</span></div>
-                        <div class="mockup-metric-grid">
-                            <div class="metric-tile"><h5>MOT</h5><span class="text-green">PASS</span></div>
-                            <div class="metric-tile"><h5>Repairs</h5><span>2 Logged</span></div>
-                            <div class="metric-tile"><h5>Faults</h5><span class="text-orange">1 Alert</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PLATFORM FEATURES ================= -->
-        <section class="services-section" id="features">
-            <div class="site-container">
-                <h2 class="section-title">Platform Features</h2>
-                <div class="grid-two-columns">
-                    <div class="content-card">
-                        <h4>System Diagnostics</h4>
-                        <p class="clean-text">Input car problems to quickly find likely component errors before visiting a workshop.</p>
-                    </div>
-                    <div class="content-card">
-                        <h4>Garage Ledger</h4>
-                        <p class="clean-text">Log parts replacement data, service schedules, and comprehensive vehicle runtime logs.</p>
-                    </div>
-                    <div class="content-card">
-                        <h4>Quote Reviewer</h4>
-                        <p class="clean-text">Break down workshop estimates line by line to understand parts costs, labour times, and VAT totals.</p>
-                    </div>
-                    <div class="content-card">
-                        <h4>Car Purchase Finder</h4>
-                        <p class="clean-text">Filter upcoming vehicle purchases by reliability scores, running budgets, and gearbox specifications.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= SAFETY / GUARDRAILS ================= -->
-        <section class="safety-section" id="safety">
-            <div class="site-container compliance-box">
-                <h3>Platform Rules &amp; Advice Thresholds</h3>
-                <div class="grid-two-columns">
-                    <p class="clean-text"><strong>Information Only:</strong> Suggested answers match historical database patterns. This is an information framework, not a hands-on vehicle diagnosis.</p>
-                    <p class="clean-text"><strong>Immediate Escalation:</strong> If critical safety components like brakes or steering fail, the platform will automatically instruct you to stop driving safely.</p>
-                    <p class="clean-text"><strong>Safety First:</strong> We never provide instructions or advice on carrying out dangerous or uncertified mechanical repair work yourself.</p>
-                    <p class="clean-text"><strong>UK Configuration:</strong> All calculations, parts terms, costs, and MOT indicators are tailored specifically to UK road regulations and Pound Sterling (£).</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= BOTTOM CTA ================= -->
-        <section class="bottom-cta">
-            <div class="site-container">
-                <h2>Take Control of Your Maintenance Costs</h2>
-                <p class="clean-text">Track your vehicle issues with precision and eliminate diagnostic confusion before talking to mechanics.</p>
-                <div class="button-group-flex">
-                    <a href="diagnose.html" class="btn btn-primary btn-large">Run Fault Check</a>
-                    <a href="diagnose.html" class="cta-link-white">Set Up Profile →</a>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- ================= FOOTER ================= -->
-    <footer class="site-footer">
-        <div class="site-container footer-grid">
-            <div class="footer-brand">
-                <span class="footer-logo">CAR<span>EXPLAIN</span></span>
-                <p>KNOW BEFORE YOU PAY</p>
-            </div>
-            <div class="footer-links">
-                <h5>Services</h5>
-                <a href="diagnose.html">Fault Finder</a>
-                <a href="#garage">Garage Logs</a>
-                <a href="#features">Quote Checker</a>
-                <a href="#features">Car Research</a>
-            </div>
-            <div class="footer-links">
-                <h5>Legal &amp; Policy</h5>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Use</a>
-                <a href="#">AI Disclaimer</a>
-                <a href="#">Support Contact</a>
-            </div>
+        <div class="content-card">
+          <div class="card-number">02</div>
+          <h3>Answer Guided Questions</h3>
+          <p class="clean-text">Our tool asks precise follow-up questions tailored to your car profile to narrow down the fault.</p>
         </div>
-        <div class="site-container footer-bottom">
-            <p>&copy; 2026 CarExplain. Reference guidance only — it does not replace professional garage verification.</p>
+        <div class="content-card">
+          <div class="card-number">03</div>
+          <h3>Get Your Breakdown Report</h3>
+          <p class="clean-text">Receive an instant overview showing probable issues, fix urgency metrics, and exact advice for the garage.</p>
         </div>
-    </footer>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MY GARAGE FEATURE ================= -->
+  <section class="garage-feature" id="garage">
+    <div class="site-container grid-two-columns">
+      <div class="feature-text-block">
+        <h2>Your Complete Digital Garage</h2>
+        <p class="clean-text">Manage multiple vehicles under one master profile. Save your diagnostic logs, real-world garage fixes, MOT advisory histories, and previous pricing quotes in a single chronological timeline.</p>
+        <a href="garage.html" class="btn btn-white">Create Your Garage</a>
+      </div>
+      <div class="feature-visual-block">
+        <div class="ui-mockup-box">
+          <div class="mockup-row"><strong>Citroën DS3 Dashboard</strong> <span>Active Status</span></div>
+          <div class="mockup-metric-grid">
+            <div class="metric-tile"><h5>MOT</h5><span class="text-green">PASS</span></div>
+            <div class="metric-tile"><h5>Repairs</h5><span>2 Logged</span></div>
+            <div class="metric-tile"><h5>Faults</h5><span class="text-orange">1 Alert</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PLATFORM FEATURES ================= -->
+  <section class="services-section" id="features">
+    <div class="site-container">
+      <h2 class="section-title">Platform Features</h2>
+      <div class="grid-two-columns">
+        <div class="content-card">
+          <h4>System Diagnostics</h4>
+          <p class="clean-text">Input car problems to quickly find likely component errors before visiting a workshop.</p>
+        </div>
+        <div class="content-card">
+          <h4>Garage Ledger</h4>
+          <p class="clean-text">Log parts replacement data, service schedules, and comprehensive vehicle runtime logs.</p>
+        </div>
+        <div class="content-card">
+          <h4>Quote Reviewer</h4>
+          <p class="clean-text">Break down workshop estimates line by line to understand parts costs, labour times, and VAT totals.</p>
+        </div>
+        <div class="content-card">
+          <h4>Car Purchase Finder</h4>
+          <p class="clean-text">Filter upcoming vehicle purchases by reliability scores, running budgets, and gearbox specifications.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SAFETY / GUARDRAILS ================= -->
+  <section class="safety-section" id="safety">
+    <div class="site-container compliance-box">
+      <h3>Platform Rules &amp; Advice Thresholds</h3>
+      <div class="grid-two-columns">
+        <p class="clean-text"><strong>Information Only:</strong> Suggested answers match historical database patterns. This is an information framework, not a hands-on vehicle diagnosis.</p>
+        <p class="clean-text"><strong>Immediate Escalation:</strong> If critical safety components like brakes or steering fail, the platform will automatically instruct you to stop driving safely.</p>
+        <p class="clean-text"><strong>Safety First:</strong> We never provide instructions or advice on carrying out dangerous or uncertified mechanical repair work yourself.</p>
+        <p class="clean-text"><strong>UK Configuration:</strong> All calculations, parts terms, costs, and MOT indicators are tailored specifically to UK road regulations and Pound Sterling (£).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BOTTOM CTA ================= -->
+  <section class="bottom-cta">
+    <div class="site-container">
+      <h2>Take Control of Your Maintenance Costs</h2>
+      <p class="clean-text">Track your vehicle issues with precision and eliminate diagnostic confusion before talking to mechanics.</p>
+      <div class="button-group-flex">
+        <a href="diagnose.html" class="btn btn-primary btn-large">Run Fault Check</a>
+        <a href="garage.html" class="cta-link-white">Set Up Profile →</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site-footer">
+  <div class="site-container footer-grid">
+    <div class="footer-brand">
+      <span class="footer-logo">CAR<span>EXPLAIN</span></span>
+      <p>KNOW BEFORE YOU PAY</p>
+    </div>
+    <div class="footer-links">
+      <h5>Services</h5>
+      <a href="diagnose.html">Fault Finder</a>
+      <a href="garage.html">Garage Logs</a>
+      <a href="#">Quote Checker</a>
+      <a href="#">Car Research</a>
+    </div>
+    <div class="footer-links">
+      <h5>Legal &amp; Policy</h5>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Use</a>
+      <a href="ai-disclaimer.html">AI Disclaimer</a>
+      <a href="support.html">Support Contact</a>
+    </div>
+  </div>
+  <div class="site-container footer-bottom">
+    <p>&copy; 2026 CarExplain. Reference guidance only — it does not replace professional garage verification.</p>
+  </div>
+</footer>
 
 </body>
 </html>

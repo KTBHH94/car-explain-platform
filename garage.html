@@ -13,10 +13,6 @@
 .garage-hero p{ font-size:17px; color:var(--slate); margin:0 auto; max-width:660px; }
 .eyebrow{ display:inline-block; background:#e8eefc; color:var(--blue); font-size:12px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; padding:7px 11px; border-radius:999px; }
 
-/* Demo notice */
-.demo-notice{ background:#fffbeb; border:1px solid #fde68a; color:#78350f; padding:14px 18px; border-radius:10px; font-size:13px; margin:0 auto 34px; max-width:900px; line-height:1.6; }
-.demo-notice strong{ color:#78350f; }
-
 /* Section wrapper */
 .garage-section{ padding:12px 0 60px; }
 
@@ -68,7 +64,7 @@
 .tab-panel .placeholder h3{ color:var(--navy); font-size:17px; margin:0 0 8px; }
 .tab-panel .placeholder p{ margin:0 auto 22px; max-width:420px; line-height:1.7; }
 
-/* Modal for adding a vehicle */
+/* Modal */
 .modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:2000; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
 .modal-backdrop.open{ display:flex; }
 .modal{ background:#fff; border-radius:14px; width:100%; max-width:640px; padding:36px; box-shadow:0 30px 80px rgba(15,23,42,.35); margin:auto; }
@@ -103,7 +99,7 @@
     </nav>
     <div class="header-actions">
       <a href="diagnose.html" class="login-action">Log In</a>
-      <a href="diagnose.html" class="btn btn-primary">Get Started</a>
+      <a href="garage.html" class="btn btn-primary">Get Started</a>
     </div>
   </div>
 </header>
@@ -115,10 +111,6 @@
       <h1>Your cars, all in one place.</h1>
       <p>Add a vehicle, keep its problems, repairs and history together, and take that context into every diagnostic.</p>
     </section>
-
-    <div class="demo-notice">
-      <strong>Demo mode:</strong> vehicles are stored only in this browser for now. Cloud sync arrives when accounts are switched on.
-    </div>
 
     <section class="garage-section" id="garageContent"><!-- filled by JS --></section>
   </div>
@@ -189,7 +181,6 @@
           <label for="r-problem">Which problem did this fix?</label>
           <select id="r-problem" name="problemId">
             <option value="">Not linked to a specific problem</option>
-            <!-- filled by JS -->
           </select>
         </div>
         <div class="form-field full">
@@ -247,10 +238,10 @@
     </div>
     <div class="footer-links">
       <h5>Legal &amp; Policy</h5>
-      <a href="#">Privacy Policy</a>
-      <a href="#">Terms of Use</a>
-      <a href="#">AI Disclaimer</a>
-      <a href="#">Support Contact</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Use</a>
+      <a href="ai-disclaimer.html">AI Disclaimer</a>
+      <a href="support.html">Support Contact</a>
     </div>
   </div>
   <div class="site-container footer-bottom">
@@ -263,7 +254,7 @@
 
 const STORAGE_KEY = "carxplain_garage_v1";
 const PROBLEMS_KEY = "carxplain_problems_v1";
-const REPAIRS_KEY = "carxplain_repairs_v1"; // New!
+const REPAIRS_KEY = "carxplain_repairs_v1";
 const state = { cars: [], activeVehicleId: null, activeTab: "overview" };
 
 const $ = id => document.getElementById(id);
@@ -274,34 +265,16 @@ const repairModalEl = $("addRepairModal");
 const repairFormEl = $("addRepairForm");
 
 /* ---------- Storage Helpers ---------- */
-function loadCars(){
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e){ return []; }
-}
-function saveCars(){
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.cars)); } catch(e){}
-}
-function loadProblems(){
-  try { return JSON.parse(localStorage.getItem(PROBLEMS_KEY) || "[]"); } catch(e){ return []; }
-}
-function saveProblems(data){
-  try { localStorage.setItem(PROBLEMS_KEY, JSON.stringify(data)); } catch(e){}
-}
-function loadRepairs(){
-  try { return JSON.parse(localStorage.getItem(REPAIRS_KEY) || "[]"); } catch(e){ return []; }
-}
-function saveRepairs(data){
-  try { localStorage.setItem(REPAIRS_KEY, JSON.stringify(data)); } catch(e){}
-}
+function loadCars(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e){ return []; } }
+function saveCars(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.cars)); } catch(e){} }
+function loadProblems(){ try { return JSON.parse(localStorage.getItem(PROBLEMS_KEY) || "[]"); } catch(e){ return []; } }
+function saveProblems(data){ try { localStorage.setItem(PROBLEMS_KEY, JSON.stringify(data)); } catch(e){} }
+function loadRepairs(){ try { return JSON.parse(localStorage.getItem(REPAIRS_KEY) || "[]"); } catch(e){ return []; } }
+function saveRepairs(data){ try { localStorage.setItem(REPAIRS_KEY, JSON.stringify(data)); } catch(e){} }
 
 /* ---------- Utilities ---------- */
-function escapeHtml(s){
-  return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-}
-function formatMileage(n){
-  const num = Number(String(n).replace(/[^\d]/g,""));
-  if(!num) return "—";
-  return num.toLocaleString("en-GB") + " mi";
-}
+function escapeHtml(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
+function formatMileage(n){ const num = Number(String(n).replace(/[^\d]/g,"")); if(!num) return "—"; return num.toLocaleString("en-GB") + " mi"; }
 function newId(){ return "id_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,7); }
 
 /* ---------- Car Operations ---------- */
@@ -321,7 +294,6 @@ function deleteCar(id){
   if(!car) return;
   if(!confirm(`Remove ${car.make} ${car.model}? This will delete its history.`)) return;
   state.cars = state.cars.filter(c => c.id !== id);
-  // Clean up related data
   saveProblems(loadProblems().filter(p => p.vehicleId !== id));
   saveRepairs(loadRepairs().filter(r => r.vehicleId !== id));
   state.activeVehicleId = null; saveCars(); render();
@@ -463,11 +435,40 @@ function renderTabPanels(car){
         `}).join("")}
       </div>`;
 
+  const timelineHtml = (() => {
+    const allEvents = [
+      ...carProblems.map(p => ({...p, type: 'problem', dateObj: new Date(p.date)})),
+      ...carRepairs.map(r => ({...r, type: 'repair', dateObj: new Date(r.date)}))
+    ].sort((a, b) => b.dateObj - a.dateObj); 
+
+    if (allEvents.length === 0) {
+      return `<div class="placeholder"><div class="big">📅</div><h3>Timeline</h3><p>Every problem, diagnosis, repair and MOT event for this vehicle will be shown as one chronological history.</p></div>`;
+    }
+
+    return `
+      <div style="display:flex; flex-direction:column; gap:20px; border-left:3px solid #cbd5e1; padding-left:20px; margin-left:10px; text-align:left;">
+        ${allEvents.map(e => {
+          const isProblem = e.type === 'problem';
+          const dotColor = isProblem ? '#2563eb' : '#047857';
+          const title = isProblem ? e.title : "Repair Logged";
+          const desc = isProblem ? e.likely : e.description;
+          return `
+          <div style="position:relative;">
+            <div style="position:absolute; left:-28px; top:4px; width:13px; height:13px; border-radius:50%; background:${dotColor}; border:3px solid #fff;"></div>
+            <div style="font-size:12px; font-weight:800; color:#64748b; margin-bottom:4px;">${e.dateObj.toLocaleDateString('en-GB')}</div>
+            <div style="font-size:16px; font-weight:900; color:#0f172a; margin-bottom:4px;">${escapeHtml(title)}</div>
+            <div style="font-size:14px; color:#334155;">${escapeHtml(desc)}</div>
+            ${!isProblem && e.cost ? `<div style="font-size:13px; font-weight:800; color:#047857; margin-top:4px;">£${escapeHtml(e.cost)}</div>` : ''}
+          </div>`;
+        }).join("")}
+      </div>`;
+  })();
+
   const panels = {
     overview: `<div class="placeholder"><div class="big">📋</div><h3>Overview</h3><p>A summary of this vehicle — recent activity, open problems and latest repairs — will appear here once you start recording things.</p><a href="diagnose.html?vehicle=${car.id}" class="btn btn-primary">Run a diagnostic</a></div>`,
     problems: problemsHtml,
     repairs: repairsHtml,
-    timeline: `<div class="placeholder"><div class="big">📅</div><h3>Timeline</h3><p>Every problem, diagnosis, repair and MOT event for this vehicle will be shown as one chronological history.</p></div>`
+    timeline: timelineHtml
   };
 
   Object.keys(panels).forEach(key => {
@@ -475,14 +476,11 @@ function renderTabPanels(car){
     if(el) el.innerHTML = panels[key];
   });
 
-  // Attach event listeners for repair buttons
   contentEl.querySelectorAll(".log-repair-btn").forEach(btn => {
     btn.addEventListener("click", () => openRepairModal(car.id, btn.dataset.problemId));
   });
-  
   const emptyRepairBtn = $("emptyRepairBtn");
   if (emptyRepairBtn) emptyRepairBtn.addEventListener("click", () => openRepairModal(car.id, ""));
-  
   const topRepairBtn = $("topRepairBtn");
   if (topRepairBtn) topRepairBtn.addEventListener("click", () => openRepairModal(car.id, ""));
 }
@@ -493,25 +491,17 @@ function updateTabs(){
 }
 
 /* ---------- Modals ---------- */
-function openAddModal(){
-  addFormEl.reset();
-  modalEl.classList.add("open");
-  setTimeout(() => $("v-make").focus(), 40);
-}
+function openAddModal(){ addFormEl.reset(); modalEl.classList.add("open"); setTimeout(() => $("v-make").focus(), 40); }
 function closeAddModal(){ modalEl.classList.remove("open"); }
 
 function openRepairModal(carId, problemId){
   repairFormEl.reset();
-  
-  // Populate problem dropdown
   const probSelect = $("r-problem");
   const carProblems = loadProblems().filter(p => p.vehicleId === carId);
   probSelect.innerHTML = `<option value="">Not linked to a specific problem</option>` + 
     carProblems.map(p => `<option value="${p.id}">${escapeHtml(p.title)} (${new Date(p.date).toLocaleDateString('en-GB')})</option>`).join("");
   
   if(problemId) probSelect.value = problemId;
-  
-  // Set default date to today
   $("r-date").value = new Date().toISOString().split("T")[0];
   
   repairModalEl.classList.add("open");
@@ -523,18 +513,13 @@ function closeRepairModal(){ repairModalEl.classList.remove("open"); }
 function handleAddSubmit(e){
   e.preventDefault();
   const form = e.target;
-  const data = {
-    make: form.make.value, model: form.model.value, year: form.year.value,
-    registration: form.registration.value, fuel: form.fuel.value,
-    gearbox: form.gearbox.value, mileage: form.mileage.value
-  };
+  const data = { make: form.make.value, model: form.model.value, year: form.year.value, registration: form.registration.value, fuel: form.fuel.value, gearbox: form.gearbox.value, mileage: form.mileage.value };
 
   if(!data.make.trim() || !data.model.trim()){
     alert("Please enter at least the make and model.");
     (!data.make.trim() ? $("v-make") : $("v-model")).focus();
     return;
   }
-
   const car = addCar(data);
   closeAddModal(); state.activeVehicleId = car.id; state.activeTab = "overview";
   render(); window.scrollTo({top:0, behavior:"smooth"});
@@ -543,32 +528,19 @@ function handleAddSubmit(e){
 function handleRepairSubmit(e){
   e.preventDefault();
   const form = e.target;
-  
   const newRepair = {
-    id: newId(),
-    vehicleId: state.activeVehicleId,
-    problemId: form.problemId.value || null,
-    description: form.description.value.trim(),
-    date: form.date.value || new Date().toISOString().split("T")[0],
-    cost: form.cost.value.trim(),
-    outcome: form.outcome.value,
-    garage: form.garage.value.trim(),
-    notes: form.notes.value.trim(),
-    createdAt: new Date().toISOString()
+    id: newId(), vehicleId: state.activeVehicleId, problemId: form.problemId.value || null,
+    description: form.description.value.trim(), date: form.date.value || new Date().toISOString().split("T")[0],
+    cost: form.cost.value.trim(), outcome: form.outcome.value, garage: form.garage.value.trim(), notes: form.notes.value.trim(), createdAt: new Date().toISOString()
   };
 
-  if(!newRepair.description){
-    alert("Please describe what was fixed.");
-    $("r-desc").focus();
-    return;
-  }
+  if(!newRepair.description){ alert("Please describe what was fixed."); $("r-desc").focus(); return; }
 
   const repairs = loadRepairs();
   repairs.unshift(newRepair);
   saveRepairs(repairs);
-  
   closeRepairModal();
-  renderDashboard(); // Re-render to show the new repair
+  renderDashboard();
 }
 
 /* ---------- Init ---------- */
