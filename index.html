@@ -6,6 +6,21 @@
 <title>CarExplain — Know Before You Pay</title>
 <meta name="description" content="Understand your car before you pay for repairs. Structured diagnostics, digital garage, and repair history for UK drivers.">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* Banner adjustments for the new layout */
+  .hero-banner-section { padding: 40px 0 20px; background-color: var(--bg); }
+  .text-hero { padding: 30px 0 60px; text-align: center; max-width: 920px; margin: 0 auto; }
+  .text-hero h1 { font-size: clamp(34px, 5.5vw, 58px); line-height: 1.05; margin: 18px 0 16px; letter-spacing: -1.6px; color: var(--navy); }
+  .text-hero p { font-size: 17px; color: var(--slate); max-width: 720px; margin: 0 auto 34px; line-height: 1.7; }
+  .hero-cta-row { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .hero-trust { font-size: 13px; color: var(--muted); font-weight: 700; letter-spacing: .2px; }
+  .hero-trust span { color: var(--blue); font-weight: 900; margin: 0 6px; }
+  
+  @media(max-width: 768px){
+    .hero-banner-section { padding: 20px 0 10px; }
+    .text-hero { padding: 20px 0 40px; }
+  }
+</style>
 </head>
 <body>
 
@@ -29,6 +44,15 @@
 </header>
 
 <main>
+  <!-- ================= BANNER IMAGE (NOW AT THE TOP) ================= -->
+  <section class="hero-banner-section">
+    <div class="site-container">
+      <div class="banner-wrapper">
+        <img src="hero-banner.png" alt="CarExplain — Know Before You Pay" class="master-banner-img">
+      </div>
+    </div>
+  </section>
+
   <!-- ================= TEXT HERO ================= -->
   <section class="text-hero">
     <span class="eyebrow">Car Explain — Know Before You Pay</span>
@@ -39,15 +63,6 @@
       <a href="garage.html" class="btn btn-white btn-large">Explore My Garage</a>
     </div>
     <p class="hero-trust">AI-assisted guidance <span>•</span> Structured diagnostics <span>•</span> Built for UK drivers</p>
-  </section>
-
-  <!-- ================= BANNER IMAGE ================= -->
-  <section class="hero-banner-section">
-    <div class="site-container">
-      <div class="banner-wrapper">
-        <img src="hero-banner.png" alt="CarExplain — Know Before You Pay" class="master-banner-img">
-      </div>
-    </div>
   </section>
 
   <!-- ================= VALUE STRIP ================= -->
@@ -168,8 +183,8 @@
       <h5>Services</h5>
       <a href="diagnose.html">Fault Finder</a>
       <a href="garage.html">Garage Logs</a>
-      <a href="#">Quote Checker</a>
-      <a href="#">Car Research</a>
+      <a href="quote-checker.html">Quote Checker</a>
+      <a href="car-research.html">Car Research</a>
     </div>
     <div class="footer-links">
       <h5>Legal &amp; Policy</h5>
