@@ -778,7 +778,11 @@ async function finish(){
       })
     });
 
-    if (!response.ok) throw new Error("AI server error");
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.details || errorData.error || `HTTP Error: ${response.status}`);
+    }
+    
     const data = await response.json();
 
     $("reportTitle").textContent = `${TRACK_LABEL[STATE.track]} assessment`;
@@ -812,7 +816,7 @@ async function finish(){
     console.error(error);
     $("reportTitle").textContent = "Analysis Failed";
     $("reportLikely").textContent = "Could not connect to the AI backend.";
-    $("reportOther").textContent = "Please check your internet connection and try again.";
+    $("reportOther").textContent = "Error Details: " + error.message;
     $("safetyAlert").innerHTML = `<div class="alert amber"><strong>Error</strong><br>Could not connect to the AI server.</div>`;
   }
 
