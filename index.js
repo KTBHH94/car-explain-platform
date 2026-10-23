@@ -1,94 +1,63 @@
+import { createClient } from '@supabase/supabase-js';
+
 export default {
   async fetch(request, env) {
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
-
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
-    }
+    if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     const url = new URL(request.url);
-    if (request.method !== "POST" || url.pathname !== "/api/diagnose") {
-      return new Response(JSON.stringify({ error: "Not found" }), { 
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } 
-      });
+    
+    // Initialize Supabase client using secrets
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+
+    // --- AUTH ROUTES ---
+    if (url.pathname === "/api/auth/signup" && request.method === "POST") {
+      const { email, password } = await request.json();
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: corsHeaders });
+      return new Response(JSON.stringify({ user: data.user }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    try {
-      const body = await request.json();
-      const { vehicle, category, answers, customText } = body;
-
-      const systemPrompt = `You are an expert UK automotive diagnostic assistant for CarExplain. 
-Your job is to help ordinary drivers understand what might be wrong with their car based on their symptoms.
-You MUST follow these rules:
-1. Never claim certainty without physical evidence. Use phrases like "possible causes" or "likely issues".
-2. Clearly separate likely possibilities from confirmed findings.
-3. If symptoms mention severe braking loss, steering failure, fuel leaks, or heavy smoke, escalate safety immediately.
-4. Do not instruct users to perform dangerous mechanical work.
-5. Use UK terminology (bonnet, boot, windscreen) and GBP (£).
-6. Never invent MOT information or repair-cost statistics.
-
-You must respond in STRICT JSON format with exactly these keys:
-{
-  "safetyLevel": "green" | "amber" | "red",
-  "safetyMessage": "String (leave empty if green)",
-  "likelyPossibility": "String (the most likely cause)",
-  "otherPossibilities": "String (other plausible causes)",
-  "whySuggested": "String (explain why based on their answers)",
-  "whatToAsk": "String (what the driver should ask the garage)",
-  "whatGarageMayInspect": "String (what parts the garage will check)",
-  "urgency": "String (Routine / Inspection soon / Urgent)",
-  "confidence": "String (Low / Moderate / High)"
-}`;
-
-      const userPrompt = `
-Vehicle: ${vehicle || "Unknown UK car"}
-Category: ${category}
-User's Answers: ${JSON.stringify(answers, null, 2)}
-Additional Details: ${customText || "None provided"}
-
-Please generate the diagnostic report based on these symptoms.`;
-
-      const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          response_format: { type: "json_object" },
-          temperature: 0.2
-        })
-      });
-
-      if (!aiResponse.ok) {
-        const errorData = await aiResponse.text();
-        throw new Error(`OpenAI API error: ${aiResponse.status} - ${errorData}`);
-      }
-
-      const aiData = await aiResponse.json();
-      const reportJson = JSON.parse(aiData.choices[0].message.content);
-
-      return new Response(JSON.stringify(reportJson), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-
-    } catch (error) {
-      return new Response(JSON.stringify({ 
-        error: "Failed to generate diagnosis", 
-        details: error.message 
-      }), { 
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } 
-      });
+    if (url.pathname === "/api/auth/login" && request.method === "POST") {
+      const { email, password } = await request.json();
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 401, headers: corsHeaders });
+      // Return the session token so the frontend can store it
+      return new Response(JSON.stringify({ session: data.session }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    // --- PROTECTED ROUTES (require a valid session token) ---
+    // For these routes, the frontend must send: Authorization: Bearer <access_token>
+    const authHeader = request.headers.get("Authorization");
+    if (url.pathname.startsWith("/api/user/") && !authHeader) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+    }
+
+    if (url.pathname === "/api/user/vehicles" && request.method === "GET") {
+      const token = authHeader.replace("Bearer ", "");
+      // Verify the user's token with Supabase
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      if (error || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: corsHeaders });
+
+      const { data: vehicles, error: dbError } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('user_id', user.id);
+      if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: corsHeaders });
+      
+      return new Response(JSON.stringify({ vehicles }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // --- AI ROUTE (your existing code) ---
+    if (url.pathname === "/api/diagnose" && request.method === "POST") {
+        // ... [Keep your existing AI code here] ...
+        // Note: You may want to add authentication to this route later to track usage.
+    }
+
+    return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: corsHeaders });
   }
 };
