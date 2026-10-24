@@ -19,6 +19,17 @@ button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 a{color:inherit}
 
+/* ---------- LOADING SPINNER ---------- */
+.spinner-container { text-align: center; padding: 80px 20px; display: none; }
+.spinner {
+  width: 60px; height: 60px; margin: 0 auto 20px;
+  border: 5px solid #e2e8f0; border-top: 5px solid var(--blue2);
+  border-radius: 50%; animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.spinner-container h3 { color: var(--navy); font-size: 22px; margin: 0 0 8px; }
+.spinner-container p { color: var(--slate); font-size: 15px; margin: 0; }
+
 /* ---------- HEADER ---------- */
 .site-header{ background:#fff; border-bottom:2px solid #cbd5e1; padding:26px 0; position:sticky; top:0; z-index:20; box-shadow:0 4px 20px rgba(0,0,0,.02); }
 .site-container{max-width:1240px;margin:0 auto;padding:0 28px}
@@ -110,7 +121,7 @@ main{padding:58px 0 80px}
 .confidence{display:inline-flex;margin-top:10px;padding:5px 9px;border-radius:999px;background:#eef2ff;color:var(--blue);font-size:11px;font-weight:900}
 .summary-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .summary-list li{padding:9px 11px;background:#f8fafc;border-radius:8px;font-size:13px}
-.report-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.report-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap; justify-content: center;}
 
 footer{background:var(--navy);color:#fff;padding:50px 0 24px}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:35px}
@@ -215,48 +226,59 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
       <h2 id="reportTitle">Analysis complete</h2>
       <p id="reportSub"></p>
     </div>
+    
     <div class="report-body">
-      <div id="safetyAlert"></div>
-      <div class="report-grid">
-        <div class="report-section full">
-          <h3>What you told us</h3>
-          <ul class="summary-list" id="reportSummary"></ul>
-        </div>
-        <div class="report-section">
-          <h3>More likely possibility</h3>
-          <div class="possibility" id="reportLikely"></div>
-          <span class="confidence" id="reportConfidence"></span>
-        </div>
-        <div class="report-section">
-          <h3>Other possibilities</h3>
-          <p id="reportOther"></p>
-        </div>
-        <div class="report-section full">
-          <h3>Why this is being suggested</h3>
-          <p id="reportWhy"></p>
-        </div>
-        <div class="report-section">
-          <h3>What you can safely note</h3>
-          <p id="reportCheck"></p>
-        </div>
-        <div class="report-section">
-          <h3>What a garage may inspect</h3>
-          <p id="reportGarage"></p>
-        </div>
-        <div class="report-section full">
-          <h3>Urgency</h3>
-          <p id="reportUrgency"></p>
-        </div>
-        <div class="report-section full">
-          <h3>Important limitation</h3>
-          <p id="reportLimit">This is a structured information tool, not a physical vehicle inspection. Several faults can produce similar symptoms, and the actual cause may require inspection, testing or diagnostic equipment.</p>
-        </div>
+      <!-- Loading Spinner (Hidden by default) -->
+      <div id="loadingState" class="spinner-container">
+        <div class="spinner"></div>
+        <h3>Analysing Symptoms</h3>
+        <p>CarExplain AI is reviewing your answers to generate a detailed report...</p>
       </div>
-      
-      <div class="report-actions">
-        <button class="btn btn-primary" type="button" id="saveReportBtn" style="display:none;">Save report to Garage</button>
-        <button class="btn btn-secondary" type="button" id="againBtn">Run another check</button>
-        <button class="btn btn-secondary" type="button" id="printBtn">Print / Save report</button>
+
+      <!-- Actual Content (Hidden while loading) -->
+      <div id="reportContent" style="display:none;">
+        <div id="safetyAlert"></div>
+        <div class="report-grid">
+          <div class="report-section full">
+            <h3>What you told us</h3>
+            <ul class="summary-list" id="reportSummary"></ul>
+          </div>
+          <div class="report-section">
+            <h3>More likely possibility</h3>
+            <div class="possibility" id="reportLikely"></div>
+            <span class="confidence" id="reportConfidence"></span>
+          </div>
+          <div class="report-section">
+            <h3>Other possibilities</h3>
+            <p id="reportOther"></p>
+          </div>
+          <div class="report-section full">
+            <h3>Why this is being suggested</h3>
+            <p id="reportWhy"></p>
+          </div>
+          <div class="report-section">
+            <h3>What you can safely note</h3>
+            <p id="reportCheck"></p>
+          </div>
+          <div class="report-section">
+            <h3>What a garage may inspect</h3>
+            <p id="reportGarage"></p>
+          </div>
+          <div class="report-section full">
+            <h3>Urgency</h3>
+            <p id="reportUrgency"></p>
+          </div>
+          <div class="report-section full">
+            <h3>Important limitation</h3>
+            <p id="reportLimit">This is a structured information tool, not a physical vehicle inspection. Several faults can produce similar symptoms, and the actual cause may require inspection, testing or diagnostic equipment.</p>
+          </div>
+        </div>
+        
+        <div class="report-actions">
+          <button class="btn btn-primary" type="button" id="saveReportBtn" style="display:none;">Save to Garage</button>
+          <button class="btn btn-secondary" type="button" id="againBtn">Run another check</button>
+          <button class="btn btn-secondary" type="button" id="printBtn">Print Report</button>
+        </div>
       </div>
     </div>
   </section>
@@ -751,17 +773,11 @@ async function finish(){
   $("wizard").style.display="none";
   $("report").style.display="block";
   
-  $("reportTitle").textContent = "Analysing symptoms...";
+  $("loadingState").style.display = "block";
+  $("reportContent").style.display = "none";
+  
+  $("reportTitle").textContent = "Analysing...";
   $("reportSub").textContent = "CarExplain AI is reviewing your answers.";
-  $("reportLikely").textContent = "Please wait...";
-  $("reportOther").textContent = "Generating response...";
-  $("reportWhy").textContent = "...";
-  $("reportCheck").textContent = "...";
-  $("reportGarage").textContent = "...";
-  $("reportUrgency").textContent = "...";
-  $("reportConfidence").textContent = "Thinking...";
-  $("safetyAlert").innerHTML = "";
-  $("reportSummary").innerHTML = "";
   
   const vehicleStr = getVehicleContext() || window.currentDiagnosingCarName || "Unknown UK car";
   const customTextId = `CUSTOM_${STATE.track}`;
@@ -813,12 +829,18 @@ async function finish(){
         return `<li><strong>${escapeHtml(q.text)}</strong><br>${escapeHtml(selectedText(qid))}</li>`;
       }).join("");
 
+    $("loadingState").style.display = "none";
+    $("reportContent").style.display = "block";
+
   } catch (error) {
     console.error(error);
     $("reportTitle").textContent = "Analysis Failed";
     $("reportLikely").textContent = "Could not connect to the AI backend.";
     $("reportOther").textContent = "Error Details: " + error.message;
     $("safetyAlert").innerHTML = `<div class="alert amber"><strong>Error</strong><br>Could not connect to the AI server.</div>`;
+    
+    $("loadingState").style.display = "none";
+    $("reportContent").style.display = "block";
   }
 
   const saveBtn = $("saveReportBtn");
