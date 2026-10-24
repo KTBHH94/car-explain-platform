@@ -625,6 +625,7 @@ const QUESTIONS = [
 
 const TRACK_LABEL = Object.fromEntries(TRACKS.map(t=>[t.id,t.title]));
 const STATE = { track:null, index:0, answers:{}, history:[], active:[] };
+const API_URL = "https://carxplain-api.murningella.workers.dev";
 
 function $(id){return document.getElementById(id)}
 
@@ -762,12 +763,12 @@ async function finish(){
   $("safetyAlert").innerHTML = "";
   $("reportSummary").innerHTML = "";
   
-  const vehicleStr = getVehicleContext();
+  const vehicleStr = getVehicleContext() || window.currentDiagnosingCarName || "Unknown UK car";
   const customTextId = `CUSTOM_${STATE.track}`;
   const customText = STATE.answers[customTextId] || "";
 
   try {
-    const response = await fetch("https://carxplain-api.murningella.workers.dev/api/diagnose", {
+    const response = await fetch(`${API_URL}/api/diagnose`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -786,7 +787,7 @@ async function finish(){
     const data = await response.json();
 
     $("reportTitle").textContent = `${TRACK_LABEL[STATE.track]} assessment`;
-    $("reportSub").textContent = vehicleStr ? `Vehicle context: ${vehicleStr}` : "Based on the answers you provided.";
+    $("reportSub").textContent = `Vehicle context: ${vehicleStr}`;
     
     $("reportLikely").textContent = data.likelyPossibility;
     $("reportConfidence").textContent = data.confidence;
@@ -846,56 +847,86 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("printBtn").addEventListener("click",printReport);
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const vehicleId = urlParams.get("vehicle");
+  const token = localStorage.getItem('sb-access-token');
   
-  if (vehicleId) {
+  if (vehicleId && token) {
     try {
-      const savedCars = JSON.parse(localStorage.getItem("carxplain_garage_v1") || "[]");
-      const car = savedCars.find(c => c.id === vehicleId);
-      if (car) {
-        const hero = document.querySelector(".hero");
-        const banner = document.createElement("div");
-        banner.style.cssText = "background:#e8eefc; border:1px solid #bfdbfe; padding:16px 20px; border-radius:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;";
-        banner.innerHTML = `
-          <div>
-            <div style="font-size:12px; font-weight:900; color:#1e3a8a; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Diagnosing:</div>
-            <div style="font-size:20px; font-weight:900; color:#0f172a;">${car.make} ${car.model}</div>
-          </div>
-          <a href="garage.html" style="font-size:13px; font-weight:700; color:#1e3a8a; text-decoration:none;">← Back to Garage</a>
-        `;
-        hero.after(banner);
-        const contextCard = document.querySelector(".context-card");
-        if (contextCard) contextCard.style.display = "none";
-        window.currentDiagnosingCarId = vehicleId;
-        window.currentDiagnosingCarName = `${car.make} ${car.model}`;
+      const response = await fetch(`${API_URL}/api/user/vehicles`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const car = data.vehicles.find(c => c.id === vehicleId);
+        
+        if (car) {
+          const hero = document.querySelector(".hero");
+          const banner = document.createElement("div");
+          banner.style.cssText = "background:#e8eefc; border:1px solid #bfdbfe; padding:16px 20px; border-radius:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;";
+          banner.innerHTML = `
+            <div>
+              <div style="font-size:12px; font-weight:900; color:#1e3a8a; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Diagnosing:</div>
+              <div style="font-size:20px; font-weight:900; color:#0f172a;">${car.make} ${car.model}</div>
+            </div>
+            <a href="garage.html" style="font-size:13px; font-weight:700; color:#1e3a8a; text-decoration:none;">← Back to Garage</a>
+          `;
+          hero.after(banner);
+          const contextCard = document.querySelector(".context-card");
+          if (contextCard) contextCard.style.display = "none";
+          
+          window.currentDiagnosingCarId = vehicleId;
+          window.currentDiagnosingCarName = `${car.make} ${car.model}`;
+        }
       }
     } catch(e) { console.warn("Could not load car details:", e); }
   }
 
   const saveBtn = document.getElementById("saveReportBtn");
   if(saveBtn) {
-    saveBtn.addEventListener("click", () => {
+    saveBtn.addEventListener("click", async () => {
       if (!window.currentDiagnosingCarId) return;
-      
+      if (!token) {
+        alert("You must be logged in to save reports.");
+        return;
+      }
+
+      saveBtn.innerText = "Saving to database...";
+      saveBtn.disabled = true;
+
       const newProblem = {
-        id: "p_" + Date.now().toString(36),
-        vehicleId: window.currentDiagnosingCarId,
-        date: new Date().toISOString(),
+        vehicle_id: window.currentDiagnosingCarId,
         title: TRACK_LABEL[STATE.track], 
-        likely: document.getElementById("reportLikely").textContent,
-        urgency: document.getElementById("reportUrgency").textContent
+        likely_cause: document.getElementById("reportLikely").textContent,
+        urgency: document.getElementById("reportUrgency").textContent,
+        report_json: {
+          summary: document.getElementById("reportSummary").innerHTML,
+          other: document.getElementById("reportOther").textContent,
+          why: document.getElementById("reportWhy").textContent,
+          check: document.getElementById("reportCheck").textContent,
+          garage: document.getElementById("reportGarage").textContent
+        }
       };
 
       try {
-        const savedProblems = JSON.parse(localStorage.getItem("carxplain_problems_v1") || "[]");
-        savedProblems.unshift(newProblem);
-        localStorage.setItem("carxplain_problems_v1", JSON.stringify(savedProblems));
-        alert("Report saved to your garage!");
+        const response = await fetch(`${API_URL}/api/user/problems`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(newProblem)
+        });
+
+        if (!response.ok) throw new Error("Failed to save to database");
+
+        alert("Report saved securely to your garage!");
         window.location.href = `garage.html`; 
       } catch(e) {
-        alert("Could not save report.");
+        alert("Error: " + e.message);
+        saveBtn.innerText = `Save to ${window.currentDiagnosingCarName}`;
+        saveBtn.disabled = false;
       }
     });
   }
