@@ -90,6 +90,7 @@ You MUST follow these rules:
 4. Do not instruct users to perform dangerous mechanical work.
 5. Use UK terminology (bonnet, boot, windscreen) and GBP (£).
 6. Never invent MOT information or repair-cost statistics.
+7. Be highly detailed and comprehensive in your answers. Explain the mechanics behind the symptoms clearly so the driver understands exactly what the garage will be looking for.
 
 You must respond in STRICT JSON format with exactly these keys:
 {
@@ -112,7 +113,8 @@ Additional Details: ${customText || "None provided"}
 
 Please generate the diagnostic report based on these symptoms.`;
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+        // Changed to gemini-3.8-flash as requested by the Google API error message
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
         const aiResponse = await fetch(geminiUrl, {
           method: "POST",
