@@ -113,18 +113,32 @@ Additional Details: ${customText || "None provided"}
 
 Please generate the diagnostic report based on these symptoms.`;
 
-        // Changed to gemini-3.8-flash as requested by the Google API error message
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
-        const aiResponse = await fetch(geminiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: systemInstruction }] },
-            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-            generationConfig: { response_mime_type: "application/json", temperature: 0.2 }
-          })
-        });
+        // --- RETRY LOGIC (Handles Google's 503 Busy errors) ---
+        let aiResponse;
+        let retries = 3;
+        
+        while (retries > 0) {
+          aiResponse = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemInstruction }] },
+              contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+              generationConfig: { response_mime_type: "application/json", temperature: 0.2 }
+            })
+          });
+
+          if (aiResponse.ok) break; // Success!
+          if (aiResponse.status === 503) {
+            retries--;
+            if (retries === 0) break;
+            await new Promise(r => setTimeout(r, 1500)); // Wait 1.5 seconds and try again
+          } else {
+            break; // Break on any other error (e.g. 404 model not found)
+          }
+        }
 
         if (!aiResponse.ok) {
           const errorText = await aiResponse.text();
