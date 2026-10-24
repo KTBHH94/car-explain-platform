@@ -843,7 +843,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("nextBtn").addEventListener("click",nextQuestion);
   $("backBtn").addEventListener("click",previousQuestion);
   $("cancelBtn").addEventListener("click",cancel);
-  $("againBtn").addEventListener("click",cancel);
+  $("againBtn").addEventListener("click", () => { window.location.reload(); });
   $("printBtn").addEventListener("click",printReport);
 });
 
