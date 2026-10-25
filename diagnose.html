@@ -18,6 +18,7 @@ body{margin:0;background:var(--bg);color:var(--navy);font-family:-apple-system,B
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 a{color:inherit}
+.hide-on-load { display: none !important; }
 
 /* ---------- LOADING SPINNER ---------- */
 .spinner-container { text-align: center; padding: 80px 20px; display: none; }
@@ -160,8 +161,8 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
       <a class="nav-link" href="index.html#features">Community</a>
       <a class="nav-link" href="index.html#features">Car Research</a>
     </nav>
-       <div class="header-actions" id="headerAuth">
-      <!-- This is filled automatically by JavaScript -->
+    <div class="header-actions" id="headerAuth">
+      <!-- Filled by JS -->
     </div>
   </div>
 </header>
@@ -227,8 +228,6 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
     </div>
     
     <div class="report-body">
-     
-      <!-- Loading Spinner -->
       <div id="loadingState" class="spinner-container">
         <div class="spinner"></div>
         <h3>Analysing Symptoms</h3>
@@ -236,7 +235,6 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
         <p style="font-size: 13px; color: #64748b;">Generating a comprehensive diagnostic report usually takes 30–60 seconds. Please do not refresh this page.</p>
       </div>
 
-      <!-- Actual Content (Hidden while loading) -->
       <div id="reportContent" style="display:none;">
         <div id="safetyAlert"></div>
         <div class="report-grid">
@@ -311,6 +309,17 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
 
 <script>
 "use strict";
+
+// --- INSTANT UI FIX ---
+// If the URL has a vehicle ID, hide the hero and text boxes instantly to prevent flashing
+if (window.location.search.includes('vehicle=')) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const hero = document.querySelector(".hero");
+    const contextCard = document.querySelector(".context-card");
+    if (hero) hero.classList.add("hide-on-load");
+    if (contextCard) contextCard.classList.add("hide-on-load");
+  });
+}
 
 const TRACKS = [
   {id:"noise", icon:"🔊", title:"Unusual noise", desc:"Grinding, clicking, squealing, knocking or rattling"},
@@ -780,7 +789,7 @@ async function finish(){
   $("reportTitle").textContent = "Analysing...";
   $("reportSub").textContent = "CarExplain AI is reviewing your answers.";
   
-  const vehicleStr = getVehicleContext() || window.currentDiagnosingCarName || "Unknown UK car";
+  const vehicleStr = getVehicleContext() || window.currentDiagnosingCarName || "Your Vehicle";
   const customTextId = `CUSTOM_${STATE.track}`;
   const customText = STATE.answers[customTextId] || "";
 
@@ -847,7 +856,7 @@ async function finish(){
   const saveBtn = $("saveReportBtn");
   if (window.currentDiagnosingCarId) {
     saveBtn.style.display = "inline-flex";
-    saveBtn.textContent = `Save to ${window.currentDiagnosingCarName}`;
+    saveBtn.textContent = `Save to ${window.currentDiagnosingCarName || "Garage"}`;
   } else {
     saveBtn.style.display = "none";
   }
@@ -908,13 +917,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const car = data.vehicles.find(c => c.id === vehicleId);
         
         if (car) {
-          // HIDE THE HERO AND CONTEXT CARD
-          const hero = document.querySelector(".hero");
-          if (hero) hero.style.display = "none";
-          const contextCard = document.querySelector(".context-card");
-          if (contextCard) contextCard.style.display = "none";
-
-          // INSERT BANNER AT TOP
           const main = document.querySelector("main");
           const banner = document.createElement("div");
           banner.style.cssText = "background:#e8eefc; border:1px solid #bfdbfe; padding:16px 20px; border-radius:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;";
@@ -930,8 +932,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           window.currentDiagnosingCarId = vehicleId;
           window.currentDiagnosingCarName = `${car.make} ${car.model}`;
         } else {
-          alert("Could not find this vehicle in the database. Please go back to My Garage and try again.");
-          window.location.href = "garage.html";
+          // Fallback if car is missing from database
+          const main = document.querySelector("main");
+          const banner = document.createElement("div");
+          banner.style.cssText = "background:#fffbeb; border:1px solid #fde68a; padding:16px 20px; border-radius:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;";
+          banner.innerHTML = `
+            <div>
+              <div style="font-size:12px; font-weight:900; color:#b45309; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Diagnosing:</div>
+              <div style="font-size:20px; font-weight:900; color:#0f172a;">Your Vehicle (Not in DB)</div>
+            </div>
+            <a href="garage.html" style="font-size:13px; font-weight:700; color:#b45309; text-decoration:none;">← Back to Garage</a>
+          `;
+          main.insertBefore(banner, main.firstChild);
+          window.currentDiagnosingCarId = vehicleId;
+          window.currentDiagnosingCarName = `Your Vehicle`;
         }
       }
     } catch(e) { console.warn("Could not load car details:", e); }
@@ -986,3 +1000,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
+</body>
+</html>
