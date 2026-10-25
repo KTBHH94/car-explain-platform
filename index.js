@@ -131,10 +131,11 @@ Please generate the diagnostic report based on these symptoms.`;
               body: JSON.stringify({
                 system_instruction: { parts: [{ text: systemInstruction }] },
                 contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-                generationConfig: { 
+                               generationConfig: { 
                   response_mime_type: "application/json", 
                   temperature: 0.2,
-                  maxOutputTokens: 800 
+                  maxOutputTokens: 4000 
+                }
                 }
               })
             });
