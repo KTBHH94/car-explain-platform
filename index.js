@@ -25,7 +25,14 @@ export default {
       // --- AUTH ROUTES ---
       if (url.pathname === "/api/auth/signup" && request.method === "POST") {
         const { email, password } = await request.json();
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        
+        // Auto-confirm email so you can test instantly
+        const { data, error } = await supabase.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true
+        });
+        
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response(JSON.stringify({ user: data.user }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
@@ -115,7 +122,6 @@ Please generate the diagnostic report based on these symptoms.`;
 
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
-        // --- RETRY LOGIC (Handles Google's 503 Busy errors) ---
         let aiResponse;
         let retries = 3;
         
@@ -126,19 +132,24 @@ Please generate the diagnostic report based on these symptoms.`;
             body: JSON.stringify({
               system_instruction: { parts: [{ text: systemInstruction }] },
               contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-                          generationConfig: { 
+              generationConfig: { 
                 response_mime_type: "application/json", 
                 temperature: 0.2,
-                maxOutputTokens: 800 
+                maxOutputTokens: 800
               }
+            })
+          });
 
-          if (aiResponse.ok) break; // Success!
-          if (aiResponse.status === 503) {
+          if (aiResponse.ok) {
+            break;
+          } else if (aiResponse.status === 503) {
             retries--;
-            if (retries === 0) break;
-            await new Promise(r => setTimeout(r, 1500)); // Wait 1.5 seconds and try again
+            if (retries === 0) {
+              break;
+            }
+            await new Promise(r => setTimeout(r, 1500)); 
           } else {
-            break; // Break on any other error (e.g. 404 model not found)
+            break; 
           }
         }
 
@@ -149,7 +160,6 @@ Please generate the diagnostic report based on these symptoms.`;
         
         const aiData = await aiResponse.json();
         
-        // Clean up potential markdown formatting from AI
         let rawText = aiData.candidates[0].content.parts[0].text;
         rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
         
