@@ -117,7 +117,7 @@ Please generate the diagnostic report based on these symptoms.`;
 
         // Abort controller to prevent Safari from timing out
         const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 55000); // 55 second limit
+                const timeoutId = setTimeout(() => controller.abort(), 95000); 
 
         let aiResponse;
         let retries = 3;
