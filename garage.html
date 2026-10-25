@@ -97,9 +97,8 @@
       <a href="index.html#features" class="nav-link">Community</a>
       <a href="index.html#features" class="nav-link">Car Research</a>
     </nav>
-    <div class="header-actions">
-      <a href="diagnose.html" class="login-action">Log In</a>
-      <a href="garage.html" class="btn btn-primary">Get Started</a>
+      <div class="header-actions" id="headerAuth">
+      <!-- This is filled automatically by JavaScript -->
     </div>
   </div>
 </header>
@@ -563,6 +562,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+</script>
+<script>
+  // --- DYNAMIC HEADER LOGIC ---
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem('sb-access-token');
+    const headerAuth = document.getElementById('headerAuth');
+    
+    if (headerAuth) {
+      if (token) {
+        // User is logged in
+        headerAuth.innerHTML = `
+          <a href="#" class="login-action" id="logoutBtn">Log Out</a>
+          <a href="garage.html" class="btn btn-primary">My Garage</a>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.removeItem('sb-access-token');
+          localStorage.removeItem('sb-refresh-token');
+          window.location.href = 'login.html';
+        });
+      } else {
+        // User is logged out
+        headerAuth.innerHTML = `
+          <a href="login.html" class="login-action">Log In</a>
+          <a href="login.html" class="btn btn-primary">Get Started</a>
+        `;
+      }
+    }
+  });
 </script>
 </body>
 </html>

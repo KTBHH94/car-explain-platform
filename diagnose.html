@@ -160,9 +160,8 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
       <a class="nav-link" href="index.html#features">Community</a>
       <a class="nav-link" href="index.html#features">Car Research</a>
     </nav>
-    <div class="header-actions">
-      <a class="login-action" href="#">Log In</a>
-      <a class="btn btn-primary" href="garage.html">My Garage</a>
+       <div class="header-actions" id="headerAuth">
+      <!-- This is filled automatically by JavaScript -->
     </div>
   </div>
 </header>
@@ -902,6 +901,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           
           window.currentDiagnosingCarId = vehicleId;
           window.currentDiagnosingCarName = `${car.make} ${car.model}`;
+        } else {
+          alert("Could not find this vehicle in the database. If you added it before logging in, please go back to My Garage and add it again so it saves to your account.");
+          window.location.href = "garage.html";
         }
       }
     } catch(e) { console.warn("Could not load car details:", e); }
@@ -956,5 +958,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
-</body>
-</html>
