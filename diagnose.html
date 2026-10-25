@@ -805,10 +805,10 @@ async function finish(){
       })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.details || errorData.error || `HTTP Error: ${response.status}`);
-    }
+            if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to save to database");
+        }
     
     const data = await response.json();
 
