@@ -133,10 +133,7 @@
 const API_URL = "https://carxplain-api.murningella.workers.dev";
 const token = localStorage.getItem('sb-access-token');
 
-// Redirect to login if no token
-if (!token) {
-  window.location.href = 'login.html';
-}
+if (!token) { window.location.href = 'login.html'; }
 
 const state = { cars: [], activeVehicleId: null, activeTab: "overview" };
 const $ = id => document.getElementById(id);
@@ -144,28 +141,22 @@ const contentEl = $("garageContent");
 const modalEl = $("addVehicleModal");
 const addFormEl = $("addVehicleForm");
 
-// Fetch cars from Supabase via Worker
 async function loadCars() {
   try {
     const response = await fetch(`${API_URL}/api/user/vehicles`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
-    
     if (response.status === 401) {
       localStorage.clear();
       window.location.href = 'login.html';
       return;
     }
-    
     if (!response.ok) throw new Error("Failed to load");
     const data = await response.json();
-    
-    // CRITICAL FIX: Overwrite state.cars entirely with the database data. No local storage fallback.
     state.cars = data.vehicles || [];
     render();
   } catch (e) {
     console.error(e);
-    alert("Could not load vehicles. Check your internet connection.");
   }
 }
 
@@ -257,8 +248,12 @@ function renderDashboard(){
 
   $("backToList").addEventListener("click", () => { state.activeVehicleId = null; render(); });
   $("deleteCarBtn").addEventListener("click", () => deleteCar(car.id));
+  
   contentEl.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => { state.activeTab = btn.dataset.tab; updateTabs(); });
+    btn.addEventListener("click", () => { 
+      state.activeTab = btn.dataset.tab; 
+      updateTabs(); 
+    });
   });
   
   renderTabPanels(car); 
@@ -273,11 +268,13 @@ async function renderTabPanels(car){
     timeline: `<div class="placeholder"><div class="big">📅</div><h3>Timeline</h3><p>Every problem, diagnosis, repair and MOT event for this vehicle will be shown as one chronological history.</p></div>`
   };
   
+  // Render initial state
   Object.keys(panels).forEach(key => {
     const el = contentEl.querySelector(`.tab-panel[data-panel="${key}"]`);
     if(el) el.innerHTML = panels[key];
   });
 
+  // Fetch problems
   try {
     const response = await fetch(`${API_URL}/api/user/problems?vehicleId=${car.id}`, {
       headers: { "Authorization": `Bearer ${token}` }
@@ -285,7 +282,7 @@ async function renderTabPanels(car){
     
     if (response.ok) {
       const data = await response.json();
-      const problems = data.problems;
+      const problems = data.problems || [];
       
       if (problems.length === 0) {
         panels.problems = `<div class="placeholder"><div class="big">🔍</div><h3>No problems recorded yet</h3><p>Diagnostic reports saved against this vehicle will be listed here.</p><a href="diagnose.html?vehicle=${car.id}" class="btn btn-primary">Start a diagnostic</a></div>`;
@@ -309,9 +306,13 @@ async function renderTabPanels(car){
       
       const statProblems = $("statProblems");
       if (statProblems) statProblems.textContent = problems.length;
+    } else {
+      throw new Error("Failed to fetch problems");
     }
   } catch(e) {
     console.error("Failed to load problems", e);
+    const probPanel = contentEl.querySelector(`.tab-panel[data-panel="problems"]`);
+    if(probPanel) probPanel.innerHTML = `<div class="placeholder"><div class="big">⚠️</div><h3>Error loading problems</h3><p>Could not connect to the database. Please try refreshing the page.</p></div>`;
   }
 }
 
@@ -352,11 +353,9 @@ async function handleAddSubmit(e){
       throw new Error(errData.error || "Failed to add vehicle");
     }
     
-    // Reload from database to get the real UUID
     await loadCars();
     closeAddModal(); 
     
-    // Automatically open the new car
     const newCar = state.cars[0];
     if(newCar) {
       state.activeVehicleId = newCar.id; 
@@ -370,15 +369,13 @@ async function handleAddSubmit(e){
 }
 
 async function deleteCar(id) {
-  if(!confirm("Remove this vehicle? This will not delete the history from the database, but it will hide it.")) return;
-  // We will add a DELETE API route later. For now, just clear it from the UI.
+  if(!confirm("Remove this vehicle?")) return;
   state.cars = state.cars.filter(c => c.id !== id);
   state.activeVehicleId = null;
   render();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Dynamic Header
   const headerAuth = document.getElementById('headerAuth');
   if (headerAuth) {
     if (token) {
@@ -401,5 +398,3 @@ document.addEventListener("DOMContentLoaded", () => {
   modalEl.addEventListener("click", (e) => { if(e.target === modalEl) closeAddModal(); });
 });
 </script>
-</body>
-</html>
