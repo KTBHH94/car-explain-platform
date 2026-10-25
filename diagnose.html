@@ -310,14 +310,14 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
 <script>
 "use strict";
 
-// --- INSTANT UI FIX ---
-// If the URL has a vehicle ID, hide the hero and text boxes instantly to prevent flashing
+// --- INSTANT UI HIDE ---
+// If the URL has a vehicle ID, hide the hero and text boxes instantly
 if (window.location.search.includes('vehicle=')) {
   document.addEventListener('DOMContentLoaded', () => {
     const hero = document.querySelector(".hero");
     const contextCard = document.querySelector(".context-card");
-    if (hero) hero.classList.add("hide-on-load");
-    if (contextCard) contextCard.classList.add("hide-on-load");
+    if (hero) hero.style.display = "none";
+    if (contextCard) contextCard.style.display = "none";
   });
 }
 
@@ -805,10 +805,10 @@ async function finish(){
       })
     });
 
-            if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to save to database");
-        }
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.details || errorData.error || `HTTP Error: ${response.status}`);
+    }
     
     const data = await response.json();
 
@@ -932,20 +932,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           window.currentDiagnosingCarId = vehicleId;
           window.currentDiagnosingCarName = `${car.make} ${car.model}`;
         } else {
-          // Fallback if car is missing from database
-          const main = document.querySelector("main");
-          const banner = document.createElement("div");
-          banner.style.cssText = "background:#fffbeb; border:1px solid #fde68a; padding:16px 20px; border-radius:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;";
-          banner.innerHTML = `
-            <div>
-              <div style="font-size:12px; font-weight:900; color:#b45309; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Diagnosing:</div>
-              <div style="font-size:20px; font-weight:900; color:#0f172a;">Your Vehicle (Not in DB)</div>
-            </div>
-            <a href="garage.html" style="font-size:13px; font-weight:700; color:#b45309; text-decoration:none;">← Back to Garage</a>
-          `;
-          main.insertBefore(banner, main.firstChild);
-          window.currentDiagnosingCarId = vehicleId;
-          window.currentDiagnosingCarName = `Your Vehicle`;
+          alert("This vehicle could not be found in your account. Redirecting to Garage so you can add it again.");
+          window.location.href = "garage.html";
         }
       }
     } catch(e) { console.warn("Could not load car details:", e); }
@@ -987,7 +975,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           body: JSON.stringify(newProblem)
         });
 
-        if (!response.ok) throw new Error("Failed to save to database");
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || "Failed to save to database");
+        }
 
         alert("Report saved securely to your garage!");
         window.location.href = `garage.html`; 
@@ -1000,5 +991,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
-</body>
-</html>
