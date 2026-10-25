@@ -25,13 +25,7 @@ export default {
       // --- AUTH ROUTES ---
       if (url.pathname === "/api/auth/signup" && request.method === "POST") {
         const { email, password } = await request.json();
-        
-        // Standard signUp (relies on "Confirm email" being OFF in Supabase)
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password
-        });
-        
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response(JSON.stringify({ user: data.user }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
@@ -121,40 +115,52 @@ Please generate the diagnostic report based on these symptoms.`;
 
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
+        // Abort controller to prevent Safari from timing out
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second limit
+
         let aiResponse;
         let retries = 3;
         
         while (retries > 0) {
-          aiResponse = await fetch(geminiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemInstruction }] },
-              contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-              generationConfig: { 
-                response_mime_type: "application/json", 
-                temperature: 0.2,
-                maxOutputTokens: 800
-              }
-            })
-          });
+          try {
+            aiResponse = await fetch(geminiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              signal: controller.signal,
+              body: JSON.stringify({
+                system_instruction: { parts: [{ text: systemInstruction }] },
+                contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+                generationConfig: { 
+                  response_mime_type: "application/json", 
+                  temperature: 0.2,
+                  maxOutputTokens: 800 
+                }
+              })
+            });
+          } catch (err) {
+            if (err.name === 'AbortError') {
+              throw new Error("The AI took too long to respond. Please try again.");
+            }
+            throw err;
+          }
 
           if (aiResponse.ok) {
             break;
           } else if (aiResponse.status === 503) {
             retries--;
-            if (retries === 0) {
-              break;
-            }
+            if (retries === 0) break;
             await new Promise(r => setTimeout(r, 1500)); 
           } else {
             break; 
           }
         }
+        
+        clearTimeout(timeoutId);
 
-        if (!aiResponse.ok) {
-          const errorText = await aiResponse.text();
-          throw new Error(`Gemini API error: ${aiResponse.status} - ${errorText}`);
+        if (!aiResponse || !aiResponse.ok) {
+          const errorText = aiResponse ? await aiResponse.text() : "No response";
+          throw new Error(`Gemini API error: ${aiResponse ? aiResponse.status : 'Unknown'} - ${errorText}`);
         }
         
         const aiData = await aiResponse.json();
