@@ -26,11 +26,10 @@ export default {
       if (url.pathname === "/api/auth/signup" && request.method === "POST") {
         const { email, password } = await request.json();
         
-        // Auto-confirm email so you can test instantly
-        const { data, error } = await supabase.auth.admin.createUser({
+        // Standard signUp (relies on "Confirm email" being OFF in Supabase)
+        const { data, error } = await supabase.auth.signUp({
           email,
-          password,
-          email_confirm: true
+          password
         });
         
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
