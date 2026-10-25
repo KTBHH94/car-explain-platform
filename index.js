@@ -126,9 +126,11 @@ Please generate the diagnostic report based on these symptoms.`;
             body: JSON.stringify({
               system_instruction: { parts: [{ text: systemInstruction }] },
               contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-              generationConfig: { response_mime_type: "application/json", temperature: 0.2 }
-            })
-          });
+                          generationConfig: { 
+                response_mime_type: "application/json", 
+                temperature: 0.2,
+                maxOutputTokens: 800 
+              }
 
           if (aiResponse.ok) break; // Success!
           if (aiResponse.status === 503) {
