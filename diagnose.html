@@ -871,9 +871,32 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Dynamic Header
+  const headerAuth = document.getElementById('headerAuth');
+  const token = localStorage.getItem('sb-access-token');
+  
+  if (headerAuth) {
+    if (token) {
+      headerAuth.innerHTML = `
+        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
+        <a href="garage.html" class="btn btn-primary">My Garage</a>
+      `;
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('sb-access-token');
+        localStorage.removeItem('sb-refresh-token');
+        window.location.href = 'login.html';
+      });
+    } else {
+      headerAuth.innerHTML = `
+        <a href="login.html" class="login-action">Log In</a>
+        <a href="login.html" class="btn btn-primary">Get Started</a>
+      `;
+    }
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const vehicleId = urlParams.get("vehicle");
-  const token = localStorage.getItem('sb-access-token');
   
   if (vehicleId && token) {
     try {
@@ -885,7 +908,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const car = data.vehicles.find(c => c.id === vehicleId);
         
         if (car) {
+          // HIDE THE HERO AND CONTEXT CARD
           const hero = document.querySelector(".hero");
+          if (hero) hero.style.display = "none";
+          const contextCard = document.querySelector(".context-card");
+          if (contextCard) contextCard.style.display = "none";
+
+          // INSERT BANNER AT TOP
+          const main = document.querySelector("main");
           const banner = document.createElement("div");
           banner.style.cssText = "background:#e8eefc; border:1px solid #bfdbfe; padding:16px 20px; border-radius:12px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;";
           banner.innerHTML = `
@@ -895,14 +925,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
             <a href="garage.html" style="font-size:13px; font-weight:700; color:#1e3a8a; text-decoration:none;">← Back to Garage</a>
           `;
-          hero.after(banner);
-          const contextCard = document.querySelector(".context-card");
-          if (contextCard) contextCard.style.display = "none";
-          
+          main.insertBefore(banner, main.firstChild);
+
           window.currentDiagnosingCarId = vehicleId;
           window.currentDiagnosingCarName = `${car.make} ${car.model}`;
         } else {
-          alert("Could not find this vehicle in the database. If you added it before logging in, please go back to My Garage and add it again so it saves to your account.");
+          alert("Could not find this vehicle in the database. Please go back to My Garage and try again.");
           window.location.href = "garage.html";
         }
       }
