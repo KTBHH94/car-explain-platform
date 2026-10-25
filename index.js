@@ -90,7 +90,7 @@ You MUST follow these rules:
 4. Do not instruct users to perform dangerous mechanical work.
 5. Use UK terminology (bonnet, boot, windscreen) and GBP (£).
 6. Never invent MOT information or repair-cost statistics.
-7. Be highly detailed and comprehensive in your answers. Explain the mechanics behind the symptoms clearly so the driver understands exactly what the garage will be looking for.
+7. Be highly detailed and comprehensive in your answers, but keep each section to a maximum of 2-3 sentences to ensure the response finishes completely.
 
 You must respond in STRICT JSON format with exactly these keys:
 {
@@ -115,9 +115,8 @@ Please generate the diagnostic report based on these symptoms.`;
 
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
-        // Abort controller to prevent Safari from timing out
         const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 95000); 
+        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 seconds
 
         let aiResponse;
         let retries = 3;
@@ -131,11 +130,10 @@ Please generate the diagnostic report based on these symptoms.`;
               body: JSON.stringify({
                 system_instruction: { parts: [{ text: systemInstruction }] },
                 contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-                               generationConfig: { 
+                generationConfig: { 
                   response_mime_type: "application/json", 
                   temperature: 0.2,
-                  maxOutputTokens: 4000 
-                }
+                  maxOutputTokens: 2000 // Plenty of room, but won't hit the Cloudflare limit
                 }
               })
             });
@@ -150,7 +148,9 @@ Please generate the diagnostic report based on these symptoms.`;
             break;
           } else if (aiResponse.status === 503) {
             retries--;
-            if (retries === 0) break;
+            if (retries === 0) {
+              break;
+            }
             await new Promise(r => setTimeout(r, 1500)); 
           } else {
             break; 
@@ -169,7 +169,24 @@ Please generate the diagnostic report based on these symptoms.`;
         let rawText = aiData.candidates[0].content.parts[0].text;
         rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
         
-        const reportJson = JSON.parse(rawText);
+        let reportJson;
+        try {
+          reportJson = JSON.parse(rawText);
+        } catch (e) {
+          console.error("Failed to parse AI JSON:", rawText);
+          // Fallback if AI cuts off
+          reportJson = {
+            safetyLevel: "amber",
+            safetyMessage: "The AI response was cut off. Please try again.",
+            likelyPossibility: "Analysis incomplete.",
+            otherPossibilities: "Could not generate report.",
+            whySuggested: "The AI generated too much text.",
+            whatToAsk: "Please try running the diagnostic again.",
+            whatGarageMayInspect: "N/A",
+            urgency: "Unknown",
+            confidence: "Low"
+          };
+        }
 
         return new Response(JSON.stringify(reportJson), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
