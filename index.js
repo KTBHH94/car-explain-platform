@@ -108,7 +108,7 @@ You MUST follow these rules:
 4. Do not instruct users to perform dangerous mechanical work.
 5. Use UK terminology (bonnet, boot, windscreen) and GBP (£).
 6. Never invent MOT information or repair-cost statistics.
-7. Be highly detailed and comprehensive in your answers, but keep each section to a maximum of 2-3 sentences to ensure the response finishes completely.
+7. Be highly detailed and comprehensive in your answers. Explain the mechanics behind the symptoms clearly so the driver understands exactly what the garage will be looking for.
 
 You must respond in STRICT JSON format with exactly these keys:
 {
@@ -134,10 +134,11 @@ Please generate the diagnostic report based on these symptoms.`;
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds
+        // Set timeout to 90 seconds to allow for long, detailed answers
+        const timeoutId = setTimeout(() => controller.abort(), 90000); 
 
         let aiResponse;
-        let retries = 6; // Increased to 6 retries for high demand
+        let retries = 3;
         
         while (retries > 0) {
           try {
@@ -151,7 +152,7 @@ Please generate the diagnostic report based on these symptoms.`;
                 generationConfig: { 
                   response_mime_type: "application/json", 
                   temperature: 0.2,
-                  maxOutputTokens: 1000 
+                  maxOutputTokens: 2500 // Large limit so it doesn't cut off the long answers
                 }
               })
             });
