@@ -109,6 +109,7 @@ You MUST follow these rules:
 5. Use UK terminology (bonnet, boot, windscreen) and GBP (£).
 6. Never invent MOT information or repair-cost statistics.
 7. Be highly detailed and comprehensive in your answers. Explain the mechanics behind the symptoms clearly so the driver understands exactly what the garage will be looking for.
+8. CRITICAL: Ensure you finish generating the full JSON structure completely. Do not cut off mid-sentence. If you are running out of time/tokens, start wrapping up your sentences immediately.
 
 You must respond in STRICT JSON format with exactly these keys:
 {
@@ -134,8 +135,8 @@ Please generate the diagnostic report based on these symptoms.`;
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
         const controller = new AbortController();
-        // Set timeout to 90 seconds to allow for long, detailed answers
-        const timeoutId = setTimeout(() => controller.abort(), 90000); 
+        // MAX limit before Cloudflare kills the connection
+        const timeoutId = setTimeout(() => controller.abort(), 99000); 
 
         let aiResponse;
         let retries = 3;
@@ -152,7 +153,7 @@ Please generate the diagnostic report based on these symptoms.`;
                 generationConfig: { 
                   response_mime_type: "application/json", 
                   temperature: 0.2,
-                  maxOutputTokens: 2500 // Large limit so it doesn't cut off the long answers
+                  maxOutputTokens: 3000 // Huge limit for long answers
                 }
               })
             });
@@ -170,7 +171,6 @@ Please generate the diagnostic report based on these symptoms.`;
             if (retries === 0) {
               break;
             }
-            // Wait 3 seconds before retrying if Google is busy
             await new Promise(r => setTimeout(r, 3000)); 
           } else {
             break; 
