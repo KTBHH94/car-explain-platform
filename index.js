@@ -39,6 +39,33 @@ export default {
 
       // --- PROTECTED ROUTES ---
       const authHeader = request.headers.get("Authorization");
+
+              // --- REPAIRS ---
+        if (url.pathname === "/api/user/repairs" && request.method === "GET") {
+          const vehicleId = url.searchParams.get("vehicleId");
+          if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          
+          const { data: repairs, error: dbError } = await supabase
+            .from('repairs')
+            .select('*')
+            .eq('vehicle_id', vehicleId)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+            
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ repairs }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        if (url.pathname === "/api/user/repairs" && request.method === "POST") {
+          const repairData = await request.json();
+          const { data, error: dbError } = await supabase
+            .from('repairs')
+            .insert([{ ...repairData, user_id: user.id }])
+            .select();
+            
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ repair: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
       
       if (url.pathname.startsWith("/api/user/")) {
         if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
