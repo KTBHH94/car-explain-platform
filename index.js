@@ -39,33 +39,6 @@ export default {
 
       // --- PROTECTED ROUTES ---
       const authHeader = request.headers.get("Authorization");
-
-              // --- REPAIRS ---
-        if (url.pathname === "/api/user/repairs" && request.method === "GET") {
-          const vehicleId = url.searchParams.get("vehicleId");
-          if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          
-          const { data: repairs, error: dbError } = await supabase
-            .from('repairs')
-            .select('*')
-            .eq('vehicle_id', vehicleId)
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
-            
-          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          return new Response(JSON.stringify({ repairs }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        if (url.pathname === "/api/user/repairs" && request.method === "POST") {
-          const repairData = await request.json();
-          const { data, error: dbError } = await supabase
-            .from('repairs')
-            .insert([{ ...repairData, user_id: user.id }])
-            .select();
-            
-          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          return new Response(JSON.stringify({ repair: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
       
       if (url.pathname.startsWith("/api/user/")) {
         if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -100,6 +73,22 @@ export default {
           const { data, error: dbError } = await supabase.from('problems').insert([{ ...problemData, user_id: user.id }]).select();
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
           return new Response(JSON.stringify({ problem: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // --- REPAIRS (NOW CORRECTLY PLACED) ---
+        if (url.pathname === "/api/user/repairs" && request.method === "GET") {
+          const vehicleId = url.searchParams.get("vehicleId");
+          if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          const { data: repairs, error: dbError } = await supabase.from('repairs').select('*').eq('vehicle_id', vehicleId).eq('user_id', user.id).order('created_at', { ascending: false });
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ repairs }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        if (url.pathname === "/api/user/repairs" && request.method === "POST") {
+          const repairData = await request.json();
+          const { data, error: dbError } = await supabase.from('repairs').insert([{ ...repairData, user_id: user.id }]).select();
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ repair: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
       }
 
@@ -143,7 +132,7 @@ Please generate the diagnostic report based on these symptoms.`;
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 seconds
+        const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 seconds
 
         let aiResponse;
         let retries = 3;
@@ -160,7 +149,7 @@ Please generate the diagnostic report based on these symptoms.`;
                 generationConfig: { 
                   response_mime_type: "application/json", 
                   temperature: 0.2,
-                  maxOutputTokens: 2000 // Plenty of room, but won't hit the Cloudflare limit
+                  maxOutputTokens: 800 // Reduced to finish faster
                 }
               })
             });
@@ -201,7 +190,6 @@ Please generate the diagnostic report based on these symptoms.`;
           reportJson = JSON.parse(rawText);
         } catch (e) {
           console.error("Failed to parse AI JSON:", rawText);
-          // Fallback if AI cuts off
           reportJson = {
             safetyLevel: "amber",
             safetyMessage: "The AI response was cut off. Please try again.",
