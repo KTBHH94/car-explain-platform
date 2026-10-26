@@ -246,7 +246,6 @@ async function renderDashboard(){
     btn.addEventListener("click", () => { state.activeTab = btn.dataset.tab; updateTabs(); });
   });
   
-  // Fetch both problems and repairs
   try {
     const [probRes, repRes] = await Promise.all([
       fetch(`${API_URL}/api/user/problems?vehicleId=${car.id}`, { headers: { "Authorization": `Bearer ${token}` } }),

@@ -47,6 +47,7 @@ export default {
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+        // Vehicles
         if (url.pathname === "/api/user/vehicles" && request.method === "GET") {
           const { data: vehicles, error: dbError } = await supabase.from('vehicles').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -60,6 +61,7 @@ export default {
           return new Response(JSON.stringify({ vehicle: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
+        // Problems
         if (url.pathname === "/api/user/problems" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -75,7 +77,7 @@ export default {
           return new Response(JSON.stringify({ problem: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // --- REPAIRS (NOW CORRECTLY PLACED) ---
+        // Repairs
         if (url.pathname === "/api/user/repairs" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -132,10 +134,10 @@ Please generate the diagnostic report based on these symptoms.`;
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 seconds
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds
 
         let aiResponse;
-        let retries = 3;
+        let retries = 6; // Increased to 6 retries for high demand
         
         while (retries > 0) {
           try {
@@ -149,7 +151,7 @@ Please generate the diagnostic report based on these symptoms.`;
                 generationConfig: { 
                   response_mime_type: "application/json", 
                   temperature: 0.2,
-                  maxOutputTokens: 800 // Reduced to finish faster
+                  maxOutputTokens: 1000 
                 }
               })
             });
@@ -167,7 +169,8 @@ Please generate the diagnostic report based on these symptoms.`;
             if (retries === 0) {
               break;
             }
-            await new Promise(r => setTimeout(r, 1500)); 
+            // Wait 3 seconds before retrying if Google is busy
+            await new Promise(r => setTimeout(r, 3000)); 
           } else {
             break; 
           }
