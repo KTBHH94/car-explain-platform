@@ -311,7 +311,6 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
 "use strict";
 
 // --- INSTANT UI HIDE ---
-// If the URL has a vehicle ID, hide the hero and text boxes instantly
 if (window.location.search.includes('vehicle=')) {
   document.addEventListener('DOMContentLoaded', () => {
     const hero = document.querySelector(".hero");
@@ -792,11 +791,16 @@ async function finish(){
   const vehicleStr = getVehicleContext() || window.currentDiagnosingCarName || "Your Vehicle";
   const customTextId = `CUSTOM_${STATE.track}`;
   const customText = STATE.answers[customTextId] || "";
+  const token = localStorage.getItem('sb-access-token');
 
   try {
+    // Note the Authorization header being sent to the worker here
     const response = await fetch(`${API_URL}/api/diagnose`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({
         vehicle: vehicleStr,
         category: TRACK_LABEL[STATE.track],
@@ -807,7 +811,8 @@ async function finish(){
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.details || errorData.error || `HTTP Error: ${response.status}`);
+      // Throw the specific error message so the catch block can read it
+      throw new Error(errorData.error || errorData.message || `HTTP Error: ${response.status}`);
     }
     
     const data = await response.json();
@@ -844,13 +849,38 @@ async function finish(){
 
   } catch (error) {
     console.error(error);
+    $("loadingState").style.display = "none";
+    $("reportContent").style.display = "block";
+    
+    // --- PREMIUM LIMIT CATCH BLOCK ---
+    if (error.message.includes("limit_reached") || error.message.includes("Upgrade to Premium") || error.message.includes("403")) {
+      $("reportTitle").textContent = "Free Limit Reached";
+      $("reportSub").textContent = "Upgrade to Premium for unlimited reports.";
+      $("reportLikely").textContent = "You have used your 3 free AI reports this month.";
+      $("reportOther").textContent = "Upgrade to CarExplain Premium to get unlimited AI diagnostics, automatic MOT lookups, and garage quote comparisons.";
+      $("safetyAlert").innerHTML = `
+        <div class="alert amber" style="text-align:center; padding: 40px;">
+          <strong style="font-size:20px; display:block; margin-bottom:10px;">Premium Feature</strong>
+          You've reached your free limit for this month. Upgrade to get unlimited access.
+        </div>
+        <div style="text-align:center; margin-top:20px;">
+          <a href="#" class="btn btn-primary" style="background:#1e3a8a; font-size:18px; padding:16px 32px; text-transform:uppercase;">Upgrade to Premium - £4.99/mo</a>
+        </div>
+      `;
+      $("saveReportBtn").style.display = "none";
+      $("reportSummary").innerHTML = "";
+      $("reportWhy").textContent = "";
+      $("reportCheck").textContent = "";
+      $("reportGarage").textContent = "";
+      $("reportUrgency").textContent = "";
+      $("reportConfidence").textContent = "";
+      return;
+    }
+
     $("reportTitle").textContent = "Analysis Failed";
     $("reportLikely").textContent = "Could not connect to the AI backend.";
     $("reportOther").textContent = "Error Details: " + error.message;
     $("safetyAlert").innerHTML = `<div class="alert amber"><strong>Error</strong><br>Could not connect to the AI server.</div>`;
-    
-    $("loadingState").style.display = "none";
-    $("reportContent").style.display = "block";
   }
 
   const saveBtn = $("saveReportBtn");
@@ -991,3 +1021,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
+</body>
+</html>

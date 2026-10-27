@@ -99,6 +99,41 @@ export default {
         const body = await request.json();
         const { vehicle, category, answers, customText } = body;
 
+        // --- FREE VS PREMIUM CHECK ---
+        const authHeader = request.headers.get("Authorization");
+        let userPlan = "free";
+        let usageCount = 0;
+        
+        if (authHeader) {
+          const token = authHeader.replace("Bearer ", "");
+          const { data: { user } } = await supabase.auth.getUser(token);
+          
+          if (user) {
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            
+            if (profile) {
+              userPlan = profile.plan;
+              usageCount = profile.ai_usage_count;
+              
+              const lastReset = new Date(profile.ai_usage_reset_date);
+              const now = new Date();
+              if (now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear()) {
+                await supabase.from('profiles').update({ ai_usage_count: 0, ai_usage_reset_date: now.toISOString().split('T')[0] }).eq('id', user.id);
+                usageCount = 0;
+              }
+
+              if (userPlan === 'free' && usageCount >= 3) {
+                return new Response(JSON.stringify({ 
+                  error: "limit_reached",
+                  message: "You have used your 3 free AI reports this month. Upgrade to Premium for unlimited reports."
+                }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+              }
+
+              await supabase.from('profiles').update({ ai_usage_count: usageCount + 1 }).eq('id', user.id);
+            }
+          }
+        }
+
         const systemInstruction = `You are an expert UK automotive diagnostic assistant for CarExplain. 
 Your job is to help ordinary drivers understand what might be wrong with their car based on their symptoms.
 You MUST follow these rules:
@@ -135,7 +170,6 @@ Please generate the diagnostic report based on these symptoms.`;
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
         const controller = new AbortController();
-        // MAX limit before Cloudflare kills the connection
         const timeoutId = setTimeout(() => controller.abort(), 99000); 
 
         let aiResponse;
@@ -153,7 +187,7 @@ Please generate the diagnostic report based on these symptoms.`;
                 generationConfig: { 
                   response_mime_type: "application/json", 
                   temperature: 0.2,
-                  maxOutputTokens: 3000 // Huge limit for long answers
+                  maxOutputTokens: 3000
                 }
               })
             });
