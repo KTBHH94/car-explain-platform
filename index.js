@@ -47,7 +47,6 @@ export default {
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-        // Vehicles
         if (url.pathname === "/api/user/vehicles" && request.method === "GET") {
           const { data: vehicles, error: dbError } = await supabase.from('vehicles').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -61,7 +60,6 @@ export default {
           return new Response(JSON.stringify({ vehicle: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Problems
         if (url.pathname === "/api/user/problems" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -77,7 +75,6 @@ export default {
           return new Response(JSON.stringify({ problem: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Repairs
         if (url.pathname === "/api/user/repairs" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -99,7 +96,7 @@ export default {
         const body = await request.json();
         const { vehicle, category, answers, customText } = body;
 
-        // --- FREE VS PREMIUM CHECK ---
+        // Free vs Premium Check
         const authHeader = request.headers.get("Authorization");
         let userPlan = "free";
         let usageCount = 0;
@@ -107,10 +104,8 @@ export default {
         if (authHeader) {
           const token = authHeader.replace("Bearer ", "");
           const { data: { user } } = await supabase.auth.getUser(token);
-          
           if (user) {
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-            
             if (profile) {
               userPlan = profile.plan;
               usageCount = profile.ai_usage_count;
@@ -144,7 +139,6 @@ You MUST follow these rules:
 5. Use UK terminology (bonnet, boot, windscreen) and GBP (£).
 6. Never invent MOT information or repair-cost statistics.
 7. Be highly detailed and comprehensive in your answers. Explain the mechanics behind the symptoms clearly so the driver understands exactly what the garage will be looking for.
-8. CRITICAL: Ensure you finish generating the full JSON structure completely. Do not cut off mid-sentence. If you are running out of time/tokens, start wrapping up your sentences immediately.
 
 You must respond in STRICT JSON format with exactly these keys:
 {
@@ -167,59 +161,29 @@ Additional Details: ${customText || "None provided"}
 
 Please generate the diagnostic report based on these symptoms.`;
 
+        // The paid API is fast, so we can use the highly capable 3.8-flash model
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 99000); 
-
-        let aiResponse;
-        let retries = 3;
-        
-        while (retries > 0) {
-          try {
-            aiResponse = await fetch(geminiUrl, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              signal: controller.signal,
-              body: JSON.stringify({
-                system_instruction: { parts: [{ text: systemInstruction }] },
-                contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-                generationConfig: { 
-                  response_mime_type: "application/json", 
-                  temperature: 0.2,
-                  maxOutputTokens: 3000
-                }
-              })
-            });
-          } catch (err) {
-            if (err.name === 'AbortError') {
-              throw new Error("The AI took too long to respond. Please try again.");
+        const aiResponse = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemInstruction }] },
+            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+            generationConfig: { 
+              response_mime_type: "application/json", 
+              temperature: 0.2,
+              maxOutputTokens: 4000 // Huge token limit because we have no timeout issues now
             }
-            throw err;
-          }
+          })
+        });
 
-          if (aiResponse.ok) {
-            break;
-          } else if (aiResponse.status === 503) {
-            retries--;
-            if (retries === 0) {
-              break;
-            }
-            await new Promise(r => setTimeout(r, 3000)); 
-          } else {
-            break; 
-          }
-        }
-        
-        clearTimeout(timeoutId);
-
-        if (!aiResponse || !aiResponse.ok) {
-          const errorText = aiResponse ? await aiResponse.text() : "No response";
-          throw new Error(`Gemini API error: ${aiResponse ? aiResponse.status : 'Unknown'} - ${errorText}`);
+        if (!aiResponse.ok) {
+          const errorText = await aiResponse.text();
+          throw new Error(`Gemini API error: ${aiResponse.status} - ${errorText}`);
         }
         
         const aiData = await aiResponse.json();
-        
         let rawText = aiData.candidates[0].content.parts[0].text;
         rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
         
@@ -227,14 +191,14 @@ Please generate the diagnostic report based on these symptoms.`;
         try {
           reportJson = JSON.parse(rawText);
         } catch (e) {
-          console.error("Failed to parse AI JSON:", rawText);
+          // Super rare now that we use paid API, but good to have as a fallback
           reportJson = {
             safetyLevel: "amber",
-            safetyMessage: "The AI response was cut off. Please try again.",
+            safetyMessage: "The AI response was slightly malformed. Please try again.",
             likelyPossibility: "Analysis incomplete.",
-            otherPossibilities: "Could not generate report.",
-            whySuggested: "The AI generated too much text.",
-            whatToAsk: "Please try running the diagnostic again.",
+            otherPossibilities: "Please try again.",
+            whySuggested: "N/A",
+            whatToAsk: "N/A",
             whatGarageMayInspect: "N/A",
             urgency: "Unknown",
             confidence: "Low"
