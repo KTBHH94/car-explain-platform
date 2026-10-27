@@ -43,7 +43,10 @@
     <div id="auth-error"></div>
     <form id="auth-form">
       <input type="email" id="email" placeholder="Email Address" required>
-      <input type="password" id="password" placeholder="Password (min 6 characters)" required>
+     <div style="position: relative; width: 100%;">
+  <input type="password" id="password" placeholder="Password (min 6 characters)" required style="width: 100%; padding-right: 40px;">
+  <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b; padding: 0;">👁️</button>
+</div>
       <button type="submit" class="btn btn-primary" id="submit-btn">Sign Up</button>
     </form>
     <p class="toggle-link" id="toggle-link">Already have an account? Log In</p>
