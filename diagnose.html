@@ -847,12 +847,37 @@ async function finish(){
     $("loadingState").style.display = "none";
     $("reportContent").style.display = "block";
 
-  } catch (error) {
+    } catch (error) {
     console.error(error);
     $("loadingState").style.display = "none";
     $("reportContent").style.display = "block";
     
-    // --- PREMIUM LIMIT CATCH BLOCK ---
+    // 1. Check for Unauthorized (Not logged in)
+    if (error.message.includes("Unauthorized") || error.message.includes("401")) {
+      $("reportTitle").textContent = "Login Required";
+      $("reportSub").textContent = "Please log in to use the AI tool.";
+      $("reportLikely").textContent = "You must have an account to run diagnostics.";
+      $("reportOther").textContent = "Create a free account to get 3 AI diagnostics per month.";
+      $("safetyAlert").innerHTML = `
+        <div class="alert amber" style="text-align:center; padding: 40px;">
+          <strong style="font-size:20px; display:block; margin-bottom:10px;">Account Required</strong>
+          You are currently not logged in. Please log in or create a free account to use the AI.
+        </div>
+        <div style="text-align:center; margin-top:20px;">
+          <a href="login.html" class="btn btn-primary" style="background:#1e3a8a; font-size:18px; padding:16px 32px; text-transform:uppercase;">Log In / Sign Up</a>
+        </div>
+      `;
+      $("saveReportBtn").style.display = "none";
+      $("reportSummary").innerHTML = "";
+      $("reportWhy").textContent = "";
+      $("reportCheck").textContent = "";
+      $("reportGarage").textContent = "";
+      $("reportUrgency").textContent = "";
+      $("reportConfidence").textContent = "";
+      return;
+    }
+
+    // 2. Check for Premium Limit Reached (403)
     if (error.message.includes("limit_reached") || error.message.includes("Upgrade to Premium") || error.message.includes("403")) {
       $("reportTitle").textContent = "Free Limit Reached";
       $("reportSub").textContent = "Upgrade to Premium for unlimited reports.";
@@ -877,6 +902,7 @@ async function finish(){
       return;
     }
 
+    // 3. Generic Error (AI Timeout, Server down, etc)
     $("reportTitle").textContent = "Analysis Failed";
     $("reportLikely").textContent = "Could not connect to the AI backend.";
     $("reportOther").textContent = "Error Details: " + error.message;
