@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Ultimate Car Buying & Repair Guide | CarExplain</title>
-<meta name="description" content="Understand fuel types, common faults for popular makes, and real UK garage repair costs. Empower yourself before you buy or visit a mechanic.">
+<title>Car Buying & Repair Guide | CarExplain</title>
+<meta name="description" content="Understand fuel types, common faults for UK cars, and realistic garage repair costs. Make informed decisions before you buy or visit a mechanic.">
 <link rel="stylesheet" href="styles.css">
 <style>
   /* HERO */
@@ -12,8 +12,13 @@
   .research-hero h1 { font-size:clamp(34px,5vw,56px); line-height:1.05; margin:16px 0; letter-spacing:-1.5px; color:var(--navy); font-weight: 900; }
   .research-hero p { font-size:18px; color:var(--slate); margin:0 auto; max-width:720px; line-height: 1.6; }
 
+  /* SECTIONS */
+  .section-container { max-width: 1100px; margin: 0 auto 80px; padding: 0 28px; }
+  .section-header { text-align: center; margin-bottom: 40px; }
+  .section-header h2 { font-size: 36px; color: var(--navy); font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; }
+  .section-header p { font-size: 17px; color: var(--slate); max-width: 700px; margin: 0 auto; line-height: 1.6; }
+
   /* TABS (FUEL TYPES) */
-  .tabs-container { max-width: 1100px; margin: 0 auto 70px; padding: 0 28px; }
   .tabs-nav { display: flex; border-bottom: 2px solid #cbd5e1; margin-bottom: 30px; gap: 10px; overflow-x: auto; }
   .tab-btn { background: none; border: none; padding: 15px 25px; font-size: 16px; font-weight: 800; color: var(--slate); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; white-space: nowrap; }
   .tab-btn:hover { color: var(--navy); }
@@ -23,68 +28,60 @@
   .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-  .tab-content h2 { font-size: 28px; color: var(--navy); margin-top: 0; margin-bottom: 15px; font-weight: 900; letter-spacing: -0.5px; }
+  .tab-content h3 { font-size: 26px; color: var(--navy); margin-top: 0; margin-bottom: 15px; font-weight: 900; }
   .tab-content p { font-size: 16px; color: var(--slate); line-height: 1.7; margin-bottom: 24px; }
   
   .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-  .pro-con-box { background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; }
-  .pro-con-box h3 { font-size: 16px; margin: 0 0 15px; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; }
-  .pro-con-box ul { margin: 0; padding-left: 20px; font-size: 15px; color: #334155; line-height: 1.7; }
-  .pro-con-box ul li { margin-bottom: 8px; }
+  .info-box { background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; }
+  .info-box h4 { font-size: 15px; margin: 0 0 15px; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 900; }
+  .info-box ul { margin: 0; padding-left: 20px; font-size: 15px; color: #334155; line-height: 1.7; }
+  .info-box ul li { margin-bottom: 10px; }
 
-  /* COMMON MAKES */
-  .makes-container { max-width: 1100px; margin: 0 auto 80px; padding: 0 28px; }
-  .makes-container h2 { font-size: 36px; color: var(--navy); font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; text-align: center; }
-  .makes-container .subtitle { text-align: center; color: var(--slate); font-size: 17px; margin-bottom: 40px; }
+  /* DROPDOWN (CAR MAKES) */
+  .make-select-container { max-width: 500px; margin: 0 auto 30px; }
+  .make-select-container select { width: 100%; padding: 16px; font-size: 16px; font-weight: 700; border: 2px solid #cbd5e1; border-radius: 10px; outline: none; font-family: inherit; background: #fff; color: var(--navy); cursor: pointer; }
+  .make-select-container select:focus { border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
   
-  .make-accordion { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
-  .accordion-header { padding: 22px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #fff; transition: 0.2s; }
-  .accordion-header:hover { background: #f8fafc; }
-  .accordion-header h3 { margin: 0; font-size: 22px; color: var(--navy); font-weight: 900; }
-  .accordion-icon { font-size: 20px; color: var(--blue); transition: 0.2s; }
-  .accordion-body { padding: 0 25px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; background: #f8fafc; border-top: 1px solid transparent; }
-  .accordion-body-inner { padding: 25px 0; font-size: 15px; color: var(--slate); line-height: 1.7; }
-  .accordion-body-inner strong { color: var(--navy); font-size: 16px; display: block; margin-bottom: 5px; margin-top: 15px; }
-  .accordion-body-inner strong:first-child { margin-top: 0; }
-  .warning-text { color: #b91c1c; background: #fef2f2; padding: 12px; border-radius: 8px; border: 1px solid #fecaca; margin-top: 15px; font-size: 14px; font-weight: 600; }
+  .make-details-card { display: none; background: #fff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(15,23,42,.03); animation: fadeIn 0.3s ease; }
+  .make-details-card.active { display: block; }
+  .make-details-card h3 { font-size: 28px; color: var(--navy); font-weight: 900; margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; }
+  .fault-item { margin-bottom: 20px; }
+  .fault-item strong { display: block; font-size: 16px; color: var(--navy); margin-bottom: 5px; }
+  .fault-item p { margin: 0; font-size: 15px; color: var(--slate); line-height: 1.6; }
+  .warning-box { background: #fef2f2; border-left: 4px solid #b91c1c; padding: 15px 20px; border-radius: 0 8px 8px 0; margin-top: 20px; font-size: 14px; color: #7f1d1d; font-weight: 600; }
 
-  /* GARAGE COSTS & REGIONS */
-  .garage-guide { background: var(--navy); padding: 80px 28px; color: #fff; margin-bottom: 80px; }
-  .garage-guide-inner { max-width: 1100px; margin: 0 auto; }
-  .garage-guide h2 { font-size: 36px; font-weight: 900; letter-spacing: -1px; margin-top: 0; margin-bottom: 20px; color: #fff; }
-  .garage-guide p { font-size: 17px; color: #cbd5e1; line-height: 1.7; margin-bottom: 40px; max-width: 800px; }
-  
-  .cost-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-  .cost-card { background: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155; }
-  .cost-card h3 { font-size: 20px; margin-top: 0; color: #fff; font-weight: 900; border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 15px; }
-  .cost-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #334155; font-size: 15px; }
-  .cost-row:last-child { border-bottom: none; }
-  .cost-row span { color: #cbd5e1; }
-  .cost-row strong { color: #fff; font-weight: 800; }
+  /* GARAGE COSTS & COMPARISON TABLE */
+  .cost-tool { background: #fff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 35px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(15,23,42,.03); }
+  .cost-tool label { font-size: 15px; font-weight: 900; color: var(--navy); margin-bottom: 10px; display: block; }
+  .cost-tool select { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 16px; outline: none; background: #f8fafc; margin-bottom: 20px; }
+  .cost-result { display: none; background: #e8eefc; border: 1px solid #bfdbfe; padding: 25px; border-radius: 12px; }
+  .cost-result.active { display: block; animation: fadeIn 0.3s ease; }
+  .cost-result h4 { margin: 0 0 10px; font-size: 18px; color: var(--navy); }
+  .cost-result .price { font-size: 32px; font-weight: 900; color: var(--blue); margin-bottom: 10px; }
+  .cost-result .context { font-size: 14px; color: var(--slate); line-height: 1.6; }
 
-  .empowerment-box { background: #fff; color: var(--navy); padding: 30px; border-radius: 12px; margin-top: 30px; }
-  .empowerment-box h3 { margin-top: 0; font-size: 20px; font-weight: 900; color: var(--red); }
-  .empowerment-box ul { margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.7; color: #334155; }
-  .empowerment-box ul li { margin-bottom: 10px; }
+  .table-responsive { overflow-x: auto; }
+  .region-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(15,23,42,.03); }
+  .region-table th, .region-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 15px; }
+  .region-table th { background: #f8fafc; font-weight: 900; color: var(--navy); text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
+  .region-table tr:last-child td { border-bottom: none; }
+  .region-table td strong { color: var(--navy); }
 
-  /* QUIZ */
-  .quiz-section { max-width: 900px; margin: 0 auto 100px; padding: 0 28px; }
-  .quiz-section h2 { font-size: 36px; color: var(--navy); font-weight: 900; margin-bottom: 10px; text-align: center; letter-spacing: -1px; }
-  .quiz-section .subtitle { text-align: center; color: var(--slate); font-size: 17px; margin-bottom: 40px; }
-  
-  .quiz-box { background: #fff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(15,23,42,.05); }
+  /* COMPREHENSIVE QUIZ */
+  .quiz-box { background: #fff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(15,23,42,.05); max-width: 800px; margin: 0 auto; }
   .quiz-question { margin-bottom: 24px; }
   .quiz-question label { display: block; font-weight: 900; margin-bottom: 8px; color: var(--navy); font-size: 15px; }
   .quiz-question select { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 15px; outline: none; background: #f8fafc; }
-  .quiz-result { display: none; margin-top: 30px; padding: 30px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; color: #065f46; }
-  .quiz-result h3 { margin-top: 0; font-size: 22px; font-weight: 900; }
-  .quiz-result p { font-size: 16px; line-height: 1.7; }
+  .quiz-result { display: none; margin-top: 30px; padding: 30px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; color: #166534; }
+  .quiz-result h3 { margin-top: 0; font-size: 24px; font-weight: 900; }
+  .quiz-result p { font-size: 16px; line-height: 1.7; margin-bottom: 15px; }
+  .quiz-result ul { margin: 0 0 20px 0; padding-left: 20px; font-size: 15px; line-height: 1.6; }
 
   @media(max-width: 768px){
-    .grid-two, .cost-grid { grid-template-columns: 1fr; }
+    .grid-two { grid-template-columns: 1fr; }
     .tab-content { padding: 24px; }
     .quiz-box { padding: 24px; }
-    .garage-guide { padding: 50px 20px; }
+    .make-details-card { padding: 24px; }
   }
 </style>
 </head>
@@ -105,13 +102,18 @@
 
 <main>
   <section class="research-hero">
-    <span class="eyebrow">The CarExplain Guide</span>
-    <h1>Understand cars. Know your costs. Never get ripped off.</h1>
-    <p>We break down the intimidating world of car buying and garage repairs into plain English. Understand the engines, the common faults, and exactly what you should be paying.</p>
+    <span class="eyebrow">The Knowledge Base</span>
+    <h1>Understand your car. Know your costs.</h1>
+    <p>We break down the intimidating world of car buying, engines, and garage repairs into clear, professional information. Make informed decisions before you spend money.</p>
   </section>
 
-  <!-- FUEL TYPES GUIDE -->
-  <div class="tabs-container">
+  <!-- 1. FUEL TYPES -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Understanding Fuel Types</h2>
+      <p>Choosing the wrong fuel type for your lifestyle is the most common (and expensive) mistake car buyers make.</p>
+    </div>
+    
     <div class="tabs-nav">
       <button class="tab-btn active" onclick="openTab('petrol')">Petrol</button>
       <button class="tab-btn" onclick="openTab('diesel')">Diesel</button>
@@ -121,11 +123,11 @@
 
     <!-- Petrol -->
     <div id="tab-petrol" class="tab-content active">
-      <h2>Petrol: The UK Default</h2>
-      <p>Petrol engines are smoother, quieter, and generally cheaper to maintain than diesels. They are perfect for city driving and low annual mileage (under 12,000 miles a year). Modern small petrol engines (like the Ford EcoBoost or VW TSI) use turbos to give great fuel economy and power.</p>
+      <h3>Petrol: The UK Default</h3>
+      <p>Petrol engines are smoother, quieter, and generally cheaper to maintain than diesels. They are perfect for city driving and low annual mileage (under 12,000 miles a year). Modern small petrol engines use turbos to give great fuel economy and power.</p>
       <div class="grid-two">
-        <div class="pro-con-box">
-          <h3>The Good</h3>
+        <div class="info-box">
+          <h4>Advantages</h4>
           <ul>
             <li>Cheaper to buy and service</li>
             <li>Quieter and smoother to drive</li>
@@ -133,10 +135,10 @@
             <li>Immediate power delivery</li>
           </ul>
         </div>
-        <div class="pro-con-box">
-          <h3>The Bad (Common Faults)</h3>
+        <div class="info-box">
+          <h4>Common Petrol Faults</h4>
           <ul>
-            <li><strong>Wet Belts:</strong> Many modern petrols (Ford 1.0 EcoBoost, Vauxhall 1.2) use a timing belt submerged in oil. These degrade and can destroy the engine. Replacing them costs £500-£800.</li>
+            <li><strong>Wet Belts:</strong> Many modern petrols (Ford 1.0 EcoBoost, Vauxhall 1.2) use a timing belt submerged in oil. These degrade and can destroy the engine if not replaced (£500-£800).</li>
             <li><strong>Carbon Build-Up:</strong> Direct Injection engines can get carbon build-up on the valves.</li>
             <li><strong>Coil Packs:</strong> Spark plug coil packs are a common failure, causing misfires.</li>
           </ul>
@@ -146,23 +148,23 @@
 
     <!-- Diesel -->
     <div id="tab-diesel" class="tab-content">
-      <h2>Diesel: The Motorway Cruiser</h2>
+      <h3>Diesel: The Motorway Cruiser</h3>
       <p>Diesel engines offer incredible torque and high fuel economy. They are the kings of the motorway. However, they are absolutely the wrong choice for someone who only does short trips to the shops, as modern emission controls will clog up.</p>
       <div class="grid-two">
-        <div class="pro-con-box">
-          <h3>The Good</h3>
+        <div class="info-box">
+          <h4>Advantages</h4>
           <ul>
             <li>Excellent fuel economy on long journeys</li>
             <li>High torque (great for towing or heavy loads)</li>
             <li>Engines often last 200,000+ miles if maintained</li>
           </ul>
         </div>
-        <div class="pro-con-box">
-          <h3>The Bad (Common Faults)</h3>
+        <div class="info-box">
+          <h4>Common Diesel Faults</h4>
           <ul>
-            <li><strong>DPF (Diesel Particulate Filter):</strong> The #1 issue. If you only do short trips, the filter cannot regenerate and will block. Replacing one costs £1,000 - £2,000.</li>
+            <li><strong>DPF (Diesel Particulate Filter):</strong> The #1 issue. Short trips block the filter. Replacing one costs £1,000 - £2,000.</li>
             <li><strong>EGR Valve:</strong> Exhaust Gas Recirculation valves get coked up with soot, causing rough idling.</li>
-            <li><strong>Dual Mass Flywheel (DMF):</strong> Diesels have huge torque which wears out the DMF, causing violent vibrations. A clutch + DMF replacement is £800 - £1,500.</li>
+            <li><strong>Dual Mass Flywheel (DMF):</strong> Diesels have huge torque which wears out the DMF. A clutch + DMF replacement is £800 - £1,500.</li>
           </ul>
         </div>
       </div>
@@ -170,11 +172,11 @@
 
     <!-- Hybrid -->
     <div id="tab-hybrid" class="tab-content">
-      <h2>Hybrid: The City King</h2>
-      <p>A hybrid (like a Toyota Yaris or Corolla) combines a small petrol engine with an electric battery. You don't plug it in; the car charges the battery itself using braking energy. They are incredibly reliable and brilliant in stop-start city traffic.</p>
+      <h3>Hybrid: The City Specialist</h3>
+      <p>A hybrid combines a small petrol engine with an electric battery. You don't plug it in; the car charges the battery itself using braking energy. They are incredibly reliable and brilliant in stop-start city traffic.</p>
       <div class="grid-two">
-        <div class="pro-con-box">
-          <h3>The Good</h3>
+        <div class="info-box">
+          <h4>Advantages</h4>
           <ul>
             <li>Incredible reliability (Toyota/Lexus are legendary)</li>
             <li>Superb fuel economy in towns and cities</li>
@@ -182,8 +184,8 @@
             <li>No charging cables required</li>
           </ul>
         </div>
-        <div class="pro-con-box">
-          <h3>The Bad (Common Faults)</h3>
+        <div class="info-box">
+          <h4>Common Hybrid Faults</h4>
           <ul>
             <li>Engine can sound "drony" under hard acceleration</li>
             <li>Not as efficient on the motorway as a diesel</li>
@@ -195,19 +197,19 @@
 
     <!-- Electric -->
     <div id="tab-electric" class="tab-content">
-      <h2>Electric (EV): The Future</h2>
+      <h3>Electric (EV): The Future</h3>
       <p>Fully electric cars offer silent, instant acceleration and incredibly low running costs. However, you must have a way to charge at home, and long journeys require planning around charging stops.</p>
       <div class="grid-two">
-        <div class="pro-con-box">
-          <h3>The Good</h3>
+        <div class="info-box">
+          <h4>Advantages</h4>
           <ul>
             <li>Lowest running costs (if charging at home)</li>
             <li>Zero road tax (currently) and no ULEZ charges</li>
             <li>Almost zero maintenance (no oil, no belts)</li>
           </ul>
         </div>
-        <div class="pro-con-box">
-          <h3>The Bad (Common Faults)</h3>
+        <div class="info-box">
+          <h4>Common EV Faults</h4>
           <ul>
             <li>High purchase price</li>
             <li><strong>Battery Degradation:</strong> Older EVs lose some range. Always check the State of Health (SoH).</li>
@@ -216,113 +218,108 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- COMMON MAKES -->
-  <div class="makes-container">
-    <h2>What to look out for by Make</h2>
-    <p class="subtitle">Every brand has a skeleton in its closet. Here are the most critical issues to check before buying.</p>
-    
-    <div class="make-accordion">
-      <div class="accordion-header" onclick="toggleAccordion(this)">
-        <h3>Ford (Fiesta, Focus, Puma)</h3>
-        <span class="accordion-icon">▼</span>
-      </div>
-      <div class="accordion-body">
-        <div class="accordion-body-inner">
-          <strong>The 1.0 EcoBoost Engine:</strong> This is a brilliant engine, but it uses a "wet belt" (a timing belt submerged in oil). If this belt snaps, it destroys the engine. It MUST be changed every 10 years or 100,000 miles. The oil pump belt is also a known weak point.
-          <div class="warning-text">⚠️ Warning: If buying a used Ford, ask for written proof that the wet belt has been changed. If they can't prove it, walk away or budget £700 for immediate replacement.</div>
-          <strong>Other checks:</strong> Look for leaks from the thermostat housing and check the rear wheel arches for rust on older Fiestas.
-        </div>
-      </div>
+  <!-- 2. CAR MAKES DROPDOWN -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Common Faults by Make</h2>
+      <p>Select a manufacturer below to see the specific mechanical issues you need to check before buying.</p>
     </div>
 
-    <div class="make-accordion">
-      <div class="accordion-header" onclick="toggleAccordion(this)">
-        <h3>Vauxhall (Corsa, Astra, Mokka)</h3>
-        <span class="accordion-icon">▼</span>
-      </div>
-      <div class="accordion-body">
-        <div class="accordion-body-inner">
-          <strong>1.2 PureTech / Ecotec Engines:</strong> Similar to Ford, many modern Vauxhall petrol engines use a wet timing belt. These can degrade and clog the oil pickup pipe, leading to catastrophic engine failure.
-          <div class="warning-text">⚠️ Warning: These engines are notorious for oil consumption. Check the oil level immediately and look for blue smoke from the exhaust.</div>
-          <strong>Other checks:</strong> Check that the air conditioning blows cold (condensers are a common failure), and listen for suspension knocks over bumps.
-        </div>
-      </div>
+    <div class="make-select-container">
+      <select id="makeSelector" onchange="updateMakeDetails()">
+        <option value="">-- Select a Car Make --</option>
+        <option value="ford">Ford (Fiesta, Focus, Puma)</option>
+        <option value="vauxhall">Vauxhall (Corsa, Astra, Mokka)</option>
+        <option value="vag">Volkswagen / Audi / Skoda / Seat</option>
+        <option value="bmw">BMW (1 Series, 3 Series, X1)</option>
+        <option value="mercedes">Mercedes-Benz (A-Class, C-Class)</option>
+        <option value="toyota">Toyota / Lexus</option>
+        <option value="nissan">Nissan (Qashqai, Juke)</option>
+        <option value="hyundai">Hyundai / Kia</option>
+        <option value="peugeot">Peugeot / Citroen / DS</option>
+      </select>
     </div>
 
-    <div class="make-accordion">
-      <div class="accordion-header" onclick="toggleAccordion(this)">
-        <h3>Volkswagen / Audi / Skoda / Seat (VAG Group)</h3>
-        <span class="accordion-icon">▼</span>
-      </div>
-      <div class="accordion-body">
-        <div class="accordion-body-inner">
-          <strong>DSG Gearboxes:</strong> VW's automatic DSG gearboxes are fast and smooth, but the older "dry clutch" versions (usually on 1.4/1.5 petrols) can suffer from juddering. The "wet clutch" versions (on diesels and higher-power petrols) require an oil change every 40,000 miles.
-          <strong>Water Pumps:</strong> A leaky water pump is a rite of passage for VW owners. Listen for a high-pitched squeal or check for pink crusty residue around the engine bay.
-          <strong>Timing Chains:</strong> Older 1.2 and 1.4 TSI engines can suffer from timing chain tensioner failure, causing a rattling noise on cold start.
-        </div>
-      </div>
-    </div>
-
-    <div class="make-accordion">
-      <div class="accordion-header" onclick="toggleAccordion(this)">
-        <h3>BMW (1 Series, 3 Series, X1)</h3>
-        <span class="accordion-icon">▼</span>
-      </div>
-      <div class="accordion-body">
-        <div class="accordion-body-inner">
-          <strong>The N47 Diesel Engine:</strong> This engine (used in many 2007-2015 models) is famous for timing chain failure. The chain is located at the back of the engine, meaning the gearbox and engine often have to be removed to fix it (a £2,000+ bill).
-          <div class="warning-text">⚠️ Warning: Listen for a whining, supercharger-like noise from the rear of the engine on cold start. Avoid high-mileage N47 diesels unless the chain has been done.</div>
-          <strong>Other checks:</strong> Check the PCV valve (crankcase breather) and look for oil leaks around the rocker cover.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GARAGE COSTS & REGIONS -->
-  <section class="garage-guide">
-    <div class="garage-guide-inner">
-      <h2>The Garage Guide: Costs & Regions</h2>
-      <p>As a woman, walking into a garage can sometimes feel intimidating. You might worry about being overcharged or talked into repairs you don't need. <strong>Knowledge is power.</strong> Here is a realistic guide to what common repairs cost in the UK, and why the price varies depending on where you live.</p>
-      
-      <div class="cost-grid">
-        <div class="cost-card">
-          <h3>Common Repair Costs (Parts & Labour)</h3>
-          <div class="cost-row"><span>Front Brake Pads & Discs</span><strong>£150 - £250</strong></div>
-          <div class="cost-row"><span>Full Service (Oil & Filters)</span><strong>£180 - £300</strong></div>
-          <div class="cost-row"><span>Clutch Replacement (Manual)</span><strong>£400 - £800</strong></div>
-          <div class="cost-row"><span>Timing Belt / Wet Belt</span><strong>£500 - £800</strong></div>
-          <div class="cost-row"><span>Alternator Replacement</span><strong>£350 - £550</strong></div>
-          <div class="cost-row"><span>DPF Cleaning / Replacement</span><strong>£300 - £1,500</strong></div>
-        </div>
-
-        <div class="cost-card">
-          <h3>Why do prices vary by region?</h3>
-          <p style="color:#cbd5e1; font-size:14px; margin-bottom:15px;">Labour rates are the biggest factor. A garage in London charges much more per hour than a garage in Yorkshire.</p>
-          <div class="cost-row"><span>London & South East</span><strong>£100 - £150 / hr</strong></div>
-          <div class="cost-row"><span>South West & Midlands</span><strong>£70 - £100 / hr</strong></div>
-          <div class="cost-row"><span>North of England & Wales</span><strong>£50 - £80 / hr</strong></div>
-          <div class="cost-row"><span>Independent vs Main Dealer</span><strong>Dealers charge up to 50% more</strong></div>
-        </div>
-      </div>
-
-      <div class="empowerment-box">
-        <h3>How to avoid being ripped off:</h3>
-        <ul>
-          <li><strong>Ask for the old parts:</strong> If they replace your brake pads, ask to see the old ones. It proves they actually did the work.</li>
-          <li><strong>Ask for a breakdown:</strong> A quote should separate the cost of the <em>parts</em> from the <em>labour hours</em>. If they just give you one big number, ask them to break it down.</li>
-          <li><strong>Don't be afraid to get a second quote:</strong> If a repair sounds expensive, politely say, "Thank you, I need to think about it." A good garage will respect this. A dodgy garage will pressure you.</li>
-          <li><strong>Use the CarExplain AI:</strong> Before agreeing to a repair, run the symptom through our AI tool. If the AI says it's likely a £150 sensor, and the garage says you need a £1,000 engine rebuild, you know to walk away.</li>
-        </ul>
-      </div>
+    <div id="makeDetails" class="make-details-card">
+      <!-- Content injected by JS -->
     </div>
   </section>
 
-  <!-- QUIZ SECTION -->
-  <section class="quiz-section">
-    <h2>Find Your Perfect Match</h2>
-    <p class="subtitle">Answer these questions and we will tell you exactly what type of car to look for.</p>
+  <!-- 3. GARAGE COSTS & REGIONS -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Garage Repairs & Regional Costs</h2>
+      <p>Understand what a repair should cost, how labour rates vary across the UK, and what to ask before agreeing to work.</p>
+    </div>
+
+    <!-- Interactive Cost Estimator -->
+    <div class="cost-tool">
+      <label for="repairSelect">Estimate a Repair Cost:</label>
+      <select id="repairSelect" onchange="showRepairCost()">
+        <option value="">-- Select a common repair --</option>
+        <option value="service">Interim Service (Oil & Filters)</option>
+        <option value="brakes">Front Brake Pads & Discs</option>
+        <option value="clutch">Clutch Replacement</option>
+        <option value="timing">Timing Belt / Wet Belt Replacement</option>
+        <option value="dpf">DPF Cleaning / Replacement</option>
+        <option value="suspension">Front Suspension Arm</option>
+        <option value="alternator">Alternator Replacement</option>
+      </select>
+
+      <div id="costResult" class="cost-result">
+        <h4 id="costTitle"></h4>
+        <div class="price" id="costPrice"></div>
+        <div class="context" id="costContext"></div>
+      </div>
+    </div>
+
+    <!-- Regional Labour Rates -->
+    <h3 style="font-size: 22px; color: var(--navy); margin-top: 50px; margin-bottom: 10px;">UK Labour Rate Comparison</h3>
+    <p style="color: var(--slate); font-size: 15px; margin-bottom: 20px;">The cost of a repair is heavily influenced by where you live. Main dealers charge the highest rates, while independent garages offer better value.</p>
+    
+    <div class="table-responsive">
+      <table class="region-table">
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th>Independent Garage (per hour)</th>
+            <th>Main Dealer (per hour)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>London & South East</strong></td>
+            <td>£85 - £120</td>
+            <td>£140 - £200+</td>
+          </tr>
+          <tr>
+            <td><strong>South West & Midlands</strong></td>
+            <td>£60 - £85</td>
+            <td>£110 - £150</td>
+          </tr>
+          <tr>
+            <td><strong>North of England & Wales</strong></td>
+            <td>£45 - £70</td>
+            <td>£90 - £130</td>
+          </tr>
+          <tr>
+            <td><strong>Scotland</strong></td>
+            <td>£55 - £80</td>
+            <td>£100 - £140</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. COMPREHENSIVE QUIZ -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Find the Right Car for You</h2>
+      <p>Answer these questions and we will match your lifestyle and budget to the right type of vehicle.</p>
+    </div>
     
     <div class="quiz-box">
       <div class="quiz-question">
@@ -347,7 +344,7 @@
       <div class="quiz-question">
         <label>3. Do you need to fit passengers or car seats?</label>
         <select id="q3">
-          <option value="no">No, it's just me and maybe one passenger</option>
+          <option value="no">No, it's mostly just me</option>
           <option value="yes">Yes, I regularly carry passengers or kids</option>
           <option value="luggage">Yes, I need a big boot for dogs or luggage</option>
         </select>
@@ -359,6 +356,15 @@
           <option value="reliability">Unbreakable reliability and cheap repairs</option>
           <option value="cost">Lowest possible running costs (fuel/tax)</option>
           <option value="fun">Fun to drive and performant</option>
+        </select>
+      </div>
+      
+      <div class="quiz-question">
+        <label>5. What transmission do you prefer?</label>
+        <select id="q5">
+          <option value="manual">Manual (Stick shift)</option>
+          <option value="auto">Automatic</option>
+          <option value="any">No preference</option>
         </select>
       </div>
 
@@ -402,72 +408,205 @@
     `;
   }
 
-  // TABS LOGIC
+  // 1. TABS LOGIC
   function openTab(tabName) {
     const contents = document.querySelectorAll('.tab-content');
     contents.forEach(content => content.classList.remove('active'));
-    
     const buttons = document.querySelectorAll('.tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
-
     document.getElementById('tab-' + tabName).classList.add('active');
     event.currentTarget.classList.add('active');
   }
 
-  // ACCORDION LOGIC
-  function toggleAccordion(header) {
-    const body = header.nextElementSibling;
-    const icon = header.querySelector('.accordion-icon');
+  // 2. MAKE DROPDOWN LOGIC
+  const makeData = {
+    ford: `
+      <h3>Ford (Fiesta, Focus, Puma)</h3>
+      <div class="fault-item">
+        <strong>The 1.0 EcoBoost Wet Belt</strong>
+        <p>This engine uses a timing belt submerged in oil. If it snaps, it destroys the engine. It MUST be changed every 10 years or 100,000 miles. The oil pump belt is also a weak point.</p>
+      </div>
+      <div class="fault-item">
+        <strong>Thermostat Housing Leaks</strong>
+        <p>Plastic thermostat housings are prone to cracking, leading to coolant leaks and overheating.</p>
+      </div>
+      <div class="warning-box">⚠️ Warning: Ask for written proof that the wet belt has been changed. If not, budget £700 for immediate replacement.</div>
+    `,
+    vauxhall: `
+      <h3>Vauxhall (Corsa, Astra, Mokka)</h3>
+      <div class="fault-item">
+        <strong>1.2 PureTech Wet Belt</strong>
+        <p>Similar to Ford, many modern Vauxhall petrols use a wet timing belt. These degrade and clog the oil pickup pipe, causing catastrophic failure.</p>
+      </div>
+      <div class="fault-item">
+        <strong>Oil Consumption</strong>
+        <p>These engines are notorious for burning oil. Check the oil level immediately on a test drive.</p>
+      </div>
+      <div class="warning-box">⚠️ Warning: Look for blue smoke from the exhaust and ensure the oil is topped up.</div>
+    `,
+    vag: `
+      <h3>VW / Audi / Skoda / Seat (VAG Group)</h3>
+      <div class="fault-item">
+        <strong>DSG Gearbox Judder</strong>
+        <p>The older "dry clutch" DSG gearboxes (usually on 1.4/1.5 petrols) can suffer from juddering. The "wet clutch" versions require an oil change every 40,000 miles.</p>
+      </div>
+      <div class="fault-item">
+        <strong>Water Pump Leaks</strong>
+        <p>A leaky water pump is a rite of passage. Listen for a high-pitched squeal or check for pink crusty residue.</p>
+      </div>
+      <div class="fault-item">
+        <strong>Timing Chain Tensioners</strong>
+        <p>Older 1.2 and 1.4 TSI engines can suffer from tensioner failure, causing a rattling noise on cold start.</p>
+      </div>
+    `,
+    bmw: `
+      <h3>BMW (1 Series, 3 Series, X1)</h3>
+      <div class="fault-item">
+        <strong>The N47 Diesel Timing Chain</strong>
+        <p>This engine (used in 2007-2015 models) is famous for timing chain failure. The chain is at the back of the engine, requiring the gearbox to be removed to fix it (a £2,000+ bill).</p>
+      </div>
+      <div class="fault-item">
+        <strong>PCV Valve Failure</strong>
+        <p>Crankcase breathers can fail, leading to rough idling and oil leaks.</p>
+      </div>
+      <div class="warning-box">⚠️ Warning: Listen for a whining, supercharger-like noise from the rear of the engine on cold start.</div>
+    `,
+    mercedes: `
+      <h3>Mercedes-Benz (A-Class, C-Class)</h3>
+      <div class="fault-item">
+        <strong>OM651 Diesel Timing Chain</strong>
+        <p>Older 4-cylinder diesel engines can suffer from timing chain stretch. Listen for a rattle on cold start.</p>
+      </div>
+      <div class="fault-item">
+        <strong>Air Suspension (Airmatic)</strong>
+        <p>If fitted, air struts can leak, causing the car to sag overnight. This is a very expensive repair (£800+ per corner).</p>
+      </div>
+    `,
+    toyota: `
+      <h3>Toyota / Lexus</h3>
+      <div class="fault-item">
+        <strong>The Gold Standard</strong>
+        <p>Toyota and Lexus consistently top reliability charts. The hybrid systems (like in the Yaris and Corolla) are incredibly robust.</p>
+      </div>
+      <div class="fault-item">
+        <strong>Hybrid Battery Cooling Fan</strong>
+        <p>Ensure the cooling fan for the hybrid battery (usually near the rear seats) is clean and not blocked by pet hair or dust.</p>
+      </div>
+    `,
+    nissan: `
+      <h3>Nissan (Qashqai, Juke)</h3>
+      <div class="fault-item">
+        <strong>1.5 dCi Diesel Engine</strong>
+        <p>While generally reliable, they are prone to turbo failure if oil changes are neglected. Look for blue smoke.</p>
+      </div>
+      <div class="fault-item">
+        <strong>CVT Gearbox (Automatic)</strong>
+        <p>The CVT gearboxes on older models can become jerky and require fluid changes to stay smooth.</p>
+      </div>
+    `,
+    hyundai: `
+      <h3>Hyundai / Kia</h3>
+      <div class="fault-item">
+        <strong>Excellent Reliability & Warranty</strong>
+        <p>These brands are highly reliable. If buying used, check if the remainder of the 7-year warranty is transferable (it usually is).</p>
+      </div>
+      <div class="fault-item">
+        <strong>GDI Engine Carbon Build-up</strong>
+        <p>Some GDI (Gasoline Direct Injection) engines can suffer from carbon build-up, causing rough idling.</p>
+      </div>
+    `,
+    peugeot: `
+      <h3>Peugeot / Citroen / DS</h3>
+      <div class="fault-item">
+        <strong>1.2 PureTech Engine</strong>
+        <p>Just like Vauxhall, the 1.2 PureTech uses a wet belt. This must be checked immediately. </p>
+      </div>
+      <div class="fault-item">
+        <strong>AdBlue System Faults</strong>
+        <p>On modern diesels, the AdBlue system can throw error codes, requiring expensive sensor replacements.</p>
+      </div>
+    `
+  };
+
+  function updateMakeDetails() {
+    const selected = document.getElementById('makeSelector').value;
+    const detailsBox = document.getElementById('makeDetails');
     
-    if (body.style.maxHeight && body.style.maxHeight !== '0px') {
-      body.style.maxHeight = '0px';
-      body.style.borderTop = '1px solid transparent';
-      icon.textContent = '▼';
+    if (selected && makeData[selected]) {
+      detailsBox.innerHTML = makeData[selected];
+      detailsBox.classList.add('active');
     } else {
-      body.style.maxHeight = body.scrollHeight + "px";
-      body.style.borderTop = '1px solid #cbd5e1';
-      icon.textContent = '▲';
+      detailsBox.classList.remove('active');
     }
   }
 
-  // QUIZ LOGIC
+  // 3. GARAGE COST LOGIC
+  const costData = {
+    service: { title: "Interim Service", price: "£150 - £280", context: "Includes oil change, oil filter, and a basic safety inspection. Prices vary based on the oil grade required." },
+    brakes: { title: "Front Brake Pads & Discs", price: "£180 - £350", context: "A critical safety component. Price depends on whether the discs and pads are standard or performance parts." },
+    clutch: { title: "Clutch Replacement", price: "£450 - £900", context: "Labour-intensive repair. Many modern cars require the subframe to be dropped, increasing labour costs. Includes a new release bearing." },
+    timing: { title: "Timing Belt / Wet Belt", price: "£500 - £900", context: "Essential maintenance. If you are buying a used Ford or Vauxhall, check if this has been done. It usually includes a new water pump." },
+    dpf: { title: "DPF Cleaning / Replacement", price: "£300 - £1,800", context: "A chemical clean can cost £300. A full replacement of the DPF unit can cost up to £1,800, plus labour." },
+    suspension: { title: "Front Suspension Arm", price: "£180 - £350", context: "Includes the arm and bushings. Replacing a whole arm is often cheaper than pressing in new bushes." },
+    alternator: { title: "Alternator Replacement", price: "£350 - £600", context: "Parts cost £150-£250, plus 2-3 hours of labour. Avoid remanufactured parts if possible." }
+  };
+
+  function showRepairCost() {
+    const selected = document.getElementById('repairSelect').value;
+    const resultBox = document.getElementById('costResult');
+    const title = document.getElementById('costTitle');
+    const price = document.getElementById('costPrice');
+    const context = document.getElementById('costContext');
+
+    if (selected && costData[selected]) {
+      title.textContent = costData[selected].title;
+      price.textContent = costData[selected].price;
+      context.textContent = costData[selected].context;
+      resultBox.classList.add('active');
+    } else {
+      resultBox.classList.remove('active');
+    }
+  }
+
+  // 4. QUIZ LOGIC
   function calculateQuiz() {
-    const q1 = document.getElementById('q1').value;
-    const q2 = document.getElementById('q2').value;
-    const q3 = document.getElementById('q3').value;
-    const q4 = document.getElementById('q4').value;
+    const q1 = document.getElementById('q1').value; // driving
+    const q2 = document.getElementById('q2').value; // budget
+    const q3 = document.getElementById('q3').value; // passengers
+    const q4 = document.getElementById('q4').value; // priority
+    const q5 = document.getElementById('q5').value; // gearbox
     
     let primary = "";
     let secondary = "";
     let reason = "";
 
-    // Logic tree based on comprehensive inputs
+    // Logic tree
     if (q4 === 'reliability') {
-      if (q3 === 'yes') {
-        primary = "Toyota Corolla or Honda Civic";
-        reason = "Japanese cars dominate the reliability charts. A petrol Corolla or Civic will easily do 150,000+ miles with basic servicing, and they have plenty of space for passengers.";
+      if (q3 === 'yes' || q3 === 'luggage') {
+        primary = q5 === 'auto' ? "Toyota Corolla Hybrid (Auto)" : "Honda Civic or Toyota Corolla";
+        reason = "Japanese cars dominate the reliability charts. A petrol Corolla or Civic will easily do 150,000+ miles, and the hybrid option gives you an automatic gearbox that is virtually bulletproof.";
       } else {
-        primary = "Toyota Yaris or Honda Jazz";
+        primary = q5 === 'auto' ? "Toyota Yaris Hybrid (Auto)" : "Toyota Yaris or Honda Jazz";
         reason = "The Yaris and Jazz are the gold standard for unbreakable small cars. Parts are cheap and independent garages love working on them.";
       }
     } else if (q4 === 'cost') {
       if (q1 === 'city') {
-        primary = "Toyota Yaris Hybrid";
+        primary = "Toyota Yaris Hybrid or Honda Jazz";
         reason = "For city driving, nothing beats a hybrid for fuel economy. The engine turns off in traffic, meaning you aren't burning petrol at a standstill.";
       } else {
         primary = "Skoda Octavia 2.0 TDI (Diesel)";
-        reason = "If you do high motorway miles and want low running costs, a diesel Octavia is unbeatable. It's massive inside and returns 60+ MPG on a run.";
+        reason = "If you do high motorway miles and want low running costs, a diesel Octavia is unbeatable. It is massive inside and returns 60+ MPG on a run.";
       }
     } else if (q4 === 'fun') {
       if (q3 === 'yes') {
-        primary = "Ford Focus ST-Line or VW Golf";
-        reason = "You get a fun, engaging drive but still have room for the kids. The 1.5 petrol engines in these are punchy and handle well.";
+        primary = q5 === 'auto' ? "VW Golf GTI (DSG)" : "Ford Focus ST-Line";
+        reason = "You get a fun, engaging drive but still have room for the kids. The 1.5 or 2.0 petrol engines in these are punchy and handle well.";
       } else {
-        primary = "Ford Fiesta ST or Mini Cooper";
-        reason = "The Fiesta ST is widely regarded as the most fun car you can buy for under £20k. It handles like a go-kart.";
+        primary = q5 === 'auto' ? "Mini Cooper S (Auto)" : "Ford Fiesta ST";
+        reason = "The Fiesta ST is widely regarded as the most fun car you can buy for under £20k. It handles like a go-kart. The Mini is a great alternative if you want an automatic.";
       }
     } else {
-      primary = "Volkswagen Golf or Seat Leon";
+      primary = q5 === 'auto' ? "VW Golf (DSG) or Mazda 3 (Auto)" : "Volkswagen Golf or Seat Leon";
       reason = "The perfect all-rounder. Refined on the motorway, easy in the city, and well-built.";
     }
 
@@ -480,12 +619,19 @@
 
     const resultBox = document.getElementById('quizResult');
     resultBox.innerHTML = `
-      <h3>Your Ideal Car Type:</h3>
-      <p style="font-size:20px; font-weight:900; color:#047857; margin-bottom:10px;">${primary}</p>
-      <p style="margin:0 0 15px; font-size:16px;"><strong>Why:</strong> ${reason}</p>
-      ${secondary ? `<p style="margin:0 0 15px; font-size:16px; color:#b45309;"><strong>Budget Note:</strong> ${secondary}</p>` : ''}
-      <br>
-      <a href="diagnose.html" class="btn btn-primary" style="background:#047857; color:#fff; font-size:15px; padding:14px 24px;">Run a Diagnostic on a Car I'm Viewing</a>
+      <h3>Your Ideal Car Match:</h3>
+      <p style="font-size:22px; font-weight:900; color:#047857; margin-bottom:15px;">${primary}</p>
+      <p><strong>Why it fits your answers:</strong> ${reason}</p>
+      ${secondary ? `<p style="color:#b45309;"><strong>Budget Note:</strong> ${secondary}</p>` : ''}
+      
+      <h4 style="margin-top:20px; margin-bottom:10px; font-size:16px;">Questions to ask the seller:</h4>
+      <ul>
+        <li>"Do you have full service history?"</li>
+        <li>"Has the timing belt / wet belt been replaced?"</li>
+        <li>"Are there any warning lights on the dashboard?"</li>
+      </ul>
+
+      <a href="diagnose.html" class="btn btn-primary" style="background:#047857; color:#fff; font-size:15px; padding:14px 24px; display:inline-block; margin-top:10px;">Run a Pre-Purchase Diagnostic</a>
     `;
     resultBox.style.display = 'block';
   }
