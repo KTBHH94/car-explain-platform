@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help Centre & FAQs | CarExplain</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .faq-hero { text-align: center; max-width: 800px; margin: 60px auto 40px; padding: 0 24px; }
+  .faq-hero h1 { font-size: 42px; color: var(--navy); letter-spacing: -1px; font-weight: 900; margin-bottom: 15px; }
+  .faq-hero p { font-size: 18px; color: var(--slate); line-height: 1.6; margin-bottom: 30px; }
+  
+  /* Search Bar */
+  .search-container { max-width: 600px; margin: 0 auto; position: relative; }
+  .search-container input { width: 100%; padding: 18px 20px 18px 50px; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 16px; outline: none; font-family: inherit; transition: 0.2s; background: #fff; box-shadow: 0 10px 30px rgba(15,23,42,.05); }
+  .search-container input:focus { border-color: var(--blue2); box-shadow: 0 10px 30px rgba(37,99,235,.15); }
+  .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 20px; }
+
+  .faq-container { max-width: 820px; margin: 0 auto 100px; padding: 0 24px; }
+  
+  .faq-category { margin-top: 50px; margin-bottom: 20px; font-size: 24px; color: var(--navy); font-weight: 900; letter-spacing: -0.5px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; }
+  
+  .faq-item { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(15,23,42,.02); }
+  .faq-question { padding: 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--navy); font-size: 17px; transition: 0.2s; }
+  .faq-question:hover { background: #f8fafc; }
+  .faq-question .icon { color: var(--blue); font-size: 24px; font-weight: 400; transition: 0.3s; }
+  
+  .faq-answer { padding: 0 24px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #f8fafc; border-top: 1px solid transparent; color: var(--slate); font-size: 15px; line-height: 1.7; }
+  .faq-answer p { margin: 0 0 15px; }
+  .faq-answer p:last-child { margin-bottom: 0; }
+  .faq-answer ul { margin: 10px 0 15px 20px; padding: 0; }
+  .faq-answer li { margin-bottom: 8px; }
+  .faq-answer-inner { padding: 24px 0; }
+  
+  .no-results { display: none; text-align: center; padding: 40px; color: var(--muted); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-container header-flex">
+    <div class="logo-group">
+      <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
+    </div>
+    <nav class="main-navigation" aria-label="Primary navigation">
+      <a href="diagnose.html" class="nav-link">Diagnostics</a>
+      <a href="quote-checker.html" class="nav-link">Quote Checker</a>
+      <a href="garage.html" class="nav-link">My Garage</a>
+      <a href="community.html" class="nav-link">Community</a>
+      <a href="car-research.html" class="nav-link">Car Research</a>
+    </nav>
+    <div class="header-actions" id="headerAuth"></div>
+  </div>
+</header>
+
+<main>
+  <section class="faq-hero">
+    <span class="eyebrow">Help Centre</span>
+    <h1>Frequently Asked Questions</h1>
+    <p>Search our knowledge base or browse the categories below to find answers about CarExplain, our AI, and your data.</p>
+    
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="faqSearch" placeholder="Search for a question (e.g., 'data', 'AI', 'premium')..." onkeyup="filterFaqs()">
+    </div>
+  </section>
+
+  <div class="faq-container" id="faqContainer">
+    
+    <div class="no-results" id="noResults">No questions matched your search. Try a different keyword.</div>
+
+    <!-- GENERAL -->
+    <h2 class="faq-category">General Platform Questions</h2>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">What exactly is CarExplain? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>CarExplain is a UK-first digital platform designed to help ordinary drivers understand their vehicles before spending money. We combine an AI-assisted diagnostic tool, a digital garage for keeping repair records, a garage quote explainer, and a community forum.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Are you a garage or a mechanic? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p><strong>No.</strong> We do not perform physical repairs, sell car parts, or provide legally binding mechanical advice. We are an educational and informational software platform. You must always consult a qualified mechanic for physical work.</p>
+      </div></div>
+    </div>
+
+    <!-- AI & DIAGNOSTICS -->
+    <h2 class="faq-category">AI Diagnostics & Safety</h2>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">How does the AI diagnostic tool work? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>We use a structured question engine to understand your car's symptoms (e.g., when a noise happens, what it sounds like). We then send this anonymised data to a Large Language Model (Google Gemini) to generate a highly detailed, plain-English breakdown of potential causes, safety warnings, and questions to ask a mechanic.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Can the AI guarantee what is wrong with my car? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p><strong>No.</strong> AI cannot physically inspect your vehicle. It provides probabilities based on the symptoms you describe. Several different faults can produce the exact same symptom. Always have a physical inspection done by a qualified mechanic before authorising expensive repairs.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">What if the AI tells me my car is unsafe to drive? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>We have programmed a strict "Safety Gate." If your symptoms match severe, life-threatening faults (such as brake loss, steering failure, or severe overheating), the system will advise you to stop driving immediately. If you ever feel unsafe driving your vehicle, you must stop, regardless of what the AI report says.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Can I add extra details that aren't in the questions? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>Yes! At the very end of every diagnostic session, there is a text box labeled "Anything else we should know?" You can type any extra context (e.g., "It only happens when it rains") which helps the AI make a more accurate assessment.</p>
+      </div></div>
+    </div>
+
+    <!-- QUOTE CHECKER -->
+    <h2 class="faq-category">Quote Checker</h2>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Will you tell me if my garage is ripping me off? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>We will never accuse a garage of malicious intent. Instead, the Quote Checker uses neutral, evidence-based language like <em>"within typical range"</em>, <em>"higher than typical range"</em>, or <em>"significantly higher than typical"</em>. We explain <em>why</em> prices vary (e.g., OEM parts vs. aftermarket, main dealer vs. independent, regional labour rates).</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Are the prices in the Quote Checker guaranteed? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>No. The prices are <strong>indicative</strong> and based on UK averages. Actual prices vary significantly based on your specific vehicle model, engine size, your location in the UK, and the quality of parts used. Always obtain a written, itemized quote from your garage before authorising work.</p>
+      </div></div>
+    </div>
+
+    <!-- MY GARAGE -->
+    <h2 class="faq-category">My Garage & Data</h2>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is my data synced across devices? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>Yes. Unlike a simple browser cache, CarExplain uses a secure cloud database (Supabase). When you log in with your email and password on your phone, tablet, or laptop, your digital garage will load with all your saved vehicles and reports.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Where is my data stored? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>Your data is stored securely in our encrypted cloud database (hosted by Supabase). All traffic is routed through secure Cloudflare Workers. We enforce strict Row-Level Security (RLS), meaning User A cannot access User B's private vehicle data.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Will my data be used to train the AI? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p><strong>No.</strong> We explicitly configure our API integrations with Google so that your symptom data is not retained or used to train public AI models. Your personal details, registration plate, and vehicle history remain private.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">How do I delete my account? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>Under UK GDPR, you have the "Right to be Forgotten". You can delete individual vehicles and diagnostic reports directly within your Garage. If you wish to delete your entire account permanently, please email us at <strong>hello@carexplain.co.uk</strong> from the email address associated with your account.</p>
+      </div></div>
+    </div>
+
+    <!-- COMMUNITY -->
+    <h2 class="faq-category">Community Forum</h2>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is the community forum professional advice? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p><strong>No.</strong> The community is a place for owners to share their experiences. A post from another user is not a verified mechanical diagnosis. Always treat community advice as anecdotal evidence, not professional fact.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">What happens if someone posts spam or abuse? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>We have a strict Acceptable Use Policy. Users can report posts, and our admin team will remove content that violates our community rules. Spam accounts are permanently banned.</p>
+      </div></div>
+    </div>
+
+    <!-- ACCOUNTS & PREMIUM -->
+    <h2 class="faq-category">Accounts, Billing & Premium</h2>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is CarExplain free to use? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>Yes. You can create a free account to add a vehicle to your garage and run <strong>one free AI diagnostic report per month</strong>. The community forum and knowledge base are completely free.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">What does Premium include? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>CarExplain Premium (£4.99/month) gives you:</p>
+        <ul>
+          <li>Unlimited AI diagnostic reports.</li>
+          <li>Unlimited vehicles in your digital garage.</li>
+          <li>Access to the Quote Checker tool.</li>
+          <li>Priority access to new features (like automatic MOT lookups).</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">How do I cancel my Premium subscription? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>You can cancel at any time via your account settings or by emailing support. Under the UK Consumer Contracts Regulations 2013, you have a 14-day right to cancel for a full refund, provided you have not already used the Premium service.</p>
+      </div></div>
+    </div>
+
+    <!-- FUTURE FEATURES -->
+    <h2 class="faq-category">Future Features (MOT & More)</h2>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Can I look up my MOT history on CarExplain? <span class="icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">
+        <p>We are currently applying for integration with the DVSA (Driver & Vehicle Standards Agency) official API. Once live, Premium users will be able to enter their registration plate and automatically pull their MOT history, mileage, and advisories directly into their digital garage.</p>
+      </div></div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-container footer-grid">
+    <div class="footer-brand"><span class="footer-logo">CAR<span>EXPLAIN</span></span><p>KNOW BEFORE YOU PAY</p></div>
+    <div class="footer-links"><h5>Services</h5><a href="diagnose.html">Fault Finder</a><a href="garage.html">Garage Logs</a><a href="quote-checker.html">Quote Checker</a><a href="car-research.html">Car Research</a></div>
+    <div class="footer-links"><h5>Legal &amp; Policy</h5><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a><a href="ai-disclaimer.html">AI Disclaimer</a><a href="support.html">Support Contact</a><a href="faq.html">FAQs</a></div>
+  </div>
+  <div class="site-container footer-bottom"><p>&copy; 2026 CarExplain.</p></div>
+</footer>
+
+<script>
+  // Dynamic Header
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem('sb-access-token');
+    const headerAuth = document.getElementById('headerAuth');
+    if (headerAuth) {
+      if (token) {
+        headerAuth.innerHTML = `<a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
+        document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = 'login.html'; });
+      } else {
+        headerAuth.innerHTML = `<a href="login.html" class="login-action">Log In</a><a href="login.html" class="btn btn-primary">Get Started</a>`;
+      }
+    }
+  });
+
+  // Accordion Logic
+  function toggleFaq(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.icon');
+    
+    if (answer.style.maxHeight && answer.style.maxHeight !== '0px') {
+      answer.style.maxHeight = '0px';
+      answer.style.borderTop = '1px solid transparent';
+      icon.textContent = '+';
+    } else {
+      answer.style.maxHeight = answer.scrollHeight + "px";
+      answer.style.borderTop = '1px solid #cbd5e1';
+      icon.textContent = '−';
+    }
+  }
+
+  // Live Search Logic
+  function filterFaqs() {
+    const input = document.getElementById('faqSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.faq-item');
+    const categories = document.querySelectorAll('.faq-category');
+    const noResults = document.getElementById('noResults');
+    let hasResults = false;
+
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      if (text.includes(input)) {
+        item.style.display = 'block';
+        hasResults = true;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    // Hide category headers if no items below them are visible
+    categories.forEach(cat => {
+      let next = cat.nextElementSibling;
+      let showCat = false;
+      while (next && next.classList.contains('faq-item')) {
+        if (next.style.display !== 'none') { showCat = true; break; }
+        next = next.nextElementSibling;
+      }
+      cat.style.display = showCat ? 'block' : 'none';
+    });
+
+    if (!hasResults && input !== '') {
+      noResults.style.display = 'block';
+    } else {
+      noResults.style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html>
