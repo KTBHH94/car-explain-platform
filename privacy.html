@@ -4,76 +4,110 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Privacy Policy | CarExplain</title>
+<meta name="description" content="How CarExplain collects, uses, and protects your data under the UK GDPR.">
 <link rel="stylesheet" href="styles.css">
 <style>
   .legal-page { max-width: 820px; margin: 80px auto; padding: 0 24px; }
   .legal-page h1 { font-size: 42px; color: var(--navy); margin-bottom: 10px; letter-spacing: -1px; }
   .legal-page .last-updated { color: var(--muted); font-size: 14px; margin-bottom: 40px; font-weight: 600; }
   .legal-page h2 { font-size: 24px; color: var(--navy); margin: 45px 0 20px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
-  .legal-page h3 { font-size: 18px; color: var(--navy); margin: 30px 0 15px; }
+  .legal-page h3 { font-size: 18px; color: var(--navy); margin: 25px 0 12px; font-weight: 800; }
   .legal-page p, .legal-page li { color: var(--slate); font-size: 16px; line-height: 1.8; margin-bottom: 16px; }
   .legal-page ul { padding-left: 20px; margin-bottom: 24px; }
   .legal-page li { margin-bottom: 8px; }
+  .legal-page .highlight-box { background: #f8fafc; border-left: 4px solid var(--blue); padding: 20px 24px; border-radius: 0 8px 8px 0; margin-bottom: 24px; }
+  .legal-page .highlight-box p { margin: 0; font-size: 15px; }
 </style>
 </head>
 <body>
+
 <header class="site-header">
   <div class="site-container header-flex">
-    <div class="logo-group"><a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a></div>
-      <nav class="main-navigation" aria-label="Primary navigation">
+    <div class="logo-group">
+      <a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a>
+    </div>
+    <nav class="main-navigation" aria-label="Primary navigation">
       <a href="diagnose.html" class="nav-link">Diagnostics</a>
       <a href="quote-checker.html" class="nav-link">Quote Checker</a>
       <a href="garage.html" class="nav-link">My Garage</a>
       <a href="community.html" class="nav-link">Community</a>
       <a href="car-research.html" class="nav-link">Car Research</a>
     </nav>
+    <div class="header-actions" id="headerAuth">
+      <!-- Filled automatically by JS below -->
+    </div>
+  </div>
 </header>
 
 <main class="site-container legal-page">
   <h1>Privacy Policy</h1>
   <div class="last-updated">Last Updated: October 2026</div>
 
+  <div class="highlight-box">
+    <p><strong>Summary:</strong> We collect the minimum amount of data required to run your digital garage and AI diagnostics. We do not sell your data. We use enterprise-grade providers (Supabase, Cloudflare, Google) to secure it.</p>
+  </div>
+
   <p>CarExplain ("we," "our," or "us") is committed to protecting the privacy and security of your personal information. This Privacy Policy explains how we collect, use, share, and protect your data when you use the CarExplain platform, in compliance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.</p>
 
-  <h2>1. Who We Are</h2>
-  <p>CarExplain is the data controller for the personal information processed through this platform. If you have any questions about this policy or your data, you can contact us at <strong>hello@carexplain.co.uk</strong>.</p>
+  <h2>1. Data Controller Information</h2>
+  <p>CarExplain is the "Data Controller" for the personal information processed through this platform. This means we are responsible for deciding how your data is used. If you have any questions about this policy, or wish to exercise your data rights, you can contact us at: <strong>hello@carexplain.co.uk</strong>.</p>
 
   <h2>2. Information We Collect</h2>
-  <p>We only collect the information necessary to provide you with a functional digital garage and diagnostic tool:</p>
+  <p>We only collect the information necessary to provide you with a functional digital garage, diagnostic tool, and community experience:</p>
   <ul>
+    <li><strong>Account Data:</strong> Your email address and encrypted password (managed securely by Supabase Auth).</li>
     <li><strong>Vehicle Data:</strong> Make, model, year, registration, mileage, and fuel type.</li>
-    <li><strong>Diagnostic Data:</strong> The symptoms you report, the answers you provide to our structured questions, and the resulting AI-generated reports.</li>
-    <li><strong>Repair History:</strong> Records of parts replaced, costs, garage names, and outcomes you choose to save.</li>
-    <li><strong>Technical Data:</strong> Browser type, device type, and standard server logs (e.g., IP address) for security and performance monitoring.</li>
+    <li><strong>Diagnostic & Quote Data:</strong> The symptoms you report, the answers you provide, and the resulting AI-generated reports or quote analyses.</li>
+    <li><strong>Community Data:</strong> Any posts or replies you publish on the Community Forum.</li>
+    <li><strong>Technical Data:</strong> Browser type, device type, and IP address for security, rate-limiting, and performance monitoring.</li>
   </ul>
 
-  <h2>3. How We Use Your Information</h2>
-  <p>Under UK GDPR, we rely on the following legal bases to process your data:</p>
+  <h2>3. How We Use Your Information (Legal Bases)</h2>
+  <p>Under the UK GDPR, we must have a lawful basis to process your data. We rely on the following:</p>
   <ul>
-    <li><strong>Contractual Necessity:</strong> To provide the diagnostic service and save your vehicle history to your account.</li>
-    <li><strong>Legitimate Interest:</strong> To improve our platform, prevent fraud, and enhance the accuracy of our diagnostic tools.</li>
-    <li><strong>Consent:</strong> Where you have explicitly opted in to receive marketing or product updates (we do not do this by default).</li>
+    <li><strong>Contractual Necessity:</strong> To create your account, save your vehicle history, and generate your AI diagnostic reports.</li>
+    <li><strong>Legitimate Interest:</strong> To prevent fraud, monitor API usage (to stop abuse of the AI), and improve the accuracy of our diagnostic tools.</li>
+    <li><strong>Consent:</strong> Where you have explicitly opted in to receive marketing emails (we do not do this by default).</li>
   </ul>
 
-  <h2>4. Data Storage & Security</h2>
-  <p>In our current beta phase, the vehicle and diagnostic data you enter is stored <strong>locally within your browser</strong> (using LocalStorage). It is not transmitted to our servers. This means if you clear your browser data, your garage history will be deleted. When we transition to cloud accounts, your data will be securely encrypted and stored using enterprise-grade infrastructure providers (such as Supabase and Cloudflare).</p>
+  <h2>4. Data Storage, Security & Cloud Infrastructure</h2>
+  <p>We take data security extremely seriously. Your data is <strong>not</strong> stored locally on your device. It is stored in an encrypted PostgreSQL database hosted by <strong>Supabase</strong>.</p>
+  <p>All traffic between your browser and our database is routed through secure, encrypted <strong>Cloudflare Workers</strong>. We enforce strict Row-Level Security (RLS) policies at the database level, ensuring that User A cannot access User B's private vehicle or repair records.</p>
 
-  <h2>5. Third-Party Sharing</h2>
-  <p>We do not sell your personal data. When AI features are fully enabled, your anonymised symptom data (never your registration or personal details) may be sent to an AI provider (such as OpenAI or Anthropic) solely to generate your diagnostic report. We ensure all third-party processors comply with strict data protection standards.</p>
-
-  <h2>6. Your Data Rights</h2>
-  <p>Under UK GDPR, you have the right to:</p>
+  <h2>5. Third-Party Data Processors</h2>
+  <p>We do not sell your personal data to advertisers or data brokers. However, to run the platform, we share specific data with trusted "Data Processors":</p>
   <ul>
-    <li>Access the personal data we hold about you.</li>
-    <li>Request correction of inaccurate data.</li>
-    <li>Request erasure of your data (the "Right to be Forgotten").</li>
-    <li>Object to or restrict processing.</li>
-    <li>Request the transfer of your data to another service (Data Portability).</li>
+    <li><strong>Supabase:</strong> Database hosting and authentication.</li>
+    <li><strong>Cloudflare:</strong> Website hosting and secure backend API routing.</li>
+    <li><strong>Google (Gemini AI):</strong> When you use the AI Diagnostic or Quote Checker, your symptom text and quote text are sent to Google's API to generate the response. <strong>We explicitly configure our API integration so that your data is NOT used to train public AI models.</strong> We do not send your email address or registration plate to the AI.</li>
+    <li><strong>Resend:</strong> To deliver transactional emails (like password resets).</li>
   </ul>
-  <p>You can exercise your right to deletion at any time by clicking "Remove Vehicle" in your garage. For other requests, please contact <strong>hello@carexplain.co.uk</strong>.</p>
 
-  <h2>7. Cookies and Analytics</h2>
-  <p>We use strictly necessary cookies to keep the website functioning. We may also use privacy-first analytics to understand aggregate user behaviour (e.g., which symptom categories are most common). We do not use invasive cross-site tracking cookies.</p>
+  <h2>6. International Data Transfers</h2>
+  <p>Our primary infrastructure is located within the UK and the European Economic Area (EEA). Where data is transferred outside the UK (for example, to US-based AI servers or cloud providers), we ensure appropriate safeguards are in place, such as the UK International Data Transfer Addendum to the EU Standard Contractual Clauses.</p>
+
+  <h2>7. Your Data Rights (UK GDPR)</h2>
+  <p>Under UK GDPR, you have several rights regarding your personal data:</p>
+  <ul>
+    <li><strong>Right of Access:</strong> You can request a copy of the data we hold about you.</li>
+    <li><strong>Right to Rectification:</strong> You can correct inaccurate data via your account settings.</li>
+    <li><strong>Right to Erasure (Right to be Forgotten):</strong> You can delete your vehicles, diagnostic reports, or your entire account at any time. When you delete your account, all associated data is permanently wiped from our active databases.</li>
+    <li><strong>Right to Restrict Processing:</strong> You can ask us to pause the processing of your data.</li>
+    <li><strong>Right to Data Portability:</strong> You can request your data in a structured, machine-readable format.</li>
+    <li><strong>Right to Complain:</strong> You have the right to lodge a complaint with the Information Commissioner's Office (ICO) if you are unhappy with how we handle your data.</li>
+  </ul>
+
+  <h2>8. Cookies and Tracking</h2>
+  <p>We use strictly necessary storage (browser LocalStorage) to keep you logged in and secure your session. We do not use invasive cross-site tracking cookies, third-party advertising pixels, or sell data to ad networks.</p>
+
+  <h2>9. Children's Privacy</h2>
+  <p>CarExplain is not intended for use by anyone under the age of 13. We do not knowingly collect personal information from children. If we become aware that a child under 13 has provided us with personal information, we will take steps to delete such information.</p>
+
+  <h2>10. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. We will notify you of any significant changes by placing a prominent notice on our website or sending you an email. Your continued use of the platform after changes are posted constitutes your acceptance of the updated policy.</p>
+
+  <h2>11. Governing Law</h2>
+  <p>This Privacy Policy is governed by the laws of England and Wales. If you reside in Scotland or Northern Ireland, you may also benefit from mandatory provisions of the local law in your country of residence.</p>
 </main>
 
 <footer class="site-footer">
@@ -84,5 +118,32 @@
   </div>
   <div class="site-container footer-bottom"><p>&copy; 2026 CarExplain.</p></div>
 </footer>
+
+<script>
+  // Dynamic Header
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem('sb-access-token');
+    const headerAuth = document.getElementById('headerAuth');
+    
+    if (headerAuth) {
+      if (token) {
+        headerAuth.innerHTML = `
+          <a href="#" class="login-action" id="logoutBtn">Log Out</a>
+          <a href="garage.html" class="btn btn-primary">My Garage</a>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = 'login.html';
+        });
+      } else {
+        headerAuth.innerHTML = `
+          <a href="login.html" class="login-action">Log In</a>
+          <a href="login.html" class="btn btn-primary">Get Started</a>
+        `;
+      }
+    }
+  });
+</script>
 </body>
 </html>
