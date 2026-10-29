@@ -251,6 +251,72 @@ Please generate the diagnostic report based on these symptoms.`;
         return new Response(JSON.stringify(reportJson), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
+      // --- QUOTE EXPLAINER ROUTE (NEW) ---
+      if (url.pathname === "/api/quote-explain" && request.method === "POST") {
+        // Require authentication
+        if (!authHeader || authHeader === "Bearer null") {
+           return new Response(JSON.stringify({ error: "You must be logged in to use the Quote Explainer." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const body = await request.json();
+        const { vehicle, quoteText, totalPrice } = body;
+
+        const systemInstruction = `You are an expert UK automotive mechanic and pricing analyst for CarExplain.
+Your job is to analyse a garage quote for an ordinary driver.
+You must follow these rules:
+1. Explain jargon in plain English.
+2. Break down what is likely parts and what is likely labour.
+3. Provide a realistic UK price range based on independent garages.
+4. NEVER accuse the garage of ripping the user off. Use neutral language like "within typical range", "higher than typical range", or "significantly higher than typical".
+5. Provide a list of intelligent questions the driver should ask the garage to verify the quote.
+6. Use UK terminology (bonnet, boot, £).
+
+You must respond in STRICT JSON format with exactly these keys:
+{
+  "verdict": "String (e.g., 'Within typical range', 'Higher than typical range')",
+  "explanation": "String (1-2 sentences explaining the verdict neutrally)",
+  "partsBreakdown": "String (explain what parts are likely included and their typical cost)",
+  "labourBreakdown": "String (explain the likely labour hours and typical regional cost)",
+  "jargonExplained": "String (explain any complex terms in the quote)",
+  "questionsToAsk": ["String (question 1)", "String (question 2)", "String (question 3)"]
+}`;
+
+        const userPrompt = `
+Vehicle: ${vehicle || "Unknown UK car"}
+Garage Quote: "${quoteText}"
+Total Quoted Price: £${totalPrice}
+
+Please analyse this quote and generate the JSON report.`;
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+
+        const aiResponse = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemInstruction }] },
+            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+            generationConfig: { 
+              response_mime_type: "application/json", 
+              temperature: 0.2,
+              maxOutputTokens: 1500
+            }
+          })
+        });
+
+        if (!aiResponse.ok) {
+          const errorText = await aiResponse.text();
+          throw new Error(`Gemini API error: ${aiResponse.status} - ${errorText}`);
+        }
+        
+        const aiData = await aiResponse.json();
+        let rawText = aiData.candidates[0].content.parts[0].text;
+        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        
+        const reportJson = JSON.parse(rawText);
+        return new Response(JSON.stringify(reportJson), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     } catch (globalError) {
