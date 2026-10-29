@@ -161,10 +161,11 @@ export default {
           usageCount = 0;
         }
 
-        if (userPlan === 'free' && usageCount >= 3) {
+        // CHANGED TO 1 FREE REPORT
+        if (userPlan === 'free' && usageCount >= 1) {
           return new Response(JSON.stringify({ 
             error: "limit_reached",
-            message: "You have used your 3 free AI reports this month. Upgrade to Premium for unlimited reports."
+            message: "You have used your 1 free AI report this month. Upgrade to Premium for unlimited reports."
           }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
@@ -251,7 +252,7 @@ Please generate the diagnostic report based on these symptoms.`;
         return new Response(JSON.stringify(reportJson), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      // --- QUOTE EXPLAINER ROUTE (NEW) ---
+      // --- QUOTE EXPLAINER ROUTE ---
       if (url.pathname === "/api/quote-explain" && request.method === "POST") {
         // Require authentication
         if (!authHeader || authHeader === "Bearer null") {
