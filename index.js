@@ -396,6 +396,7 @@ Please analyse this quote and generate the JSON report.`;
 
         try {
           const session = await stripe.checkout.sessions.create({
+            managed_payments: { enabled: false }, // <-- Disable Managed Payments (bypasses tax-code requirement)
             line_items: [
               {
                 price: env.STRIPE_PRICE_ID,
