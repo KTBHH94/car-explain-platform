@@ -49,6 +49,13 @@ export default {
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+        // Get User Profile (to check plan for the banner)
+        if (url.pathname === "/api/user/profile" && request.method === "GET") {
+          const { data: profile, error: dbError } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ plan: profile.plan }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
         // Vehicles
         if (url.pathname === "/api/user/vehicles" && request.method === "GET") {
           const { data: vehicles, error: dbError } = await supabase.from('vehicles').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
