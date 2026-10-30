@@ -396,7 +396,6 @@ Please analyse this quote and generate the JSON report.`;
 
         try {
           const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
             line_items: [
               {
                 price: env.STRIPE_PRICE_ID,
