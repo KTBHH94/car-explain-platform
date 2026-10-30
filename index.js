@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
 
 export default {
   async fetch(request, env) {
@@ -371,6 +372,72 @@ Please analyse this quote and generate the JSON report.`;
         
         const reportJson = JSON.parse(rawText);
         return new Response(JSON.stringify(reportJson), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // --- STRIPE CHECKOUT ROUTE ---
+      if (url.pathname === "/api/stripe/create-checkout" && request.method === "POST") {
+        if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+          apiVersion: '2023-10-16',
+          httpClient: Stripe.createFetchHttpClient(),
+        });
+
+        try {
+          const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+              {
+                price: env.STRIPE_PRICE_ID,
+                quantity: 1,
+              },
+            ],
+            mode: 'subscription',
+            customer_email: user.email,
+            client_reference_id: user.id, // This links the payment to the user in Supabase
+            success_url: `https://carexplain.co.uk/garage.html?payment=success`,
+            cancel_url: `https://carexplain.co.uk/garage.html?payment=cancelled`,
+          });
+
+          return new Response(JSON.stringify({ url: session.url }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        } catch (stripeError) {
+          return new Response(JSON.stringify({ error: stripeError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+      }
+
+      // --- STRIPE WEBHOOK ROUTE ---
+      if (url.pathname === "/api/stripe/webhook" && request.method === "POST") {
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+          apiVersion: '2023-10-16',
+          httpClient: Stripe.createFetchHttpClient(),
+        });
+
+        const signature = request.headers.get('stripe-signature');
+        const body = await request.text();
+
+        let event;
+        try {
+          event = await stripe.webhooks.constructEventAsync(body, signature, env.STRIPE_WEBHOOK_SECRET);
+        } catch (err) {
+          return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+        }
+
+        // Handle the checkout.session.completed event
+        if (event.type === 'checkout.session.completed') {
+          const session = event.data.object;
+          const userId = session.client_reference_id;
+          
+          if (userId) {
+            // Update the user's plan to 'premium' in Supabase
+            await supabase.from('profiles').update({ plan: 'premium' }).eq('id', userId);
+          }
+        }
+
+        return new Response(JSON.stringify({ received: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
