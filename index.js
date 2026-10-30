@@ -56,6 +56,17 @@ export default {
         }
 
         if (url.pathname === "/api/user/vehicles" && request.method === "POST") {
+          // --- FREE VS PREMIUM VEHICLE LIMIT CHECK ---
+          const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+          if (profile && profile.plan === 'free') {
+            const { count } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
+            if (count >= 1) {
+              return new Response(JSON.stringify({ 
+                error: "Free accounts are limited to 1 vehicle. Upgrade to Premium for unlimited vehicles." 
+              }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+            }
+          }
+
           const vehicleData = await request.json();
           const { data, error: dbError } = await supabase.from('vehicles').insert([{ ...vehicleData, user_id: user.id }]).select();
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -123,23 +134,54 @@ export default {
         return new Response(JSON.stringify({ post: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-             if (url.pathname === "/api/user/vehicles" && request.method === "POST") {
-          // Check if Free user and already has a car
-          const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+      if (url.pathname.startsWith("/api/community/replies/") && request.method === "GET") {
+        const postId = url.pathname.split("/").pop();
+        const { data: replies, error: dbError } = await supabase
+          .from('community_replies')
+          .select(`id, content, created_at, profiles ( email )`)
+          .eq('post_id', postId)
+          .order('created_at', { ascending: true });
           
-          if (profile && profile.plan === 'free') {
-            const { count } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
-            if (count >= 1) {
-              return new Response(JSON.stringify({ 
-                error: "Free accounts are limited to 1 vehicle. Upgrade to Premium for unlimited vehicles." 
-              }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-            }
-          }
+        if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ replies }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
 
-          const vehicleData = await request.json();
-          const { data, error: dbError } = await supabase.from('vehicles').insert([{ ...vehicleData, user_id: user.id }]).select();
-          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          return new Response(JSON.stringify({ vehicle: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (url.pathname === "/api/community/replies" && request.method === "POST") {
+        if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+        const replyData = await request.json();
+        const { data, error: dbError } = await supabase
+          .from('community_replies')
+          .insert([{ ...replyData, user_id: user.id }])
+          .select();
+          
+        if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ reply: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // --- AI DIAGNOSE ROUTE ---
+      if (url.pathname === "/api/diagnose" && request.method === "POST") {
+        
+        // --- STRICT AUTHENTICATION CHECK ---
+        if (!authHeader || authHeader === "Bearer null" || authHeader === "Bearer undefined") {
+           return new Response(JSON.stringify({ 
+             error: "Unauthorized", 
+             message: "You must be logged in to use the AI diagnostic tool. Please create a free account." 
+           }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        
+        if (authError || !user) {
+           return new Response(JSON.stringify({ 
+             error: "Unauthorized", 
+             message: "Your session has expired. Please log in again." 
+           }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
         // --- FREE VS PREMIUM CHECK ---
@@ -159,7 +201,7 @@ export default {
           usageCount = 0;
         }
 
-        // CHANGED TO 1 FREE REPORT
+        // LIMIT TO 1 FREE REPORT
         if (userPlan === 'free' && usageCount >= 1) {
           return new Response(JSON.stringify({ 
             error: "limit_reached",
@@ -255,6 +297,21 @@ Please generate the diagnostic report based on these symptoms.`;
         // Require authentication
         if (!authHeader || authHeader === "Bearer null") {
            return new Response(JSON.stringify({ error: "You must be logged in to use the Quote Explainer." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) {
+           return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        
+        // PREMIUM ONLY CHECK
+        const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+        if (!profile || profile.plan !== 'premium') {
+           return new Response(JSON.stringify({ 
+             error: "Premium Required", 
+             message: "The Quote Checker is a Premium feature. Please upgrade to unlock it." 
+           }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
         const body = await request.json();
