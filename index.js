@@ -123,25 +123,23 @@ export default {
         return new Response(JSON.stringify({ post: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      // --- AI DIAGNOSE ROUTE ---
-      if (url.pathname === "/api/diagnose" && request.method === "POST") {
-        
-        // --- STRICT AUTHENTICATION CHECK ---
-        if (!authHeader || authHeader === "Bearer null" || authHeader === "Bearer undefined") {
-           return new Response(JSON.stringify({ 
-             error: "Unauthorized", 
-             message: "You must be logged in to use the AI diagnostic tool. Please create a free account." 
-           }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
+             if (url.pathname === "/api/user/vehicles" && request.method === "POST") {
+          // Check if Free user and already has a car
+          const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+          
+          if (profile && profile.plan === 'free') {
+            const { count } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
+            if (count >= 1) {
+              return new Response(JSON.stringify({ 
+                error: "Free accounts are limited to 1 vehicle. Upgrade to Premium for unlimited vehicles." 
+              }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+            }
+          }
 
-        const token = authHeader.replace("Bearer ", "");
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-        
-        if (authError || !user) {
-           return new Response(JSON.stringify({ 
-             error: "Unauthorized", 
-             message: "Your session has expired. Please log in again." 
-           }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          const vehicleData = await request.json();
+          const { data, error: dbError } = await supabase.from('vehicles').insert([{ ...vehicleData, user_id: user.id }]).select();
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ vehicle: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
         // --- FREE VS PREMIUM CHECK ---
