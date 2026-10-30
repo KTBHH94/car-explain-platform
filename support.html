@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   .legal-page { max-width: 820px; margin: 80px auto; padding: 0 24px; }
-  .legal-page h1 { font-size: 42px; color: var(--navy); margin-bottom: 10px; letter-spacing: -1px; }
+  .legal-page h1 { font-size: 42px; color: var(--navy); margin-bottom: 10px; letter-spacing: -1px; font-weight: 900; }
   .legal-page p, .legal-page li { color: var(--slate); font-size: 16px; line-height: 1.8; margin-bottom: 16px; }
-  .legal-page h2 { font-size: 24px; color: var(--navy); margin: 45px 0 20px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+  .legal-page h2 { font-size: 24px; color: var(--navy); margin: 45px 0 20px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; font-weight: 900; }
   .legal-page h3 { font-size: 18px; color: var(--navy); margin: 30px 0 15px; font-weight: 800; }
   
   .email-box { background: #fff; border: 1px solid #cbd5e1; padding: 40px 30px; border-radius: 16px; text-align: center; margin: 40px 0; box-shadow: 0 10px 30px rgba(15,23,42,.03); }
@@ -20,6 +20,7 @@
   .faq-item { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 25px; margin-bottom: 20px; }
   .faq-item h3 { margin-top: 0; font-size: 18px; }
   .faq-item p { margin-bottom: 0; }
+  .faq-item ul { margin-top: 10px; padding-left: 20px; }
 </style>
 </head>
 <body>
@@ -44,7 +45,7 @@
 
 <main class="site-container legal-page">
   <h1>Support & Help Centre</h1>
-  <p>Whether you are having trouble saving a vehicle, have a question about an AI diagnostic report, or simply want to provide feedback on the platform, our UK-based support team is here to assist you.</p>
+  <p>Whether you are having trouble saving a vehicle, have a question about an AI diagnostic report, or need help managing your Premium subscription, our UK-based support team is here to assist you.</p>
   
   <div class="email-box">
     <p style="margin:0 0 10px; font-weight:800; color:var(--navy); font-size:16px; text-transform:uppercase; letter-spacing:1px;">Email Our Support Team</p>
@@ -52,8 +53,31 @@
     <p style="margin:15px 0 0; font-size:14px; color:var(--muted);">We aim to respond to all technical and account enquiries within 2 working days (Monday–Friday, 9am–5pm).</p>
   </div>
 
-  <h2>Frequently Asked Questions</h2>
+  <h2>Account & Billing</h2>
   
+  <div class="faq-item">
+    <h3>Is CarExplain free to use?</h3>
+    <p>Yes, you can create a free account which includes access to your Digital Garage, the Community Forum, and our Car Research guides. Free accounts receive <strong>1 free AI Diagnostic report per month</strong>.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>What does CarExplain Premium include?</h3>
+    <p>For £4.99/month, Premium users get:</p>
+    <ul>
+      <li><strong>Unlimited</strong> AI Diagnostic Reports (no monthly limits).</li>
+      <li><strong>Quote Checker:</strong> Upload any garage quote and get an instant AI breakdown of parts, labour, and jargon.</li>
+      <li><strong>Unlimited vehicles</strong> in your Digital Garage (Free users are limited to 1).</li>
+      <li>Priority access to future features, such as automatic MOT lookups.</li>
+    </ul>
+  </div>
+
+  <div class="faq-item">
+    <h3>How do I cancel my Premium subscription?</h3>
+    <p>You can cancel at any time by logging into your account and clicking "Manage Subscription", which will take you to our secure Stripe billing portal. Under the UK Consumer Contracts Regulations 2013, you have a 14-day right to cancel for a full refund, provided you have not already used the Premium service.</p>
+  </div>
+
+  <h2>Technical & Data</h2>
+
   <div class="faq-item">
     <h3>Where is my data stored?</h3>
     <p>Your data is securely stored in our encrypted cloud database (hosted by Supabase). Because your account is tied to your email address, you can log in from any device (phone, tablet, or laptop) and your digital garage will be exactly as you left it.</p>
@@ -65,9 +89,11 @@
   </div>
 
   <div class="faq-item">
-    <h3>Is CarExplain free to use?</h3>
-    <p>Yes, the core diagnostic tool, digital garage, and community are free to use. Free accounts receive up to 3 AI diagnostic reports per month. If you require unlimited reports and advanced features, you can upgrade to CarExplain Premium.</p>
+    <h3>Will my data be used to train the AI?</h3>
+    <p>No. We explicitly configure our API integrations with Google so that your symptom data is not retained or used to train public AI models. Your personal details, registration plate, and vehicle history remain private.</p>
   </div>
+
+  <h2>Diagnostics & Safety</h2>
 
   <div class="faq-item">
     <h3>Can CarExplain fix my car?</h3>
