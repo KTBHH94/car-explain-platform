@@ -450,7 +450,11 @@ async function upgradeToPremium() {
   try {
     const response = await fetch(`${API_URL}/api/stripe/create-checkout`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${token}` }
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ origin: window.location.origin })
     });
     const data = await response.json();
     if (data.url) {
