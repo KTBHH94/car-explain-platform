@@ -395,8 +395,12 @@ Please analyse this quote and generate the JSON report.`;
         });
 
         try {
+          // ✅ Read the origin sent from the frontend (e.g. http://127.0.0.1:5500), fallback to production
+          const body = await request.json().catch(() => ({}));
+          const origin = body.origin || 'https://carexplain.co.uk';
+
           const session = await stripe.checkout.sessions.create({
-            managed_payments: { enabled: false }, // <-- Disable Managed Payments (bypasses tax-code requirement)
+            managed_payments: { enabled: false },
             line_items: [
               {
                 price: env.STRIPE_PRICE_ID,
@@ -405,9 +409,10 @@ Please analyse this quote and generate the JSON report.`;
             ],
             mode: 'subscription',
             customer_email: user.email,
-            client_reference_id: user.id, // This links the payment to the user in Supabase
-            success_url: `https://carexplain.co.uk/garage.html?payment=success`,
-            cancel_url: `https://carexplain.co.uk/garage.html?payment=cancelled`,
+            client_reference_id: user.id,
+            // ✅ Dynamic URLs based on the origin that sent the request
+            success_url: `${origin}/garage.html?payment=success`,
+            cancel_url: `${origin}/garage.html?payment=cancelled`,
           });
 
           return new Response(JSON.stringify({ url: session.url }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
