@@ -6,23 +6,60 @@
 <title>Community | CarExplain</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-  .community-header { text-align: center; margin: 40px 0; }
-  .community-header h1 { font-size: 36px; color: var(--navy); margin-bottom: 10px; }
-  .community-header p { color: var(--slate); font-size: 16px; }
-  
-  .post-list { display: flex; flex-direction: column; gap: 16px; max-width: 800px; margin: 0 auto; }
-  .post-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; text-decoration: none; color: inherit; transition: 0.2s; display: block; }
+  /* --- PREMIUM COMMUNITY LAYOUT --- */
+  .community-wrapper { display: grid; grid-template-columns: 1fr 300px; gap: 40px; margin: 40px auto; max-width: 1100px; align-items: start; }
+  @media(max-width: 850px) { .community-wrapper { grid-template-columns: 1fr; } }
+
+  /* Header */
+  .community-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+  .community-header h1 { font-size: 32px; color: var(--navy); margin: 0 0 8px; letter-spacing: -1px; }
+  .community-header p { color: var(--slate); font-size: 15px; margin: 0; }
+
+  /* Main Feed */
+  .post-list { display: flex; flex-direction: column; gap: 16px; }
+  .post-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; text-decoration: none; color: inherit; transition: 0.2s; display: flex; gap: 20px; }
   .post-card:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(15,23,42,.05); }
-  .post-meta { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
-  .post-title { font-size: 20px; font-weight: 900; color: var(--navy); margin: 0 0 10px; }
-  .post-snippet { font-size: 14px; color: #475569; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   
-  .new-post-form { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; max-width: 800px; margin: 0 auto 40px; display: none; }
-  .new-post-form.active { display: block; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; flex-shrink: 0; }
+  
+  .post-content-area { flex: 1; min-width: 0; }
+  .post-meta { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .post-meta strong { color: var(--slate); font-weight: 800; }
+  .post-title { font-size: 18px; font-weight: 900; color: var(--navy); margin: 0 0 8px; line-height: 1.3; }
+  .post-snippet { font-size: 14px; color: #475569; line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* Category Badges */
+  .badge { font-size: 11px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.5px; }
+  .badge-general { background: #f1f5f9; color: #334155; }
+  .badge-diagnosis { background: #e0e7ff; color: #3730a3; }
+  .badge-repair { background: #dcfce7; color: #166534; }
+  .badge-cost { background: #fef08a; color: #854d0e; }
+  .badge-mot { background: #ffedd5; color: #9a3412; }
+
+  /* Sidebar */
+  .sidebar-box { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .sidebar-box h3 { font-size: 16px; color: var(--navy); margin: 0 0 16px; font-weight: 900; }
+  .sidebar-box p { font-size: 13px; color: var(--slate); line-height: 1.6; margin: 0 0 16px; }
+  .sidebar-box ul { list-style: none; padding: 0; margin: 0; }
+  .sidebar-box li { margin-bottom: 10px; }
+  .sidebar-box li:last-child { margin-bottom: 0; }
+  
+  .category-filter { display: flex; flex-direction: column; gap: 8px; }
+  .cat-btn { background: none; border: 1px solid transparent; text-align: left; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; color: var(--slate); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+  .cat-btn:hover { background: #f8fafc; color: var(--navy); }
+  .cat-btn.active { background: #e8eefc; color: var(--blue); border-color: #c7d2fe; }
+  .cat-count { font-size: 12px; background: #e2e8f0; padding: 2px 8px; border-radius: 999px; color: var(--slate); }
+  .cat-btn.active .cat-count { background: var(--blue); color: #fff; }
+
+  /* Form */
+  .new-post-form { background: #fff; border: 1px solid var(--blue); border-radius: 12px; padding: 28px; margin-bottom: 24px; display: none; box-shadow: 0 10px 30px rgba(37,99,235,.1); }
+  .new-post-form.active { display: block; animation: slideDown 0.3s ease; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 800; color: var(--slate); margin-bottom: 6px; text-transform: uppercase; }
-  .form-group input, .form-group select, .form-group textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
-  .form-group textarea { resize: vertical; min-height: 100px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 800; color: var(--slate); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 14px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+  .form-group textarea { resize: vertical; min-height: 120px; }
 </style>
 </head>
 <body>
@@ -41,44 +78,78 @@
   </div>
 </header>
 
-<main class="site-container" style="padding-bottom: 80px;">
-  <div class="community-header">
-    <h1>Owner Community</h1>
-    <p>Real questions, real experiences, real repair outcomes from UK drivers.</p>
-    <button id="togglePostBtn" class="btn btn-primary" style="margin-top: 20px;">+ Ask a Question</button>
-  </div>
+<main class="site-container">
+  <div class="community-wrapper">
+    
+    <!-- MAIN FEED -->
+    <div>
+      <div class="community-header">
+        <div>
+          <h1>Owner Community</h1>
+          <p>Real questions, real experiences, real repair outcomes.</p>
+        </div>
+        <button id="togglePostBtn" class="btn btn-primary">+ Ask a Question</button>
+      </div>
 
-  <!-- New Post Form -->
-  <div class="new-post-form" id="newPostFormContainer">
-    <h3 style="margin-top:0; color:var(--navy);">Ask the Community</h3>
-    <form id="newPostForm">
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="postTitle" required placeholder="e.g. 2015 Fiesta knocking over bumps">
+      <!-- New Post Form -->
+      <div class="new-post-form" id="newPostFormContainer">
+        <h3 style="margin-top:0; color:var(--navy); font-size: 20px;">Ask the Community</h3>
+        <form id="newPostForm">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="postTitle" required placeholder="e.g. 2015 Fiesta knocking over bumps">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="postCategory">
+              <option value="General">General Question</option>
+              <option value="Diagnosis">Diagnosis Help</option>
+              <option value="Repair Outcome">Repair Outcome</option>
+              <option value="Cost Question">Cost Question</option>
+              <option value="MOT">MOT / Advisory</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Details</label>
+            <textarea id="postContent" required placeholder="Describe the issue or share your experience..."></textarea>
+          </div>
+          <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button type="button" class="btn btn-white" id="cancelPostBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Post Question</button>
+          </div>
+        </form>
       </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select id="postCategory">
-          <option value="General">General Question</option>
-          <option value="Diagnosis">Diagnosis Help</option>
-          <option value="Repair Outcome">Repair Outcome</option>
-          <option value="Cost Question">Cost Question</option>
-          <option value="MOT">MOT / Advisory</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Details</label>
-        <textarea id="postContent" required placeholder="Describe the issue or share your experience..."></textarea>
-      </div>
-      <div style="display:flex; gap:10px; justify-content:flex-end;">
-        <button type="button" class="btn btn-white" id="cancelPostBtn">Cancel</button>
-        <button type="submit" class="btn btn-primary">Post Question</button>
-      </div>
-    </form>
-  </div>
 
-  <div class="post-list" id="postList">
-    <p style="text-align:center; color:var(--muted);">Loading community posts...</p>
+      <div class="post-list" id="postList">
+        <p style="text-align:center; color:var(--muted); padding: 40px;">Loading community posts...</p>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside>
+      <div class="sidebar-box">
+        <h3>Categories</h3>
+        <div class="category-filter" id="categoryFilter">
+          <button class="cat-btn active" data-cat="All">All Posts <span class="cat-count" id="count-All">0</span></button>
+          <button class="cat-btn" data-cat="Diagnosis">Diagnosis Help <span class="cat-count" id="count-Diagnosis">0</span></button>
+          <button class="cat-btn" data-cat="Repair Outcome">Repair Outcomes <span class="cat-count" id="count-Repair Outcome">0</span></button>
+          <button class="cat-btn" data-cat="Cost Question">Cost Questions <span class="cat-count" id="count-Cost Question">0</span></button>
+          <button class="cat-btn" data-cat="MOT">MOT / Advisory <span class="cat-count" id="count-MOT">0</span></button>
+          <button class="cat-btn" data-cat="General">General <span class="cat-count" id="count-General">0</span></button>
+        </div>
+      </div>
+
+      <div class="sidebar-box" style="background: var(--navy); color: #fff; border-color: var(--navy);">
+        <h3 style="color: #fff;">Community Rules</h3>
+        <ul style="font-size: 13px; line-height: 1.6; color: #cbd5e1;">
+          <li>🤝 Be respectful and helpful.</li>
+          <li>🚫 No spam or self-promotion.</li>
+          <li>⚠️ Community advice is not a professional diagnosis.</li>
+          <li>🔒 Protect your personal data (no reg plates or addresses).</li>
+        </ul>
+      </div>
+    </aside>
+
   </div>
 </main>
 
@@ -91,6 +162,28 @@
 <script>
 const API_URL = "https://carxplain-api.murningella.workers.dev";
 const token = localStorage.getItem('sb-access-token');
+let allPosts = []; // Store posts locally so we can filter them without fetching again
+let currentFilter = "All";
+
+// --- HELPER: Turn email into a nice display name ---
+function getDisplayName(email) {
+  if (!email || email === "Anonymous") return "Anonymous Driver";
+  const prefix = email.split('@')[0];
+  // If it has dots (e.g. ella.smith), capitalize each word
+  if (prefix.includes('.')) {
+    return prefix.split('.').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+  // Otherwise just capitalize the first letter (e.g. ellasmith -> Ellasmith)
+  return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+}
+
+function getCategoryClass(cat) {
+  if (cat === 'Diagnosis') return 'badge-diagnosis';
+  if (cat === 'Repair Outcome') return 'badge-repair';
+  if (cat === 'Cost Question') return 'badge-cost';
+  if (cat === 'MOT') return 'badge-mot';
+  return 'badge-general';
+}
 
 // Header Auth Logic
 document.addEventListener("DOMContentLoaded", () => {
@@ -112,32 +205,79 @@ async function loadPosts() {
   try {
     const res = await fetch(`${API_URL}/api/community/posts`);
     const data = await res.json();
-    
-    if (!data.posts || data.posts.length === 0) {
-      list.innerHTML = `<p style="text-align:center; color:var(--muted); padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1;">No posts yet. Be the first to ask a question!</p>`;
+
+    if (!res.ok || data.error) {
+      list.innerHTML = `<p style="text-align:center; color:red;">Error loading posts: ${data.error || res.status}</p>`;
       return;
     }
+    
+    allPosts = data.posts || [];
+    updateCategoryCounts();
+    renderPosts();
 
-    list.innerHTML = data.posts.map(post => {
-      const date = new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-      const email = post.profiles?.email || "Anonymous";
-      const username = email.split('@')[0]; 
-      
-      return `
-        <a href="post.html?id=${post.id}" class="post-card">
+  } catch (e) {
+    list.innerHTML = `<p style="text-align:center; color:red;">Failed to connect to server.</p>`;
+  }
+}
+
+function updateCategoryCounts() {
+  // Reset counts
+  const cats = ["All", "Diagnosis", "Repair Outcome", "Cost Question", "MOT", "General"];
+  cats.forEach(c => {
+    const el = document.getElementById(`count-${c}`);
+    if(el) el.textContent = c === "All" ? allPosts.length : allPosts.filter(p => p.category === c).length;
+  });
+}
+
+function renderPosts() {
+  const list = document.getElementById('postList');
+  
+  const filtered = currentFilter === "All" 
+    ? allPosts 
+    : allPosts.filter(p => p.category === currentFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<p style="text-align:center; color:var(--muted); padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1;">No posts in this category yet.</p>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(post => {
+    const date = new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const displayName = getDisplayName(post.profiles?.email);
+    const initial = displayName.charAt(0).toUpperCase();
+    const badgeClass = getCategoryClass(post.category);
+    
+    return `
+      <a href="post.html?id=${post.id}" class="post-card">
+        <div class="avatar">${initial}</div>
+        <div class="post-content-area">
           <div class="post-meta">
-            <span>${post.category} • By ${username}</span>
-            <span>${date}</span>
+            <strong>${displayName}</strong> • ${date}
           </div>
           <h3 class="post-title">${post.title}</h3>
           <p class="post-snippet">${post.content}</p>
-        </a>
-      `;
-    }).join("");
-  } catch (e) {
-    list.innerHTML = `<p style="text-align:center; color:red;">Failed to load posts.</p>`;
-  }
+          <div style="margin-top: 12px;">
+            <span class="badge ${badgeClass}">${post.category}</span>
+          </div>
+        </div>
+      </a>
+    `;
+  }).join("");
 }
+
+// Category Filter Logic
+document.getElementById('categoryFilter').addEventListener('click', (e) => {
+  const btn = e.target.closest('.cat-btn');
+  if (!btn) return;
+  
+  // Update active state
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  // Update filter and re-render
+  currentFilter = btn.dataset.cat;
+  renderPosts();
+});
 
 // Form Toggle Logic
 const formContainer = document.getElementById('newPostFormContainer');
