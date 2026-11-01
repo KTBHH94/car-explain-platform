@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community | CarExplain</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .community-header { text-align: center; margin: 40px 0; }
+  .community-header h1 { font-size: 36px; color: var(--navy); margin-bottom: 10px; }
+  .community-header p { color: var(--slate); font-size: 16px; }
+  
+  .post-list { display: flex; flex-direction: column; gap: 16px; max-width: 800px; margin: 0 auto; }
+  .post-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; text-decoration: none; color: inherit; transition: 0.2s; display: block; }
+  .post-card:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(15,23,42,.05); }
+  .post-meta { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .post-title { font-size: 20px; font-weight: 900; color: var(--navy); margin: 0 0 10px; }
+  .post-snippet { font-size: 14px; color: #475569; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  
+  .new-post-form { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; max-width: 800px; margin: 0 auto 40px; display: none; }
+  .new-post-form.active { display: block; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 800; color: var(--slate); margin-bottom: 6px; text-transform: uppercase; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-container header-flex">
+    <div class="logo-group"><a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a></div>
+    <nav class="main-navigation">
+      <a href="diagnose.html" class="nav-link">Diagnostics</a>
+      <a href="quote-checker.html" class="nav-link">Quote Checker</a>
+      <a href="garage.html" class="nav-link">My Garage</a>
+      <a href="community.html" class="nav-link">Community</a>
+      <a href="car-research.html" class="nav-link">Car Research</a>
+    </nav>
+    <div class="header-actions" id="headerAuth"></div>
+  </div>
+</header>
+
+<main class="site-container" style="padding-bottom: 80px;">
+  <div class="community-header">
+    <h1>Owner Community</h1>
+    <p>Real questions, real experiences, real repair outcomes from UK drivers.</p>
+    <button id="togglePostBtn" class="btn btn-primary" style="margin-top: 20px;">+ Ask a Question</button>
+  </div>
+
+  <!-- New Post Form -->
+  <div class="new-post-form" id="newPostFormContainer">
+    <h3 style="margin-top:0; color:var(--navy);">Ask the Community</h3>
+    <form id="newPostForm">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="postTitle" required placeholder="e.g. 2015 Fiesta knocking over bumps">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="postCategory">
+          <option value="General">General Question</option>
+          <option value="Diagnosis">Diagnosis Help</option>
+          <option value="Repair Outcome">Repair Outcome</option>
+          <option value="Cost Question">Cost Question</option>
+          <option value="MOT">MOT / Advisory</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Details</label>
+        <textarea id="postContent" required placeholder="Describe the issue or share your experience..."></textarea>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" class="btn btn-white" id="cancelPostBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Post Question</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="post-list" id="postList">
+    <p style="text-align:center; color:var(--muted);">Loading community posts...</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-container footer-bottom">
+    <p>&copy; 2026 CarExplain. Reference guidance only — it does not replace professional garage verification.</p>
+  </div>
+</footer>
+
+<script>
+const API_URL = "https://carxplain-api.murningella.workers.dev";
+const token = localStorage.getItem('sb-access-token');
+
+// Header Auth Logic
+document.addEventListener("DOMContentLoaded", () => {
+  const headerAuth = document.getElementById('headerAuth');
+  if (headerAuth) {
+    if (token) {
+      headerAuth.innerHTML = `<a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
+      document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = 'login.html'; });
+    } else {
+      headerAuth.innerHTML = `<a href="login.html" class="login-action">Log In</a><a href="signup.html" class="btn btn-primary">Sign Up</a>`;
+    }
+  }
+  
+  loadPosts();
+});
+
+async function loadPosts() {
+  const list = document.getElementById('postList');
+  try {
+    const res = await fetch(`${API_URL}/api/community/posts`);
+    const data = await res.json();
+    
+    if (!data.posts || data.posts.length === 0) {
+      list.innerHTML = `<p style="text-align:center; color:var(--muted); padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1;">No posts yet. Be the first to ask a question!</p>`;
+      return;
+    }
+
+    list.innerHTML = data.posts.map(post => {
+      const date = new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const email = post.profiles?.email || "Anonymous";
+      const username = email.split('@')[0]; 
+      
+      return `
+        <a href="post.html?id=${post.id}" class="post-card">
+          <div class="post-meta">
+            <span>${post.category} • By ${username}</span>
+            <span>${date}</span>
+          </div>
+          <h3 class="post-title">${post.title}</h3>
+          <p class="post-snippet">${post.content}</p>
+        </a>
+      `;
+    }).join("");
+  } catch (e) {
+    list.innerHTML = `<p style="text-align:center; color:red;">Failed to load posts.</p>`;
+  }
+}
+
+// Form Toggle Logic
+const formContainer = document.getElementById('newPostFormContainer');
+document.getElementById('togglePostBtn').addEventListener('click', () => {
+  if (!token) {
+    alert("You must be logged in to ask a question.");
+    window.location.href = 'login.html';
+    return;
+  }
+  formContainer.classList.toggle('active');
+});
+document.getElementById('cancelPostBtn').addEventListener('click', () => {
+  formContainer.classList.remove('active');
+});
+
+// Submit Post Logic
+document.getElementById('newPostForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const title = document.getElementById('postTitle').value;
+  const category = document.getElementById('postCategory').value;
+  const content = document.getElementById('postContent').value;
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.textContent = "Posting...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_URL}/api/community/posts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ title, content, category })
+    });
+    
+    if (res.ok) {
+      document.getElementById('newPostForm').reset();
+      formContainer.classList.remove('active');
+      loadPosts(); // Reload list
+    } else {
+      const err = await res.json();
+      alert("Error: " + err.error);
+    }
+  } catch (err) {
+    alert("Failed to connect to server.");
+  } finally {
+    btn.textContent = "Post Question";
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
