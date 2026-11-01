@@ -125,6 +125,19 @@ export default {
         return new Response(JSON.stringify({ posts }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
+      // --- GET SINGLE COMMUNITY POST ---
+      if (url.pathname.startsWith("/api/community/posts/") && request.method === "GET") {
+        const postId = url.pathname.split("/").pop();
+        const { data: post, error: dbError } = await supabase
+          .from('community_posts')
+          .select(`id, title, content, category, created_at, profiles ( email )`)
+          .eq('id', postId)
+          .single();
+          
+        if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ post }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
       if (url.pathname === "/api/community/posts" && request.method === "POST") {
         if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         
