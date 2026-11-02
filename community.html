@@ -160,6 +160,10 @@
 </footer>
 
 <script>
+  const token = localStorage.getItem('sb-access-token');
+if (!token) { 
+  window.location.href = 'login.html'; 
+}
 const API_URL = "https://carxplain-api.murningella.workers.dev";
 const token = localStorage.getItem('sb-access-token');
 let allPosts = []; // Store posts locally so we can filter them without fetching again

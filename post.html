@@ -90,6 +90,10 @@
 </footer>
 
 <script>
+  const token = localStorage.getItem('sb-access-token');
+if (!token) { 
+  window.location.href = 'login.html'; 
+}
 const API_URL = "https://carxplain-api.murningella.workers.dev";
 const token = localStorage.getItem('sb-access-token');
 const urlParams = new URLSearchParams(window.location.search);
