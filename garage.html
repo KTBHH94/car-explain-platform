@@ -467,7 +467,7 @@ async function upgradeToPremium() {
   }
 }
 
-// --- FETCH USER PROFILE TO SHOW/HIDE BANNER ---
+// --- FETCH USER PROFILE TO SHOW/HIDE BANNER & ADMIN LINKS ---
 async function checkUserPlan() {
   try {
     const response = await fetch(`${API_URL}/api/user/profile`, {
@@ -482,16 +482,43 @@ async function checkUserPlan() {
   } catch (e) { console.log(e); }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const headerAuth = document.getElementById('headerAuth');
+  
   if (headerAuth && token) {
-    headerAuth.innerHTML = `<a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
-    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = 'login.html'; });
+    try {
+      // Fetch user profile to check if admin
+      const res = await fetch(`${API_URL}/api/user/profile`, { headers: { "Authorization": `Bearer ${token}` } });
+      const data = await res.json();
+      
+      const adminLink = data.is_admin ? `<a href="admin.html" class="login-action" style="color:#ef4444;">Admin</a>` : '';
+      
+      headerAuth.innerHTML = `
+        ${adminLink}
+        <a href="settings.html" class="login-action">Settings</a>
+        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
+        <a href="garage.html" class="btn btn-primary">My Garage</a>
+      `;
+    } catch (e) {
+      headerAuth.innerHTML = `
+        <a href="settings.html" class="login-action">Settings</a>
+        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
+        <a href="garage.html" class="btn btn-primary">My Garage</a>
+      `;
+    }
+    
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { 
+      e.preventDefault(); 
+      localStorage.clear(); 
+      window.location.href = 'login.html'; 
+    });
   }
+  
   if (token) {
     loadCars();
-    checkUserPlan(); // Show the upgrade banner if free
+    checkUserPlan(); 
   }
+  
   $("cancelAddVehicle").addEventListener("click", closeAddModal);
   addFormEl.addEventListener("submit", handleAddSubmit);
   modalEl.addEventListener("click", (e) => { if(e.target === modalEl) closeAddModal(); });
