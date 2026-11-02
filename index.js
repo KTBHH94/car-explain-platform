@@ -30,9 +30,16 @@ export default {
         
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         
-        // Save the username to the profiles table if provided
-        if (data.user && username) {
-          await supabase.from('profiles').update({ username: username }).eq('id', data.user.id);
+        if (data.user) {
+          await supabase.from('profiles').upsert({
+            id: data.user.id,
+            email: data.user.email,
+            username: username || null,
+            plan: 'free',
+            is_admin: false,
+            ai_usage_count: 0,
+            ai_usage_reset_date: new Date().toISOString().split('T')[0]
+          });
         }
 
         return new Response(JSON.stringify({ user: data.user }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -56,7 +63,6 @@ export default {
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-        // Get User Profile (for settings page and admin check)
         if (url.pathname === "/api/user/profile" && request.method === "GET") {
           const { data: profile, error: dbError } = await supabase.from('profiles').select('*').eq('id', user.id).single();
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -69,7 +75,6 @@ export default {
           }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // UPDATE User Profile (Username & Bio)
         if (url.pathname === "/api/user/profile" && request.method === "PUT") {
           const { username, bio } = await request.json();
           const { error: dbError } = await supabase.from('profiles').update({ username, bio }).eq('id', user.id);
@@ -77,7 +82,6 @@ export default {
           return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // UPLOAD Avatar
         if (url.pathname === "/api/user/avatar" && request.method === "POST") {
           try {
             const formData = await request.formData();
@@ -87,14 +91,10 @@ export default {
             const fileExt = file.name.split('.').pop();
             const fileName = `${user.id}-${Date.now()}.${fileExt}`;
 
-            // Upload to Supabase Storage
             const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file, { contentType: file.type });
             if (uploadError) throw uploadError;
 
-            // Get public URL
             const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
-
-            // Save to profile
             await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
 
             return new Response(JSON.stringify({ url: publicUrl }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -103,7 +103,6 @@ export default {
           }
         }
 
-        // Vehicles
         if (url.pathname === "/api/user/vehicles" && request.method === "GET") {
           const { data: vehicles, error: dbError } = await supabase.from('vehicles').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -127,7 +126,6 @@ export default {
           return new Response(JSON.stringify({ vehicle: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Problems
         if (url.pathname === "/api/user/problems" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -143,7 +141,6 @@ export default {
           return new Response(JSON.stringify({ problem: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Repairs
         if (url.pathname === "/api/user/repairs" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -158,25 +155,89 @@ export default {
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
           return new Response(JSON.stringify({ repair: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
+
+        // --- MOT LOOKUP ROUTE ---
+        if (url.pathname === "/api/mot/lookup" && request.method === "POST") {
+          const { registration, vehicleId } = await request.json();
+          if (!registration) return new Response(JSON.stringify({ error: "Registration is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+          try {
+            // 1. Get OAuth Token from DVLA
+            const tokenUrl = env.DVLA_TOKEN_URL || 'https://login.microsoftonline.com/1f673723-8a47-4c6e-9a33-6c8d8eb1424f/oauth2/v2.0/token'; 
+            
+            const tokenParams = new URLSearchParams();
+            tokenParams.append('grant_type', 'client_credentials');
+            tokenParams.append('client_id', env.DVLA_CLIENT_ID);
+            tokenParams.append('client_secret', env.DVLA_CLIENT_SECRET);
+            tokenParams.append('scope', 'https://tapi.dvla.gov.uk/.default');
+
+            const tokenResponse = await fetch(tokenUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: tokenParams
+            });
+            
+            if (!tokenResponse.ok) throw new Error("Failed to authenticate with DVLA");
+            const tokenData = await tokenResponse.json();
+            const dvlaAccessToken = tokenData.access_token;
+
+            // 2. Fetch MOT Data
+            const cleanReg = registration.replace(/\s+/g, '').toUpperCase();
+            const motUrl = `https://history.mot.api.gov.uk/v1/trade/vehicles/registration/${cleanReg}`;
+            
+            const motResponse = await fetch(motUrl, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${dvlaAccessToken}`,
+                'X-API-Key': env.DVLA_API_KEY,
+                'Accept': 'application/json'
+              }
+            });
+
+            if (!motResponse.ok) {
+              if (motResponse.status === 404) return new Response(JSON.stringify({ error: "Vehicle not found on DVLA system" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+              throw new Error(`DVLA API Error: ${motResponse.status}`);
+            }
+
+            const motData = await motResponse.json();
+            
+            // 3. Save to Supabase (Upsert)
+            // Note: Ensure vehicle_id has a UNIQUE constraint in your DB for this to work perfectly
+            await supabase.from('mot_records').upsert({
+              vehicle_id: vehicleId,
+              registration: cleanReg,
+              mot_status: motData.motTests && motData.motTests.length > 0 && motData.motTests[0].testResult === 'PASSED' ? 'Valid' : 'Expired',
+              expiry_date: motData.motTests && motData.motTests.length > 0 ? motData.motTests[0].expiryDate : null,
+              last_test_date: motData.motTests && motData.motTests.length > 0 ? motData.motTests[0].testDate : null,
+              mileage: motData.motTests && motData.motTests.length > 0 ? motData.motTests[0].odometerValue : null,
+              raw_data: motData
+            }, { onConflict: 'vehicle_id' });
+
+            return new Response(JSON.stringify({ success: true, data: motData }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+            
+          } catch (err) {
+            return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
+        }
       }
 
       // --- COMMUNITY ROUTES ---
+      // ... (rest of the community routes remain exactly the same) ...
       if (url.pathname === "/api/community/posts" && request.method === "GET") {
         const { data: posts, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( username, email, avatar_url )`) // Added avatar_url
+          .select(`id, title, content, category, created_at, profiles ( username, email, avatar_url )`)
           .order('created_at', { ascending: false });
           
         if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response(JSON.stringify({ posts }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      // --- GET SINGLE COMMUNITY POST ---
       if (url.pathname.startsWith("/api/community/posts/") && request.method === "GET") {
         const postId = url.pathname.split("/").pop();
         const { data: post, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( username, email, avatar_url )`) // Added avatar_url
+          .select(`id, title, content, category, created_at, profiles ( username, email, avatar_url )`)
           .eq('id', postId)
           .single();
           
@@ -205,7 +266,7 @@ export default {
         const postId = url.pathname.split("/").pop();
         const { data: replies, error: dbError } = await supabase
           .from('community_replies')
-          .select(`id, content, created_at, profiles ( username, email, avatar_url )`) // Added avatar_url
+          .select(`id, content, created_at, profiles ( username, email, avatar_url )`)
           .eq('post_id', postId)
           .order('created_at', { ascending: true });
           
@@ -238,27 +299,23 @@ export default {
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-        // Verify they are actually an admin
         const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
         if (!profile || !profile.is_admin) {
           return new Response(JSON.stringify({ error: "Access Denied. Admins only." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Get Stats
         if (url.pathname === "/api/admin/stats" && request.method === "GET") {
           const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
           const { count: postsCount } = await supabase.from('community_posts').select('*', { count: 'exact', head: true });
           return new Response(JSON.stringify({ users: usersCount, posts: postsCount }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Get All Users
         if (url.pathname === "/api/admin/users" && request.method === "GET") {
           const { data: users, error: dbError } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
           return new Response(JSON.stringify({ users }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Update User Plan
         if (url.pathname === "/api/admin/users/plan" && request.method === "POST") {
           const { targetUserId, newPlan } = await request.json();
           const { error: dbError } = await supabase.from('profiles').update({ plan: newPlan }).eq('id', targetUserId);
@@ -266,14 +323,12 @@ export default {
           return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Get All Posts (for moderation)
         if (url.pathname === "/api/admin/posts" && request.method === "GET") {
           const { data: posts, error: dbError } = await supabase.from('community_posts').select(`id, title, category, created_at, profiles ( email, username )`).order('created_at', { ascending: false });
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
           return new Response(JSON.stringify({ posts }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Delete Post
         if (url.pathname.startsWith("/api/admin/posts/") && request.method === "DELETE") {
           const postId = url.pathname.split("/").pop();
           const { error: dbError } = await supabase.from('community_posts').delete().eq('id', postId);
