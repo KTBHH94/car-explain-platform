@@ -56,11 +56,51 @@ export default {
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-        // Get User Profile (to check plan for the banner)
+        // Get User Profile (for settings page and admin check)
         if (url.pathname === "/api/user/profile" && request.method === "GET") {
-          const { data: profile, error: dbError } = await supabase.from('profiles').select('*').eq('id', user.id).single(); // <-- Changed to *
+          const { data: profile, error: dbError } = await supabase.from('profiles').select('*').eq('id', user.id).single();
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          return new Response(JSON.stringify({ plan: profile.plan, is_admin: profile.is_admin }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }); // <-- Added is_admin
+          return new Response(JSON.stringify({ 
+            plan: profile.plan, 
+            is_admin: profile.is_admin,
+            username: profile.username,
+            bio: profile.bio,
+            avatar_url: profile.avatar_url
+          }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // UPDATE User Profile (Username & Bio)
+        if (url.pathname === "/api/user/profile" && request.method === "PUT") {
+          const { username, bio } = await request.json();
+          const { error: dbError } = await supabase.from('profiles').update({ username, bio }).eq('id', user.id);
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // UPLOAD Avatar
+        if (url.pathname === "/api/user/avatar" && request.method === "POST") {
+          try {
+            const formData = await request.formData();
+            const file = formData.get('avatar');
+            if (!file) return new Response(JSON.stringify({ error: "No file uploaded" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+
+            // Upload to Supabase Storage
+            const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file, { contentType: file.type });
+            if (uploadError) throw uploadError;
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+
+            // Save to profile
+            await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+
+            return new Response(JSON.stringify({ url: publicUrl }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          } catch (err) {
+            return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
         }
 
         // Vehicles
@@ -71,7 +111,6 @@ export default {
         }
 
         if (url.pathname === "/api/user/vehicles" && request.method === "POST") {
-          // --- FREE VS PREMIUM VEHICLE LIMIT CHECK ---
           const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
           if (profile && profile.plan === 'free') {
             const { count } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
@@ -125,7 +164,7 @@ export default {
       if (url.pathname === "/api/community/posts" && request.method === "GET") {
         const { data: posts, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( username, email )`)
+          .select(`id, title, content, category, created_at, profiles ( username, email, avatar_url )`) // Added avatar_url
           .order('created_at', { ascending: false });
           
         if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -137,7 +176,7 @@ export default {
         const postId = url.pathname.split("/").pop();
         const { data: post, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( username, email )`)
+          .select(`id, title, content, category, created_at, profiles ( username, email, avatar_url )`) // Added avatar_url
           .eq('id', postId)
           .single();
           
@@ -166,7 +205,7 @@ export default {
         const postId = url.pathname.split("/").pop();
         const { data: replies, error: dbError } = await supabase
           .from('community_replies')
-          .select(`id, content, created_at, profiles ( username, email )`)
+          .select(`id, content, created_at, profiles ( username, email, avatar_url )`) // Added avatar_url
           .eq('post_id', postId)
           .order('created_at', { ascending: true });
           
@@ -246,30 +285,19 @@ export default {
       // --- AI DIAGNOSE ROUTE ---
       if (url.pathname === "/api/diagnose" && request.method === "POST") {
         
-        // --- STRICT AUTHENTICATION CHECK ---
         if (!authHeader || authHeader === "Bearer null" || authHeader === "Bearer undefined") {
-           return new Response(JSON.stringify({ 
-             error: "Unauthorized", 
-             message: "You must be logged in to use the AI diagnostic tool. Please create a free account." 
-           }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+           return new Response(JSON.stringify({ error: "Unauthorized", message: "You must be logged in to use the AI diagnostic tool." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
         const token = authHeader.replace("Bearer ", "");
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         
         if (authError || !user) {
-           return new Response(JSON.stringify({ 
-             error: "Unauthorized", 
-             message: "Your session has expired. Please log in again." 
-           }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+           return new Response(JSON.stringify({ error: "Unauthorized", message: "Your session has expired. Please log in again." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // --- FREE VS PREMIUM CHECK ---
         const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        
-        if (!profile) {
-           return new Response(JSON.stringify({ error: "Profile not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
+        if (!profile) return new Response(JSON.stringify({ error: "Profile not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
         let userPlan = profile.plan;
         let usageCount = profile.ai_usage_count;
@@ -281,17 +309,12 @@ export default {
           usageCount = 0;
         }
 
-        // LIMIT TO 1 FREE REPORT
         if (userPlan === 'free' && usageCount >= 1) {
-          return new Response(JSON.stringify({ 
-            error: "limit_reached",
-            message: "You have used your 1 free AI report this month. Upgrade to Premium for unlimited reports."
-          }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ error: "limit_reached", message: "You have used your 1 free AI report this month. Upgrade to Premium for unlimited reports." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
         await supabase.from('profiles').update({ ai_usage_count: usageCount + 1 }).eq('id', user.id);
 
-        // --- AI LOGIC ---
         const body = await request.json();
         const { vehicle, category, answers, customText } = body;
 
@@ -335,11 +358,7 @@ Please generate the diagnostic report based on these symptoms.`;
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemInstruction }] },
             contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-            generationConfig: { 
-              response_mime_type: "application/json", 
-              temperature: 0.2,
-              maxOutputTokens: 4000
-            }
+            generationConfig: { response_mime_type: "application/json", temperature: 0.2, maxOutputTokens: 4000 }
           })
         });
 
@@ -356,17 +375,7 @@ Please generate the diagnostic report based on these symptoms.`;
         try {
           reportJson = JSON.parse(rawText);
         } catch (e) {
-          reportJson = {
-            safetyLevel: "amber",
-            safetyMessage: "The AI response was slightly malformed. Please try again.",
-            likelyPossibility: "Analysis incomplete.",
-            otherPossibilities: "Please try again.",
-            whySuggested: "N/A",
-            whatToAsk: "N/A",
-            whatGarageMayInspect: "N/A",
-            urgency: "Unknown",
-            confidence: "Low"
-          };
+          reportJson = { safetyLevel: "amber", safetyMessage: "The AI response was slightly malformed. Please try again.", likelyPossibility: "Analysis incomplete.", otherPossibilities: "Please try again.", whySuggested: "N/A", whatToAsk: "N/A", whatGarageMayInspect: "N/A", urgency: "Unknown", confidence: "Low" };
         }
 
         return new Response(JSON.stringify(reportJson), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -374,7 +383,6 @@ Please generate the diagnostic report based on these symptoms.`;
 
       // --- QUOTE EXPLAINER ROUTE ---
       if (url.pathname === "/api/quote-explain" && request.method === "POST") {
-        // Require authentication
         if (!authHeader || authHeader === "Bearer null") {
            return new Response(JSON.stringify({ error: "You must be logged in to use the Quote Explainer." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
@@ -385,13 +393,9 @@ Please generate the diagnostic report based on these symptoms.`;
            return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
         
-        // PREMIUM ONLY CHECK
         const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
         if (!profile || profile.plan !== 'premium') {
-           return new Response(JSON.stringify({ 
-             error: "Premium Required", 
-             message: "The Quote Checker is a Premium feature. Please upgrade to unlock it." 
-           }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+           return new Response(JSON.stringify({ error: "Premium Required", message: "The Quote Checker is a Premium feature. Please upgrade to unlock it." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
         const body = await request.json();
@@ -432,11 +436,7 @@ Please analyse this quote and generate the JSON report.`;
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemInstruction }] },
             contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-            generationConfig: { 
-              response_mime_type: "application/json", 
-              temperature: 0.2,
-              maxOutputTokens: 1500
-            }
+            generationConfig: { response_mime_type: "application/json", temperature: 0.2, maxOutputTokens: 1500 }
           })
         });
 
@@ -461,28 +461,18 @@ Please analyse this quote and generate the JSON report.`;
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-        const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-          apiVersion: '2023-10-16',
-          httpClient: Stripe.createFetchHttpClient(),
-        });
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16', httpClient: Stripe.createFetchHttpClient() });
 
         try {
-          // ✅ Read the origin sent from the frontend (e.g. http://127.0.0.1:5500), fallback to production
           const body = await request.json().catch(() => ({}));
           const origin = body.origin || 'https://carexplain.co.uk';
 
           const session = await stripe.checkout.sessions.create({
             managed_payments: { enabled: false },
-            line_items: [
-              {
-                price: env.STRIPE_PRICE_ID,
-                quantity: 1,
-              },
-            ],
+            line_items: [{ price: env.STRIPE_PRICE_ID, quantity: 1 }],
             mode: 'subscription',
             customer_email: user.email,
             client_reference_id: user.id,
-            // ✅ Dynamic URLs based on the origin that sent the request
             success_url: `${origin}/garage.html?payment=success`,
             cancel_url: `${origin}/garage.html?payment=cancelled`,
           });
@@ -495,10 +485,7 @@ Please analyse this quote and generate the JSON report.`;
 
       // --- STRIPE WEBHOOK ROUTE ---
       if (url.pathname === "/api/stripe/webhook" && request.method === "POST") {
-        const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-          apiVersion: '2023-10-16',
-          httpClient: Stripe.createFetchHttpClient(),
-        });
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16', httpClient: Stripe.createFetchHttpClient() });
 
         const signature = request.headers.get('stripe-signature');
         const body = await request.text();
@@ -510,13 +497,11 @@ Please analyse this quote and generate the JSON report.`;
           return new Response(`Webhook Error: ${err.message}`, { status: 400 });
         }
 
-        // Handle the checkout.session.completed event
         if (event.type === 'checkout.session.completed') {
           const session = event.data.object;
           const userId = session.client_reference_id;
           
           if (userId) {
-            // Update the user's plan to 'premium' in Supabase
             await supabase.from('profiles').update({ plan: 'premium' }).eq('id', userId);
           }
         }
