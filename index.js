@@ -25,9 +25,16 @@ export default {
 
       // --- AUTH ROUTES ---
       if (url.pathname === "/api/auth/signup" && request.method === "POST") {
-        const { email, password } = await request.json();
+        const { email, password, username } = await request.json();
         const { data, error } = await supabase.auth.signUp({ email, password });
+        
         if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        
+        // Save the username to the profiles table if provided
+        if (data.user && username) {
+          await supabase.from('profiles').update({ username: username }).eq('id', data.user.id);
+        }
+
         return new Response(JSON.stringify({ user: data.user }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
@@ -118,7 +125,7 @@ export default {
       if (url.pathname === "/api/community/posts" && request.method === "GET") {
         const { data: posts, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( username, email )`) // <-- Added username
+          .select(`id, title, content, category, created_at, profiles ( username, email )`)
           .order('created_at', { ascending: false });
           
         if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -130,7 +137,7 @@ export default {
         const postId = url.pathname.split("/").pop();
         const { data: post, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( username, email )`) // <-- Added username
+          .select(`id, title, content, category, created_at, profiles ( username, email )`)
           .eq('id', postId)
           .single();
           
@@ -159,7 +166,7 @@ export default {
         const postId = url.pathname.split("/").pop();
         const { data: replies, error: dbError } = await supabase
           .from('community_replies')
-          .select(`id, content, created_at, profiles ( username, email )`) // <-- Added username
+          .select(`id, content, created_at, profiles ( username, email )`)
           .eq('post_id', postId)
           .order('created_at', { ascending: true });
           
