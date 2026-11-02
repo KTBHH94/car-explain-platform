@@ -58,9 +58,9 @@ export default {
 
         // Get User Profile (to check plan for the banner)
         if (url.pathname === "/api/user/profile" && request.method === "GET") {
-          const { data: profile, error: dbError } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+          const { data: profile, error: dbError } = await supabase.from('profiles').select('*').eq('id', user.id).single(); // <-- Changed to *
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          return new Response(JSON.stringify({ plan: profile.plan }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ plan: profile.plan, is_admin: profile.is_admin }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }); // <-- Added is_admin
         }
 
         // Vehicles
@@ -189,6 +189,58 @@ export default {
           
         if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response(JSON.stringify({ reply: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // --- ADMIN ROUTES ---
+      if (url.pathname.startsWith("/api/admin/")) {
+        if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+        // Verify they are actually an admin
+        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+        if (!profile || !profile.is_admin) {
+          return new Response(JSON.stringify({ error: "Access Denied. Admins only." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // Get Stats
+        if (url.pathname === "/api/admin/stats" && request.method === "GET") {
+          const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+          const { count: postsCount } = await supabase.from('community_posts').select('*', { count: 'exact', head: true });
+          return new Response(JSON.stringify({ users: usersCount, posts: postsCount }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // Get All Users
+        if (url.pathname === "/api/admin/users" && request.method === "GET") {
+          const { data: users, error: dbError } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ users }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // Update User Plan
+        if (url.pathname === "/api/admin/users/plan" && request.method === "POST") {
+          const { targetUserId, newPlan } = await request.json();
+          const { error: dbError } = await supabase.from('profiles').update({ plan: newPlan }).eq('id', targetUserId);
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // Get All Posts (for moderation)
+        if (url.pathname === "/api/admin/posts" && request.method === "GET") {
+          const { data: posts, error: dbError } = await supabase.from('community_posts').select(`id, title, category, created_at, profiles ( email, username )`).order('created_at', { ascending: false });
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ posts }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // Delete Post
+        if (url.pathname.startsWith("/api/admin/posts/") && request.method === "DELETE") {
+          const postId = url.pathname.split("/").pop();
+          const { error: dbError } = await supabase.from('community_posts').delete().eq('id', postId);
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
       }
 
       // --- AI DIAGNOSE ROUTE ---
