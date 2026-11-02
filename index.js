@@ -118,7 +118,7 @@ export default {
       if (url.pathname === "/api/community/posts" && request.method === "GET") {
         const { data: posts, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( email )`)
+          .select(`id, title, content, category, created_at, profiles ( username, email )`) // <-- Added username
           .order('created_at', { ascending: false });
           
         if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -130,7 +130,7 @@ export default {
         const postId = url.pathname.split("/").pop();
         const { data: post, error: dbError } = await supabase
           .from('community_posts')
-          .select(`id, title, content, category, created_at, profiles ( email )`)
+          .select(`id, title, content, category, created_at, profiles ( username, email )`) // <-- Added username
           .eq('id', postId)
           .single();
           
@@ -159,7 +159,7 @@ export default {
         const postId = url.pathname.split("/").pop();
         const { data: replies, error: dbError } = await supabase
           .from('community_replies')
-          .select(`id, content, created_at, profiles ( email )`)
+          .select(`id, content, created_at, profiles ( username, email )`) // <-- Added username
           .eq('post_id', postId)
           .order('created_at', { ascending: true });
           
