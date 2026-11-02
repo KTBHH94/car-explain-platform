@@ -9,18 +9,12 @@
     .auth-container { max-width: 420px; margin: 80px auto 120px; padding: 40px; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
     .auth-container h2 { margin-top: 0; color: var(--navy); font-size: 28px; letter-spacing: -1px; }
     .auth-container p.sub { color: var(--muted); font-size: 14px; margin-bottom: 25px; }
-    
-    /* Form Inputs */
     .auth-container .input-group { position: relative; margin-bottom: 16px; width: 100%; }
     .auth-container input { width: 100%; padding: 14px 40px 14px 14px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.2s; }
     .auth-container input:focus { border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-    
-    /* Professional SVG Eye Toggle */
     .toggle-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
     .toggle-eye:hover { color: var(--navy); }
     .toggle-eye svg { width: 20px; height: 20px; stroke-width: 2; }
-    
-    /* Submit Button */
     .auth-container .btn { width: 100%; padding: 14px; margin-top: 10px; margin-bottom: 20px; font-size: 15px; }
     .toggle-link { text-align: center; font-size: 14px; color: var(--blue); cursor: pointer; font-weight: 700; }
     .toggle-link:hover { text-decoration: underline; }
@@ -41,9 +35,7 @@
       <a href="community.html" class="nav-link">Community</a>
       <a href="car-research.html" class="nav-link">Car Research</a>
     </nav>
-    <div class="header-actions" id="headerAuth">
-      <!-- Filled by JS -->
-    </div>
+    <div class="header-actions" id="headerAuth"></div>
   </div>
 </header>
 
@@ -54,9 +46,8 @@
     <div id="auth-error"></div>
     
     <form id="auth-form">
-      <!-- NEW USERNAME FIELD (Hidden by default) -->
-      <div class="input-group" id="username-group" style="display: none;">
-        <input type="text" id="username" placeholder="Username (e.g. FiestaFan99)" required>
+      <div class="input-group" id="username-group">
+        <input type="text" id="username" placeholder="Username (e.g. FiestaFan99)">
       </div>
 
       <div class="input-group">
@@ -66,7 +57,6 @@
       <div class="input-group">
         <input type="password" id="password" placeholder="Password (min 6 characters)" required>
         <button type="button" class="toggle-eye" id="togglePassword" aria-label="Show password">
-          <!-- Default Eye Icon -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
@@ -132,7 +122,7 @@
     }
   }
 
-  // --- 2. PASSWORD VISIBILITY TOGGLE (WITH SVG ICONS) ---
+  // --- 2. PASSWORD VISIBILITY TOGGLE ---
   const togglePassword = document.getElementById('togglePassword');
   const passwordInput = document.getElementById('password');
 
@@ -143,11 +133,7 @@
     togglePassword.addEventListener('click', function (e) {
       e.preventDefault();
       const isPassword = passwordInput.getAttribute('type') === 'password';
-      
-      // Toggle type
       passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-      
-      // Toggle Icon
       this.innerHTML = isPassword ? eyeOffIcon : eyeIcon;
     });
   }
@@ -160,7 +146,12 @@
   const submitBtn = document.getElementById('submit-btn');
   const toggleLink = document.getElementById('toggle-link');
   const errorDiv = document.getElementById('auth-error');
-  const usernameGroup = document.getElementById('username-group'); // NEW
+  const usernameGroup = document.getElementById('username-group');
+  const usernameInput = document.getElementById('username');
+
+  // Start in Signup mode — username is required and visible
+  usernameInput.required = true;
+  usernameGroup.style.display = 'block';
 
   toggleLink.addEventListener('click', () => {
     isLogin = !isLogin;
@@ -170,8 +161,10 @@
     toggleLink.innerText = isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In";
     errorDiv.style.display = 'none';
 
-    // NEW: Hide username if logging in, show it if signing up
+    // FIX: toggle BOTH the visibility and the required attribute
     usernameGroup.style.display = isLogin ? 'none' : 'block';
+    usernameInput.required = !isLogin;
+    if (isLogin) usernameInput.value = '';
   });
 
   // --- 4. FORM SUBMISSION ---
@@ -183,14 +176,13 @@
 
     const email = document.getElementById('email').value.trim();
     const password = passwordInput.value;
-    const username = document.getElementById('username').value.trim(); // NEW
+    const username = usernameInput.value.trim();
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
 
     try {
       const response = await fetch(`https://carxplain-api.murningella.workers.dev${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // NEW: Only include username in the body if signing up
         body: JSON.stringify({ 
           email, 
           password,
