@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Settings | CarExplain</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .settings-container { max-width: 800px; margin: 50px auto; }
+  .settings-header { margin-bottom: 30px; }
+  .settings-header h1 { color: var(--navy); font-size: 32px; letter-spacing: -1px; margin: 0 0 8px; }
+  .settings-header p { color: var(--muted); margin: 0; }
+  .settings-grid { display: grid; grid-template-columns: 280px 1fr; gap: 30px; align-items: start; }
+  @media(max-width: 768px) { .settings-grid { grid-template-columns: 1fr; } }
+  .profile-preview { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(15,23,42,.03); }
+  .avatar-large { width: 120px; height: 120px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 900; margin: 0 auto 20px; background-size: cover; background-position: center; border: 4px solid #f1f5f9; }
+  .upload-btn { font-size: 13px; font-weight: 800; color: var(--blue); cursor: pointer; display: inline-block; padding: 8px 16px; border-radius: 8px; transition: 0.2s; background: #e8eefc; }
+  .upload-btn:hover { background: #d0defc; }
+  input[type="file"] { display: none; }
+  .settings-form { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(15,23,42,.03); }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 800; color: var(--slate); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input, .form-group textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; font-family: inherit; font-size: 15px; box-sizing: border-box; outline: none; }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+  .form-group textarea { resize: vertical; min-height: 120px; }
+  .help-text { font-size: 12px; color: var(--muted); margin-top: 6px; display: block; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-container header-flex">
+    <div class="logo-group"><a href="index.html" class="brand-logo">CAR<span>EXPLAIN</span></a></div>
+    <nav class="main-navigation">
+      <a href="diagnose.html" class="nav-link">Diagnostics</a>
+      <a href="quote-checker.html" class="nav-link">Quote Checker</a>
+      <a href="garage.html" class="nav-link">My Garage</a>
+      <a href="community.html" class="nav-link">Community</a>
+      <a href="car-research.html" class="nav-link">Car Research</a>
+    </nav>
+    <div class="header-actions" id="headerAuth"></div>
+  </div>
+</header>
+
+<main class="site-container">
+  <div class="settings-container">
+    <div class="settings-header">
+      <h1>Account Settings</h1>
+      <p>Update your public profile for the CarExplain Community.</p>
+    </div>
+
+    <div class="settings-grid">
+      <div class="profile-preview">
+        <div class="avatar-large" id="avatarPreview">?</div>
+        <label for="avatarInput" class="upload-btn">Change Photo</label>
+        <input type="file" id="avatarInput" accept="image/*">
+        <p class="help-text" style="margin-top:15px;">Max size: 2MB. JPG or PNG.</p>
+      </div>
+
+      <div class="settings-form">
+        <form id="settingsForm">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="usernameInput" placeholder="e.g. FiestaFan99" required>
+            <span class="help-text">This is how you appear on posts and replies.</span>
+          </div>
+
+          <div class="form-group">
+            <label>About Me / Car History</label>
+            <textarea id="bioInput" placeholder="Tell the community about your cars. What was your first car? What's your dream car? Any funny breakdown stories?"></textarea>
+            <span class="help-text">This will appear on your public profile next to your posts.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="saveBtn" style="width: 100%;">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-container footer-bottom">
+    <p>&copy; 2026 CarExplain. Reference guidance only — it does not replace professional garage verification.</p>
+  </div>
+</footer>
+
+<script>
+  const API_URL = "https://carxplain-api.murningella.workers.dev";
+  const token = localStorage.getItem('sb-access-token');
+  if (!token) { window.location.href = 'login.html'; }
+
+  const avatarPreview = document.getElementById('avatarPreview');
+  const usernameInput = document.getElementById('usernameInput');
+  const bioInput = document.getElementById('bioInput');
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const headerAuth = document.getElementById('headerAuth');
+    try {
+      const res = await fetch(`${API_URL}/api/user/profile`, { headers: { "Authorization": `Bearer ${token}` } });
+      const data = await res.json();
+      const adminLink = data.is_admin ? `<a href="admin.html" class="login-action" style="color:#ef4444;">Admin</a>` : '';
+      headerAuth.innerHTML = `${adminLink}<a href="settings.html" class="login-action">Settings</a><a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
+      
+      if (data.username) usernameInput.value = data.username;
+      if (data.bio) bioInput.value = data.bio;
+      if (data.avatar_url) {
+         avatarPreview.style.backgroundImage = `url(${data.avatar_url})`;
+         avatarPreview.innerText = '';
+      } else if (data.username) {
+         avatarPreview.innerText = data.username.charAt(0).toUpperCase();
+      }
+    } catch (e) {
+      headerAuth.innerHTML = `<a href="settings.html" class="login-action">Settings</a><a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
+    }
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = 'login.html'; });
+  });
+
+  document.getElementById('avatarInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("File is too large. Please choose an image under 2MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      avatarPreview.style.backgroundImage = `url(${e.target.result})`;
+      avatarPreview.innerText = '';
+    };
+    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+      const res = await fetch(`${API_URL}/api/user/avatar`, {
+        method: 'POST',
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.error) alert("Error uploading avatar: " + data.error);
+    } catch (err) {
+      alert("Failed to connect to server.");
+    }
+  });
+
+  document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('saveBtn');
+    btn.innerText = 'Saving...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_URL}/api/user/profile`, {
+        method: 'PUT',
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          username: usernameInput.value.trim(),
+          bio: bioInput.value.trim()
+        })
+      });
+
+      if (res.ok) {
+        btn.innerText = 'Saved!';
+        setTimeout(() => { btn.innerText = 'Save Changes'; btn.disabled = false; }, 2000);
+      } else {
+        const err = await res.json();
+        alert("Error: " + err.error);
+        btn.innerText = 'Save Changes'; btn.disabled = false;
+      }
+    } catch (err) {
+      alert("Failed to connect to server.");
+      btn.innerText = 'Save Changes'; btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
