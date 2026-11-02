@@ -17,10 +17,10 @@
 
   /* Main Feed */
   .post-list { display: flex; flex-direction: column; gap: 16px; }
-  .post-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; text-decoration: none; color: inherit; transition: 0.2s; display: flex; gap: 20px; }
+  .post-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; text-decoration: none; color: inherit; transition: 0.2s; display: flex; gap: 20px; cursor: pointer; }
   .post-card:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(15,23,42,.05); }
   
-  .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; flex-shrink: 0; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; flex-shrink: 0; background-size: cover; background-position: center; }
   
   .post-content-area { flex: 1; min-width: 0; }
   .post-meta { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
@@ -160,176 +160,183 @@
 </footer>
 
 <script>
+  // --- 1. GLOBAL VARIABLES & SECURITY ---
+  const API_URL = "https://carxplain-api.murningella.workers.dev";
   const token = localStorage.getItem('sb-access-token');
-if (!token) { 
-  window.location.href = 'login.html'; 
-}
-const API_URL = "https://carxplain-api.murningella.workers.dev";
-const token = localStorage.getItem('sb-access-token');
-let allPosts = []; // Store posts locally so we can filter them without fetching again
-let currentFilter = "All";
-
-// --- HELPER: Turn email into a nice display name ---
-function getDisplayName(email) {
-  if (!email || email === "Anonymous") return "Anonymous Driver";
-  const prefix = email.split('@')[0];
-  // If it has dots (e.g. ella.smith), capitalize each word
-  if (prefix.includes('.')) {
-    return prefix.split('.').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  
+  if (!token) { 
+    window.location.href = 'login.html'; 
   }
-  // Otherwise just capitalize the first letter (e.g. ellasmith -> Ellasmith)
-  return prefix.charAt(0).toUpperCase() + prefix.slice(1);
-}
 
-function getCategoryClass(cat) {
-  if (cat === 'Diagnosis') return 'badge-diagnosis';
-  if (cat === 'Repair Outcome') return 'badge-repair';
-  if (cat === 'Cost Question') return 'badge-cost';
-  if (cat === 'MOT') return 'badge-mot';
-  return 'badge-general';
-}
+  let allPosts = [];
+  let currentFilter = "All";
 
-// Header Auth Logic
-document.addEventListener("DOMContentLoaded", () => {
-  const headerAuth = document.getElementById('headerAuth');
-  if (headerAuth) {
-    if (token) {
-      headerAuth.innerHTML = `<a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
-      document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = 'login.html'; });
-    } else {
-      headerAuth.innerHTML = `<a href="login.html" class="login-action">Log In</a><a href="signup.html" class="btn btn-primary">Sign Up</a>`;
+  // --- 2. HELPER FUNCTIONS ---
+  function getDisplayName(profile) {
+    if (profile?.username) return profile.username;
+    if (profile?.email) {
+      const prefix = profile.email.split('@')[0];
+      if (prefix.includes('.')) return prefix.split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      return prefix.charAt(0).toUpperCase() + prefix.slice(1);
     }
+    return "Anonymous Driver";
   }
-  
-  loadPosts();
-});
 
-async function loadPosts() {
-  const list = document.getElementById('postList');
-  try {
-    const res = await fetch(`${API_URL}/api/community/posts`);
-    const data = await res.json();
+  function getCategoryClass(cat) {
+    if (cat === 'Diagnosis') return 'badge-diagnosis';
+    if (cat === 'Repair Outcome') return 'badge-repair';
+    if (cat === 'Cost Question') return 'badge-cost';
+    if (cat === 'MOT') return 'badge-mot';
+    return 'badge-general';
+  }
 
-    if (!res.ok || data.error) {
-      list.innerHTML = `<p style="text-align:center; color:red;">Error loading posts: ${data.error || res.status}</p>`;
-      return;
+  // --- 3. HEADER & INIT ---
+  document.addEventListener("DOMContentLoaded", async () => {
+    const headerAuth = document.getElementById('headerAuth');
+    
+    // Fetch profile to check for Admin status
+    try {
+      const res = await fetch(`${API_URL}/api/user/profile`, { headers: { "Authorization": `Bearer ${token}` } });
+      const data = await res.json();
+      
+      const adminLink = data.is_admin ? `<a href="admin.html" class="login-action" style="color:#ef4444;">Admin</a>` : '';
+      
+      headerAuth.innerHTML = `
+        ${adminLink}
+        <a href="settings.html" class="login-action">Settings</a>
+        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
+        <a href="garage.html" class="btn btn-primary">My Garage</a>
+      `;
+    } catch (e) {
+      headerAuth.innerHTML = `
+        <a href="settings.html" class="login-action">Settings</a>
+        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
+        <a href="garage.html" class="btn btn-primary">My Garage</a>
+      `;
     }
-    
-    allPosts = data.posts || [];
-    updateCategoryCounts();
-    renderPosts();
 
-  } catch (e) {
-    list.innerHTML = `<p style="text-align:center; color:red;">Failed to connect to server.</p>`;
-  }
-}
-
-function updateCategoryCounts() {
-  // Reset counts
-  const cats = ["All", "Diagnosis", "Repair Outcome", "Cost Question", "MOT", "General"];
-  cats.forEach(c => {
-    const el = document.getElementById(`count-${c}`);
-    if(el) el.textContent = c === "All" ? allPosts.length : allPosts.filter(p => p.category === c).length;
-  });
-}
-
-function renderPosts() {
-  const list = document.getElementById('postList');
-  
-  const filtered = currentFilter === "All" 
-    ? allPosts 
-    : allPosts.filter(p => p.category === currentFilter);
-
-  if (filtered.length === 0) {
-    list.innerHTML = `<p style="text-align:center; color:var(--muted); padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1;">No posts in this category yet.</p>`;
-    return;
-  }
-
-  list.innerHTML = filtered.map(post => {
-    const date = new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    const displayName = getDisplayName(post.profiles?.email);
-    const initial = displayName.charAt(0).toUpperCase();
-    const badgeClass = getCategoryClass(post.category);
-    
-    return `
-      <a href="post.html?id=${post.id}" class="post-card">
-        <div class="avatar">${initial}</div>
-        <div class="post-content-area">
-          <div class="post-meta">
-            <strong>${displayName}</strong> • ${date}
-          </div>
-          <h3 class="post-title">${post.title}</h3>
-          <p class="post-snippet">${post.content}</p>
-          <div style="margin-top: 12px;">
-            <span class="badge ${badgeClass}">${post.category}</span>
-          </div>
-        </div>
-      </a>
-    `;
-  }).join("");
-}
-
-// Category Filter Logic
-document.getElementById('categoryFilter').addEventListener('click', (e) => {
-  const btn = e.target.closest('.cat-btn');
-  if (!btn) return;
-  
-  // Update active state
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  // Update filter and re-render
-  currentFilter = btn.dataset.cat;
-  renderPosts();
-});
-
-// Form Toggle Logic
-const formContainer = document.getElementById('newPostFormContainer');
-document.getElementById('togglePostBtn').addEventListener('click', () => {
-  if (!token) {
-    alert("You must be logged in to ask a question.");
-    window.location.href = 'login.html';
-    return;
-  }
-  formContainer.classList.toggle('active');
-});
-document.getElementById('cancelPostBtn').addEventListener('click', () => {
-  formContainer.classList.remove('active');
-});
-
-// Submit Post Logic
-document.getElementById('newPostForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const title = document.getElementById('postTitle').value;
-  const category = document.getElementById('postCategory').value;
-  const content = document.getElementById('postContent').value;
-
-  const btn = e.target.querySelector('button[type="submit"]');
-  btn.textContent = "Posting...";
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(`${API_URL}/api/community/posts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ title, content, category })
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { 
+      e.preventDefault(); 
+      localStorage.clear(); 
+      window.location.href = 'login.html'; 
     });
     
-    if (res.ok) {
-      document.getElementById('newPostForm').reset();
-      formContainer.classList.remove('active');
-      loadPosts(); // Reload list
-    } else {
-      const err = await res.json();
-      alert("Error: " + err.error);
+    loadPosts();
+  });
+
+  // --- 4. DATA & RENDERING ---
+  async function loadPosts() {
+    const list = document.getElementById('postList');
+    try {
+      const res = await fetch(`${API_URL}/api/community/posts`);
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        list.innerHTML = `<p style="text-align:center; color:red;">Error loading posts: ${data.error || res.status}</p>`;
+        return;
+      }
+      
+      allPosts = data.posts || [];
+      updateCategoryCounts();
+      renderPosts();
+
+    } catch (e) {
+      list.innerHTML = `<p style="text-align:center; color:red;">Failed to connect to server.</p>`;
     }
-  } catch (err) {
-    alert("Failed to connect to server.");
-  } finally {
-    btn.textContent = "Post Question";
-    btn.disabled = false;
   }
-});
+
+  function updateCategoryCounts() {
+    const cats = ["All", "Diagnosis", "Repair Outcome", "Cost Question", "MOT", "General"];
+    cats.forEach(c => {
+      const el = document.getElementById(`count-${c}`);
+      if(el) el.textContent = c === "All" ? allPosts.length : allPosts.filter(p => p.category === c).length;
+    });
+  }
+
+  function renderPosts() {
+    const list = document.getElementById('postList');
+    const filtered = currentFilter === "All" ? allPosts : allPosts.filter(p => p.category === currentFilter);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<p style="text-align:center; color:var(--muted); padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1;">No posts in this category yet.</p>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(post => {
+      const date = new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const displayName = getDisplayName(post.profiles);
+      const initial = displayName.charAt(0).toUpperCase();
+      const badgeClass = getCategoryClass(post.category);
+      const avatarStyle = post.profiles?.avatar_url ? `background-image: url(${post.profiles.avatar_url}); background-size: cover; color: transparent;` : '';
+      
+      return `
+        <a href="post.html?id=${post.id}" class="post-card">
+          <div class="avatar" style="${avatarStyle}">${initial}</div>
+          <div class="post-content-area">
+            <div class="post-meta">
+              <strong>${displayName}</strong> • ${date}
+            </div>
+            <h3 class="post-title">${post.title}</h3>
+            <p class="post-snippet">${post.content}</p>
+            <div style="margin-top: 12px;">
+              <span class="badge ${badgeClass}">${post.category}</span>
+            </div>
+          </div>
+        </a>
+      `;
+    }).join("");
+  }
+
+  // --- 5. EVENT LISTENERS ---
+  document.getElementById('categoryFilter').addEventListener('click', (e) => {
+    const btn = e.target.closest('.cat-btn');
+    if (!btn) return;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.cat;
+    renderPosts();
+  });
+
+  const formContainer = document.getElementById('newPostFormContainer');
+  document.getElementById('togglePostBtn').addEventListener('click', () => {
+    formContainer.classList.toggle('active');
+  });
+  document.getElementById('cancelPostBtn').addEventListener('click', () => {
+    formContainer.classList.remove('active');
+  });
+
+  document.getElementById('newPostForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('postTitle').value;
+    const category = document.getElementById('postCategory').value;
+    const content = document.getElementById('postContent').value;
+
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.textContent = "Posting...";
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_URL}/api/community/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ title, content, category })
+      });
+      
+      if (res.ok) {
+        document.getElementById('newPostForm').reset();
+        formContainer.classList.remove('active');
+        loadPosts();
+      } else {
+        const err = await res.json();
+        alert("Error: " + err.error);
+      }
+    } catch (err) {
+      alert("Failed to connect to server.");
+    } finally {
+      btn.textContent = "Post Question";
+      btn.disabled = false;
+    }
+  });
 </script>
 </body>
 </html>
