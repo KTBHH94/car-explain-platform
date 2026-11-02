@@ -268,7 +268,12 @@ async function renderDashboard(){
       <div class="stat-card"><p class="label">Mileage</p><p class="value small">${formatMileage(car.mileage)}</p></div>
       <div class="stat-card"><p class="label">Open problems</p><p class="value" id="statProblems">0</p></div>
       <div class="stat-card"><p class="label">Repairs logged</p><p class="value" id="statRepairs">0</p></div>
-      <div class="stat-card"><p class="label">MOT</p><p class="value small">Not connected</p></div>
+      
+      <!-- NEW MOT STAT CARD -->
+      <div class="stat-card" id="motStatCard">
+        <p class="label">MOT Status</p>
+        <button id="checkMotBtn" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="checkMOT('${car.id}', '${car.registration || ''}')">Check DVLA</button>
+      </div>
     </div>
     <div class="dashboard-tabs" role="tablist">
       <button type="button" class="tab-btn" data-tab="overview">Overview</button>
@@ -445,6 +450,56 @@ async function deleteCar(id) {
   render();
 }
 
+// --- MOT LOOKUP LOGIC ---
+async function checkMOT(vehicleId, reg) {
+  if (!reg) {
+    alert("You need to add a registration plate to this vehicle first!");
+    return;
+  }
+  
+  const btn = document.getElementById('checkMotBtn');
+  const originalText = btn.innerText;
+  btn.innerText = "Checking...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_URL}/api/mot/lookup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ registration: reg, vehicleId: vehicleId })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success && data.data.motTests && data.data.motTests.length > 0) {
+      const latestTest = data.data.motTests[0];
+      const expiry = new Date(latestTest.expiryDate).toLocaleDateString('en-GB');
+      const card = document.getElementById('motStatCard');
+      
+      let html = `<p class="label">MOT Status</p><p class="value small" style="color: #16a34a;">Expires ${expiry}</p>`;
+      
+      // Premium teaser for advisories
+      if (latestTest.rfrAndComments && latestTest.rfrAndComments.length > 0) {
+          html += `<p style="font-size: 11px; margin-top: 6px; color: #b45309; line-height: 1.4;"><strong>${latestTest.rfrAndComments.length}</strong> advisories found.`;
+          if (state.isPremium) {
+             html += ` <a href="#" onclick="alert('Full MOT breakdown coming soon!')" style="color:var(--blue); font-weight:bold;">View details</a></p>`;
+          } else {
+             html += ` <a href="#" onclick="alert('Upgrade to Premium to read AI explanations of these advisories!')" style="color:var(--blue); font-weight:bold;">Upgrade to view</a></p>`;
+          }
+      }
+      card.innerHTML = html;
+    } else {
+      alert("Error: " + (data.error || "No MOT history found for this registration."));
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
+  } catch (e) {
+    alert("Failed to connect to server.");
+    btn.innerText = originalText;
+    btn.disabled = false;
+  }
+}
+
 // --- STRIPE UPGRADE LOGIC ---
 async function upgradeToPremium() {
   try {
@@ -475,7 +530,11 @@ async function checkUserPlan() {
     });
     if (response.ok) {
       const data = await response.json();
-      if (data.plan === 'free') {
+      
+      // Set global premium state
+      state.isPremium = (data.plan === 'premium');
+      
+      if (!state.isPremium) {
         $("premiumBanner").style.display = 'flex';
       }
     }
@@ -487,7 +546,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   if (headerAuth && token) {
     try {
-      // Fetch user profile to check if admin
       const res = await fetch(`${API_URL}/api/user/profile`, { headers: { "Authorization": `Bearer ${token}` } });
       const data = await res.json();
       
