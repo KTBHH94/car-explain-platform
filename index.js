@@ -181,18 +181,20 @@ export default {
           return new Response(JSON.stringify({ mot: mot || null }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // MOT LOOKUP (POST) - FIXED ROUTE PATH
+        // MOT LOOKUP (POST) - UPDATED TO USE ENV VARIABLES FOR SCOPE
         if (url.pathname === "/api/user/mot/lookup" && request.method === "POST") {
           const { registration, vehicleId } = await request.json();
           if (!registration) return new Response(JSON.stringify({ error: "Registration is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
           try {
-            const tokenUrl = env.DVLA_TOKEN_URL || 'https://login.microsoftonline.com/1f673723-8a47-4c6e-9a33-6c8d8eb1424f/oauth2/v2.0/token'; 
+            const tokenUrl = env.DVLA_TOKEN_URL; 
+            if (!tokenUrl) throw new Error("DVLA_TOKEN_URL secret is missing from Cloudflare.");
+            
             const tokenParams = new URLSearchParams();
             tokenParams.append('grant_type', 'client_credentials');
             tokenParams.append('client_id', env.DVLA_CLIENT_ID);
             tokenParams.append('client_secret', env.DVLA_CLIENT_SECRET);
-            tokenParams.append('scope', 'https://tapi.dvla.gov.uk/.default');
+            tokenParams.append('scope', env.DVLA_SCOPE || 'https://tapi.dvsa.gov.uk/.default');
 
             const tokenResponse = await fetch(tokenUrl, {
               method: 'POST',
@@ -200,7 +202,11 @@ export default {
               body: tokenParams
             });
             
-            if (!tokenResponse.ok) throw new Error("Failed to authenticate with DVLA");
+            if (!tokenResponse.ok) {
+              const errorDetails = await tokenResponse.text();
+              throw new Error(`Auth failed (${tokenResponse.status}). Details: ${errorDetails}`);
+            }
+            
             const tokenData = await tokenResponse.json();
             const dvlaAccessToken = tokenData.access_token;
 
@@ -218,7 +224,8 @@ export default {
 
             if (!motResponse.ok) {
               if (motResponse.status === 404) return new Response(JSON.stringify({ error: "Vehicle not found on DVLA system" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-              throw new Error(`DVLA API Error: ${motResponse.status}`);
+              const motError = await motResponse.text();
+              throw new Error(`DVLA API Error (${motResponse.status}): ${motError}`);
             }
 
             const motData = await motResponse.json();
