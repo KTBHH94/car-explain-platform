@@ -103,6 +103,7 @@ export default {
           }
         }
 
+        // VEHICLES
         if (url.pathname === "/api/user/vehicles" && request.method === "GET") {
           const { data: vehicles, error: dbError } = await supabase.from('vehicles').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
           if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -126,6 +127,17 @@ export default {
           return new Response(JSON.stringify({ vehicle: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
+        if (url.pathname === "/api/user/vehicles" && request.method === "PUT") {
+          const vehicleData = await request.json();
+          const { id, make, model, year, registration, fuel, gearbox, mileage } = vehicleData;
+          const { error: dbError } = await supabase.from('vehicles')
+            .update({ make, model, year, registration, fuel, gearbox, mileage })
+            .eq('id', id).eq('user_id', user.id);
+          if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // PROBLEMS
         if (url.pathname === "/api/user/problems" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -141,6 +153,7 @@ export default {
           return new Response(JSON.stringify({ problem: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
+        // REPAIRS
         if (url.pathname === "/api/user/repairs" && request.method === "GET") {
           const vehicleId = url.searchParams.get("vehicleId");
           if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -156,15 +169,25 @@ export default {
           return new Response(JSON.stringify({ repair: data[0] }), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // --- MOT LOOKUP ROUTE ---
-        if (url.pathname === "/api/mot/lookup" && request.method === "POST") {
+        // MOT HISTORY (GET)
+        if (url.pathname === "/api/user/mot" && request.method === "GET") {
+          const vehicleId = url.searchParams.get("vehicleId");
+          if (!vehicleId) return new Response(JSON.stringify({ error: "Missing vehicleId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          
+          const { data: mot, error: dbError } = await supabase.from('mot_records').select('*').eq('vehicle_id', vehicleId).single();
+          if (dbError && dbError.code !== 'PGRST116') {
+            return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
+          return new Response(JSON.stringify({ mot: mot || null }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // MOT LOOKUP (POST) - FIXED ROUTE PATH
+        if (url.pathname === "/api/user/mot/lookup" && request.method === "POST") {
           const { registration, vehicleId } = await request.json();
           if (!registration) return new Response(JSON.stringify({ error: "Registration is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
           try {
-            // 1. Get OAuth Token from DVLA
             const tokenUrl = env.DVLA_TOKEN_URL || 'https://login.microsoftonline.com/1f673723-8a47-4c6e-9a33-6c8d8eb1424f/oauth2/v2.0/token'; 
-            
             const tokenParams = new URLSearchParams();
             tokenParams.append('grant_type', 'client_credentials');
             tokenParams.append('client_id', env.DVLA_CLIENT_ID);
@@ -181,7 +204,6 @@ export default {
             const tokenData = await tokenResponse.json();
             const dvlaAccessToken = tokenData.access_token;
 
-            // 2. Fetch MOT Data
             const cleanReg = registration.replace(/\s+/g, '').toUpperCase();
             const motUrl = `https://history.mot.api.gov.uk/v1/trade/vehicles/registration/${cleanReg}`;
             
@@ -201,8 +223,6 @@ export default {
 
             const motData = await motResponse.json();
             
-            // 3. Save to Supabase (Upsert)
-            // Note: Ensure vehicle_id has a UNIQUE constraint in your DB for this to work perfectly
             await supabase.from('mot_records').upsert({
               vehicle_id: vehicleId,
               registration: cleanReg,
@@ -222,7 +242,6 @@ export default {
       }
 
       // --- COMMUNITY ROUTES ---
-      // ... (rest of the community routes remain exactly the same) ...
       if (url.pathname === "/api/community/posts" && request.method === "GET") {
         const { data: posts, error: dbError } = await supabase
           .from('community_posts')
@@ -339,7 +358,6 @@ export default {
 
       // --- AI DIAGNOSE ROUTE ---
       if (url.pathname === "/api/diagnose" && request.method === "POST") {
-        
         if (!authHeader || authHeader === "Bearer null" || authHeader === "Bearer undefined") {
            return new Response(JSON.stringify({ error: "Unauthorized", message: "You must be logged in to use the AI diagnostic tool." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }

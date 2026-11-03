@@ -75,6 +75,8 @@
 .timeline-dot { position:absolute; left:-9px; top:4px; width:15px; height:15px; border-radius:50%; border:3px solid #fff; }
 .timeline-dot.problem { background:var(--blue2); }
 .timeline-dot.repair { background:var(--green); }
+.timeline-dot.mot-pass { background:#16a34a; }
+.timeline-dot.mot-fail { background:#dc2626; }
 .timeline-date { font-size:12px; font-weight:800; color:var(--muted); margin-bottom:4px; }
 .timeline-title { font-size:16px; font-weight:900; color:var(--navy); margin-bottom:4px; }
 .timeline-desc { font-size:14px; color:#334155; }
@@ -107,7 +109,6 @@
       <p>Add a vehicle, keep its problems, repairs and history together, and take that context into every diagnostic.</p>
     </section>
 
-    <!-- Premium Upgrade Banner (Shown to Free Users) -->
     <div class="premium-banner" id="premiumBanner" style="display:none;">
       <div>
         <h3>Upgrade to CarExplain Premium</h3>
@@ -120,12 +121,13 @@
   </div>
 </main>
 
-<!-- Add Vehicle Modal -->
+<!-- Add/Edit Vehicle Modal -->
 <div class="modal-backdrop" id="addVehicleModal">
   <div class="modal">
-    <h2>Add a vehicle</h2>
+    <h2 id="vehicleModalTitle">Add a vehicle</h2>
     <p class="modal-sub">Only make and model are required.</p>
     <form id="addVehicleForm" novalidate>
+      <input type="hidden" id="v-id" name="id">
       <div class="form-grid">
         <div class="form-field"><label>Make *</label><input id="v-make" name="make" placeholder="e.g. Ford" required></div>
         <div class="form-field"><label>Model *</label><input id="v-model" name="model" placeholder="e.g. Fiesta" required></div>
@@ -135,7 +137,7 @@
         <div class="form-field"><label>Gearbox</label><select id="v-gearbox" name="gearbox"><option value="">Not sure</option><option>Manual</option><option>Automatic</option><option>CVT</option><option>Other</option></select></div>
         <div class="form-field full"><label>Current mileage</label><input id="v-mileage" name="mileage" inputmode="numeric" placeholder="e.g. 87400"></div>
       </div>
-      <div class="modal-actions"><button type="button" class="btn btn-white" id="cancelAddVehicle">Cancel</button><button type="submit" class="btn btn-primary">Add vehicle</button></div>
+      <div class="modal-actions"><button type="button" class="btn btn-white" id="cancelAddVehicle">Cancel</button><button type="submit" class="btn btn-primary" id="submitVehicleBtn">Add vehicle</button></div>
     </form>
   </div>
 </div>
@@ -253,6 +255,23 @@ async function renderDashboard(){
   const title = `${car.make} ${car.model}`;
   const subline = [car.year, car.registration, car.fuel, car.gearbox].filter(Boolean).join(" • ") || "Details not set";
 
+  // Check if we have an MOT record to display the status
+  let motCardHtml = `<p class="label">MOT Status</p>`;
+  try {
+      const motRes = await fetch(`${API_URL}/api/user/mot?vehicleId=${car.id}`, { headers: { "Authorization": `Bearer ${token}` } });
+      const motData = await motRes.json();
+      if (motData.mot && motData.mot.expiry_date) {
+          const expDate = new Date(motData.mot.expiry_date).toLocaleDateString('en-GB');
+          motCardHtml += `<p class="value small" style="color: #16a34a;">Expires ${expDate}</p>`;
+      } else {
+          if (car.registration) {
+              motCardHtml += `<button id="checkMotBtn" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="checkMOT('${car.id}', '${car.registration}')">Check DVLA</button>`;
+          } else {
+              motCardHtml += `<p class="value small" style="color: #b45309; font-size: 12px;">Add Reg Plate</p>`;
+          }
+      }
+  } catch(e) { motCardHtml += `<p class="value small">Error</p>`; }
+
   contentEl.innerHTML = `
     <div class="dashboard-head">
       <div>
@@ -261,6 +280,7 @@ async function renderDashboard(){
       </div>
       <div class="dashboard-toolbar">
         <a href="diagnose.html?vehicle=${car.id}" class="btn btn-primary">Run a diagnostic</a>
+        <button type="button" class="btn btn-white" id="editCarBtn">Edit details</button>
         <button type="button" class="btn btn-white" id="deleteCarBtn">Remove vehicle</button>
       </div>
     </div>
@@ -268,27 +288,26 @@ async function renderDashboard(){
       <div class="stat-card"><p class="label">Mileage</p><p class="value small">${formatMileage(car.mileage)}</p></div>
       <div class="stat-card"><p class="label">Open problems</p><p class="value" id="statProblems">0</p></div>
       <div class="stat-card"><p class="label">Repairs logged</p><p class="value" id="statRepairs">0</p></div>
-      
-      <!-- NEW MOT STAT CARD -->
-      <div class="stat-card" id="motStatCard">
-        <p class="label">MOT Status</p>
-        <button id="checkMotBtn" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="checkMOT('${car.id}', '${car.registration || ''}')">Check DVLA</button>
-      </div>
+      <div class="stat-card" id="motStatCard">${motCardHtml}</div>
     </div>
     <div class="dashboard-tabs" role="tablist">
       <button type="button" class="tab-btn" data-tab="overview">Overview</button>
       <button type="button" class="tab-btn" data-tab="problems">Problems</button>
       <button type="button" class="tab-btn" data-tab="repairs">Repairs</button>
+      <button type="button" class="tab-btn" data-tab="mot">MOT History</button>
       <button type="button" class="tab-btn" data-tab="timeline">Timeline</button>
     </div>
     <div class="tab-panel" data-panel="overview"></div>
     <div class="tab-panel" data-panel="problems"></div>
     <div class="tab-panel" data-panel="repairs"></div>
+    <div class="tab-panel" data-panel="mot"></div>
     <div class="tab-panel" data-panel="timeline"></div>
   `;
 
   $("backToList").addEventListener("click", () => { state.activeVehicleId = null; render(); });
   $("deleteCarBtn").addEventListener("click", () => deleteCar(car.id));
+  $("editCarBtn").addEventListener("click", () => openEditModal(car));
+  
   contentEl.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", () => { state.activeTab = btn.dataset.tab; updateTabs(); });
   });
@@ -306,11 +325,46 @@ async function renderDashboard(){
   $("statProblems").textContent = state.problems.length;
   $("statRepairs").textContent = state.repairs.length;
 
-  renderTabPanels(car); 
+  await renderTabPanels(car); 
   updateTabs();
 }
 
-function renderTabPanels(car){
+async function renderTabPanels(car){
+  let motHtml = `<div class="placeholder"><div class="big">📄</div><h3>No MOT history found</h3><p>Click "Check DVLA" on the dashboard to pull this vehicle's history.</p></div>`;
+  
+  try {
+    const motRes = await fetch(`${API_URL}/api/user/mot?vehicleId=${car.id}`, { headers: { "Authorization": `Bearer ${token}` } });
+    const motData = await motRes.json();
+    
+    if (motData.mot && motData.mot.raw_data && motData.mot.raw_data.motTests) {
+      const tests = motData.mot.raw_data.motTests;
+      motHtml = `<div style="display:flex; flex-direction:column; gap:16px;">`;
+      tests.forEach(test => {
+        const isPass = test.testResult === 'PASSED';
+        const color = isPass ? '#16a34a' : '#dc2626';
+        const date = new Date(test.testDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        motHtml += `
+          <div class="timeline-item">
+            <div class="timeline-dot ${isPass ? 'mot-pass' : 'mot-fail'}"></div>
+            <div class="timeline-date">${date} • ${test.odometerValue} miles</div>
+            <div class="timeline-title" style="color: ${color};">${isPass ? 'PASSED' : 'FAILED'}</div>
+            <div class="timeline-desc">Expiry: ${test.expiryDate || 'N/A'}</div>
+            ${test.rfrAndComments && test.rfrAndComments.length > 0 ? `
+              <div style="margin-top:10px; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+                <strong style="font-size:12px; color:#334155;">Advisories / Failures:</strong>
+                <ul style="margin:5px 0 0 15px; padding:0; font-size:13px; color:#475569;">
+                  ${test.rfrAndComments.map(r => `<li>${r.text} (${r.type})</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+      motHtml += `</div>`;
+    }
+  } catch(e) { console.error(e); }
+
   const panels = {
     overview: `<div class="placeholder"><div class="big">📋</div><h3>Overview</h3><p>A summary of this vehicle will appear here.</p><a href="diagnose.html?vehicle=${car.id}" class="btn btn-primary">Run a diagnostic</a></div>`,
     
@@ -351,6 +405,8 @@ function renderTabPanels(car){
             </div>`}).join("")}
         </div>`,
 
+    mot: motHtml,
+
     timeline: (() => {
       const events = [
         ...state.problems.map(p => ({...p, type:'problem', date: new Date(p.created_at)})),
@@ -390,7 +446,30 @@ function updateTabs(){
   contentEl.querySelectorAll(".tab-panel").forEach(panel => panel.classList.toggle("active", panel.dataset.panel === state.activeTab));
 }
 
-function openAddModal(){ addFormEl.reset(); modalEl.classList.add("open"); }
+function openAddModal(){ 
+  addFormEl.reset(); 
+  $("v-id").value = "";
+  $("vehicleModalTitle").innerText = "Add a vehicle";
+  $("submitVehicleBtn").innerText = "Add vehicle";
+  modalEl.classList.add("open"); 
+}
+
+function openEditModal(car){
+  addFormEl.reset();
+  $("v-id").value = car.id;
+  $("v-make").value = car.make || "";
+  $("v-model").value = car.model || "";
+  $("v-year").value = car.year || "";
+  $("v-reg").value = car.registration || "";
+  $("v-fuel").value = car.fuel || "";
+  $("v-gearbox").value = car.gearbox || "";
+  $("v-mileage").value = car.mileage || "";
+  
+  $("vehicleModalTitle").innerText = "Edit vehicle";
+  $("submitVehicleBtn").innerText = "Save changes";
+  modalEl.classList.add("open"); 
+}
+
 function closeAddModal(){ modalEl.classList.remove("open"); }
 
 function openRepairModal(carId, problemId){
@@ -407,17 +486,40 @@ function closeRepairModal(){ repairModalEl.classList.remove("open"); }
 async function handleAddSubmit(e){
   e.preventDefault();
   const form = e.target;
-  const data = { make: form.make.value.trim(), model: form.model.value.trim(), year: form.year.value.trim(), registration: form.registration.value.trim(), fuel: form.fuel.value, gearbox: form.gearbox.value, mileage: form.mileage.value.trim() };
+  const vehicleId = $("v-id").value;
+  const isEdit = !!vehicleId;
+
+  const data = { 
+    id: vehicleId,
+    make: form.make.value.trim(), 
+    model: form.model.value.trim(), 
+    year: form.year.value.trim(), 
+    registration: form.registration.value.trim(), 
+    fuel: form.fuel.value, 
+    gearbox: form.gearbox.value, 
+    mileage: form.mileage.value.trim() 
+  };
+  
   if(!data.make || !data.model){ alert("Please enter at least the make and model."); return; }
+  
   try {
-    const response = await fetch(`${API_URL}/api/user/vehicles`, { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(data) });
+    const method = isEdit ? "PUT" : "POST";
+    const response = await fetch(`${API_URL}/api/user/vehicles`, { method, headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(data) });
+    
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error || "Failed to add vehicle");
+      throw new Error(err.error || "Failed to save vehicle");
     }
-    await loadCars(); closeAddModal(); 
-    const newCar = state.cars[0];
-    if(newCar) { state.activeVehicleId = newCar.id; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+    
+    await loadCars(); 
+    closeAddModal(); 
+    
+    if(!isEdit) {
+      const newCar = state.cars[0];
+      if(newCar) { state.activeVehicleId = newCar.id; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+    } else {
+      render(); // Refresh current dashboard
+    }
   } catch (e) { alert("Error: " + e.message); }
 }
 
@@ -463,7 +565,7 @@ async function checkMOT(vehicleId, reg) {
   btn.disabled = true;
 
   try {
-    const res = await fetch(`${API_URL}/api/mot/lookup`, {
+    const res = await fetch(`${API_URL}/api/user/mot/lookup`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body: JSON.stringify({ registration: reg, vehicleId: vehicleId })
@@ -472,22 +574,7 @@ async function checkMOT(vehicleId, reg) {
     const data = await res.json();
     
     if (data.success && data.data.motTests && data.data.motTests.length > 0) {
-      const latestTest = data.data.motTests[0];
-      const expiry = new Date(latestTest.expiryDate).toLocaleDateString('en-GB');
-      const card = document.getElementById('motStatCard');
-      
-      let html = `<p class="label">MOT Status</p><p class="value small" style="color: #16a34a;">Expires ${expiry}</p>`;
-      
-      // Premium teaser for advisories
-      if (latestTest.rfrAndComments && latestTest.rfrAndComments.length > 0) {
-          html += `<p style="font-size: 11px; margin-top: 6px; color: #b45309; line-height: 1.4;"><strong>${latestTest.rfrAndComments.length}</strong> advisories found.`;
-          if (state.isPremium) {
-             html += ` <a href="#" onclick="alert('Full MOT breakdown coming soon!')" style="color:var(--blue); font-weight:bold;">View details</a></p>`;
-          } else {
-             html += ` <a href="#" onclick="alert('Upgrade to Premium to read AI explanations of these advisories!')" style="color:var(--blue); font-weight:bold;">Upgrade to view</a></p>`;
-          }
-      }
-      card.innerHTML = html;
+      renderDashboard(); // Re-render the whole dashboard to show updated MOT data
     } else {
       alert("Error: " + (data.error || "No MOT history found for this registration."));
       btn.innerText = originalText;
@@ -522,54 +609,29 @@ async function upgradeToPremium() {
   }
 }
 
-// --- FETCH USER PROFILE TO SHOW/HIDE BANNER & ADMIN LINKS ---
 async function checkUserPlan() {
   try {
-    const response = await fetch(`${API_URL}/api/user/profile`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
+    const response = await fetch(`${API_URL}/api/user/profile`, { headers: { "Authorization": `Bearer ${token}` } });
     if (response.ok) {
       const data = await response.json();
-      
-      // Set global premium state
       state.isPremium = (data.plan === 'premium');
-      
-      if (!state.isPremium) {
-        $("premiumBanner").style.display = 'flex';
-      }
+      if (!state.isPremium) $("premiumBanner").style.display = 'flex';
     }
   } catch (e) { console.log(e); }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   const headerAuth = document.getElementById('headerAuth');
-  
   if (headerAuth && token) {
     try {
       const res = await fetch(`${API_URL}/api/user/profile`, { headers: { "Authorization": `Bearer ${token}` } });
       const data = await res.json();
-      
       const adminLink = data.is_admin ? `<a href="admin.html" class="login-action" style="color:#ef4444;">Admin</a>` : '';
-      
-      headerAuth.innerHTML = `
-        ${adminLink}
-        <a href="settings.html" class="login-action">Settings</a>
-        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
-        <a href="garage.html" class="btn btn-primary">My Garage</a>
-      `;
+      headerAuth.innerHTML = `${adminLink}<a href="settings.html" class="login-action">Settings</a><a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
     } catch (e) {
-      headerAuth.innerHTML = `
-        <a href="settings.html" class="login-action">Settings</a>
-        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
-        <a href="garage.html" class="btn btn-primary">My Garage</a>
-      `;
+      headerAuth.innerHTML = `<a href="settings.html" class="login-action">Settings</a><a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
     }
-    
-    document.getElementById('logoutBtn').addEventListener('click', (e) => { 
-      e.preventDefault(); 
-      localStorage.clear(); 
-      window.location.href = 'login.html'; 
-    });
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = 'login.html'; });
   }
   
   if (token) {
