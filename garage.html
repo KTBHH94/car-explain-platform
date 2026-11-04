@@ -81,6 +81,10 @@
 .timeline-title { font-size:16px; font-weight:900; color:var(--navy); margin-bottom:4px; }
 .timeline-desc { font-size:14px; color:#334155; }
 
+/* AI Report Box */
+.ai-report-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-top: 10px; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
 @media(max-width:900px){ .vehicle-grid{ grid-template-columns:repeat(2,1fr); } .dashboard-stats{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:640px){ .vehicle-grid{ grid-template-columns:1fr; } .dashboard-stats{ grid-template-columns:1fr 1fr; } .form-grid{ grid-template-columns:1fr; } .modal{ padding:26px; } .tab-panel{ padding:24px; } .dashboard-head{ flex-direction:column; } }
 </style>
@@ -109,10 +113,11 @@
       <p>Add a vehicle, keep its problems, repairs and history together, and take that context into every diagnostic.</p>
     </section>
 
+    <!-- Premium Banner -->
     <div class="premium-banner" id="premiumBanner" style="display:none;">
       <div>
         <h3>Upgrade to CarExplain Premium</h3>
-        <p>Get unlimited AI diagnostics, the Quote Checker, and unlimited vehicles for just £4.99/mo.</p>
+        <p>Get unlimited AI diagnostics, the Quote Checker, and AI MOT explanations for £4.99/mo.</p>
       </div>
       <button class="btn-upgrade" onclick="upgradeToPremium()">Upgrade Now</button>
     </div>
@@ -199,7 +204,7 @@ const API_URL = "https://carxplain-api.murningella.workers.dev";
 const token = localStorage.getItem('sb-access-token');
 if (!token) { window.location.href = 'login.html'; }
 
-const state = { cars: [], activeVehicleId: null, activeTab: "overview", problems: [], repairs: [], isPremium: false };
+const state = { cars: [], activeVehicleId: null, activeTab: "overview", problems: [], repairs: [], isPremium: false, motData: null };
 const $ = id => document.getElementById(id);
 const contentEl = $("garageContent");
 const modalEl = $("addVehicleModal");
@@ -255,22 +260,26 @@ async function renderDashboard(){
   const title = `${car.make} ${car.model}`;
   const subline = [car.year, car.registration, car.fuel, car.gearbox].filter(Boolean).join(" • ") || "Details not set";
 
-  // Check if we have an MOT record to display the status
-  let motCardHtml = `<p class="label">MOT Status</p>`;
+  // Fetch MOT data first so we can use it across the dashboard
+  state.motData = null;
   try {
       const motRes = await fetch(`${API_URL}/api/user/mot?vehicleId=${car.id}`, { headers: { "Authorization": `Bearer ${token}` } });
-      const motData = await motRes.json();
-      if (motData.mot && motData.mot.expiry_date) {
-          const expDate = new Date(motData.mot.expiry_date).toLocaleDateString('en-GB');
-          motCardHtml += `<p class="value small" style="color: #16a34a;">Expires ${expDate}</p>`;
+      const motJson = await motRes.json();
+      if (motJson.mot) state.motData = motJson.mot;
+  } catch(e) { console.error(e); }
+
+  let motCardHtml = `<p class="label">MOT Status</p>`;
+  if (state.motData && state.motData.expiry_date) {
+      const rawExpiry = state.motData.expiry_date.replace(/\./g, '-');
+      const expDate = new Date(rawExpiry).toLocaleDateString('en-GB');
+      motCardHtml += `<p class="value small" style="color: #16a34a;">Expires ${expDate}</p>`;
+  } else {
+      if (car.registration) {
+          motCardHtml += `<button id="checkMotBtn" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="checkMOT('${car.id}', '${car.registration}')">Check DVLA</button>`;
       } else {
-          if (car.registration) {
-              motCardHtml += `<button id="checkMotBtn" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="checkMOT('${car.id}', '${car.registration}')">Check DVLA</button>`;
-          } else {
-              motCardHtml += `<p class="value small" style="color: #b45309; font-size: 12px;">Add Reg Plate</p>`;
-          }
+          motCardHtml += `<p class="value small" style="color: #b45309; font-size: 12px;">Add Reg Plate</p>`;
       }
-  } catch(e) { motCardHtml += `<p class="value small">Error</p>`; }
+  }
 
   contentEl.innerHTML = `
     <div class="dashboard-head">
@@ -325,48 +334,75 @@ async function renderDashboard(){
   $("statProblems").textContent = state.problems.length;
   $("statRepairs").textContent = state.repairs.length;
 
-  await renderTabPanels(car); 
+  renderTabPanels(car); 
   updateTabs();
 }
 
-async function renderTabPanels(car){
+function renderTabPanels(car){
   let motHtml = `<div class="placeholder"><div class="big">📄</div><h3>No MOT history found</h3><p>Click "Check DVLA" on the dashboard to pull this vehicle's history.</p></div>`;
   
-  try {
-    const motRes = await fetch(`${API_URL}/api/user/mot?vehicleId=${car.id}`, { headers: { "Authorization": `Bearer ${token}` } });
-    const motData = await motRes.json();
-    
-    if (motData.mot && motData.mot.raw_data && motData.mot.raw_data.motTests) {
-      const tests = motData.mot.raw_data.motTests;
-      motHtml = `<div style="display:flex; flex-direction:column; gap:16px;">`;
-      tests.forEach(test => {
-        const isPass = test.testResult === 'PASSED';
-        const color = isPass ? '#16a34a' : '#dc2626';
-        const date = new Date(test.testDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-        
-        motHtml += `
-          <div class="timeline-item">
-            <div class="timeline-dot ${isPass ? 'mot-pass' : 'mot-fail'}"></div>
-            <div class="timeline-date">${date} • ${test.odometerValue} miles</div>
-            <div class="timeline-title" style="color: ${color};">${isPass ? 'PASSED' : 'FAILED'}</div>
-            <div class="timeline-desc">Expiry: ${test.expiryDate || 'N/A'}</div>
-            ${test.rfrAndComments && test.rfrAndComments.length > 0 ? `
-              <div style="margin-top:10px; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
-                <strong style="font-size:12px; color:#334155;">Advisories / Failures:</strong>
-                <ul style="margin:5px 0 0 15px; padding:0; font-size:13px; color:#475569;">
-                  ${test.rfrAndComments.map(r => `<li>${r.text} (${r.type})</li>`).join('')}
-                </ul>
+  if (state.motData && state.motData.raw_data && state.motData.raw_data.motTests) {
+    const tests = state.motData.raw_data.motTests;
+    motHtml = `<div style="display:flex; flex-direction:column; gap:16px;">`;
+    tests.forEach(test => {
+      const isPass = test.testResult === 'PASSED';
+      const color = isPass ? '#16a34a' : '#dc2626';
+      
+      // FIX: DVLA returns dates like "2023.09.09", we need to replace dots with dashes
+      const rawDate = test.testDate ? test.testDate.replace(/\./g, '-') : new Date();
+      const date = new Date(rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      
+      let expiryStr = "N/A";
+      if (test.expiryDate) {
+          const rawExpiry = test.expiryDate.replace(/\./g, '-');
+          expiryStr = new Date(rawExpiry).toLocaleDateString('en-GB');
+      }
+      
+      motHtml += `
+        <div class="timeline-item">
+          <div class="timeline-dot ${isPass ? 'mot-pass' : 'mot-fail'}"></div>
+          <div class="timeline-date">${date} • ${test.odometerValue} miles</div>
+          <div class="timeline-title" style="color: ${color};">${isPass ? 'PASSED' : 'FAILED'}</div>
+          <div class="timeline-desc">Expiry: ${expiryStr}</div>
+          ${test.rfrAndComments && test.rfrAndComments.length > 0 ? `
+            <div style="margin-top:10px; background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <strong style="font-size:13px; color:#334155;">DVLA Advisories / Failures:</strong>
+                ${state.isPremium 
+                  ? `<button class="btn btn-primary" style="padding:4px 10px; font-size:11px;" onclick="explainMOT(this, '${encodeURIComponent(JSON.stringify(test.rfrAndComments))}')">✨ Explain with AI</button>`
+                  : `<a href="#" onclick="alert('Upgrade to Premium to read AI explanations of these advisories!')" style="font-size:11px; font-weight:bold; color:var(--blue);">Upgrade to Explain</a>`
+                }
               </div>
-            ` : ''}
-          </div>
-        `;
-      });
-      motHtml += `</div>`;
-    }
-  } catch(e) { console.error(e); }
+              <ul style="margin:0 0 0 15px; padding:0; font-size:13px; color:#475569;">
+                ${test.rfrAndComments.map(r => `<li>${r.text} (${r.type})</li>`).join('')}
+              </ul>
+              <div id="ai-report-${test.testDate.replace(/\./g, '')}" style="display:none;"></div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+    motHtml += `</div>`;
+  }
+
+  // Overview Tab
+  let overviewHtml = `<div class="placeholder"><div class="big">📋</div><h3>Overview</h3><p>No summary available yet. Run an MOT check or a diagnostic.</p></div>`;
+  if (state.motData && state.motData.raw_data && state.motData.raw_data.motTests && state.motData.raw_data.motTests.length > 0) {
+      const latest = state.motData.raw_data.motTests[0];
+      const lastMileage = latest.odometerValue;
+      overviewHtml = `
+        <div style="text-align:left;">
+            <h3 style="color:var(--navy); margin-bottom:15px;">Latest Vehicle Snapshot</h3>
+            <p style="font-size:15px; margin-bottom:10px;"><strong>Last Recorded Mileage:</strong> ${lastMileage.toLocaleString('en-GB')} miles</p>
+            <p style="font-size:15px; margin-bottom:10px;"><strong>Last MOT Date:</strong> ${new Date(latest.testDate.replace(/\./g, '-')).toLocaleDateString('en-GB')}</p>
+            <p style="font-size:15px; margin-bottom:20px;"><strong>Current MOT Expiry:</strong> ${new Date(latest.expiryDate.replace(/\./g, '-')).toLocaleDateString('en-GB')}</p>
+            <a href="diagnose.html?vehicle=${car.id}" class="btn btn-primary">Run a Diagnostic</a>
+        </div>
+      `;
+  }
 
   const panels = {
-    overview: `<div class="placeholder"><div class="big">📋</div><h3>Overview</h3><p>A summary of this vehicle will appear here.</p><a href="diagnose.html?vehicle=${car.id}" class="btn btn-primary">Run a diagnostic</a></div>`,
+    overview: overviewHtml,
     
     problems: state.problems.length === 0 
       ? `<div class="placeholder"><div class="big">🔍</div><h3>No problems recorded yet</h3><p>Diagnostic reports saved against this vehicle will be listed here.</p><a href="diagnose.html?vehicle=${car.id}" class="btn btn-primary">Start a diagnostic</a></div>`
@@ -518,7 +554,7 @@ async function handleAddSubmit(e){
       const newCar = state.cars[0];
       if(newCar) { state.activeVehicleId = newCar.id; render(); window.scrollTo({top:0, behavior:"smooth"}); }
     } else {
-      render(); // Refresh current dashboard
+      render(); 
     }
   } catch (e) { alert("Error: " + e.message); }
 }
@@ -574,7 +610,7 @@ async function checkMOT(vehicleId, reg) {
     const data = await res.json();
     
     if (data.success && data.data.motTests && data.data.motTests.length > 0) {
-      renderDashboard(); // Re-render the whole dashboard to show updated MOT data
+      renderDashboard(); 
     } else {
       alert("Error: " + (data.error || "No MOT history found for this registration."));
       btn.innerText = originalText;
@@ -587,10 +623,71 @@ async function checkMOT(vehicleId, reg) {
   }
 }
 
-// --- STRIPE UPGRADE LOGIC ---
+// --- AI MOT ADVISOR LOGIC ---
+async function explainMOT(btn, encodedAdvisories) {
+  const advisories = JSON.parse(decodeURIComponent(encodedAdvisories));
+  const container = btn.closest('.timeline-item').querySelector('.ai-report-box') || btn.closest('div').querySelector('[id^="ai-report-"]');
+  
+  btn.innerText = "Thinking...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_URL}/api/user/mot/explain`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ advisories: advisories })
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      container.style.display = "block";
+      container.className = "ai-report-box";
+      container.innerHTML = `
+        <div style="font-size:13px; color:#166534; margin-bottom:5px;"><strong>✨ AI Mechanic Translation:</strong></div>
+        <p style="margin:0 0 8px; font-size:14px; color:#14532d;"><strong>Summary:</strong> ${data.summary}</p>
+        <p style="margin:0 0 8px; font-size:14px; color:#14532d;"><strong>What this means:</strong> ${data.plainEnglish}</p>
+        <p style="margin:0 0 8px; font-size:14px; color:#14532d;"><strong>Urgency:</strong> ${data.urgency}</p>
+        <p style="margin:0; font-size:14px; color:#14532d;"><strong>Estimated Cost:</strong> ${data.estimatedCost}</p>
+      `;
+      btn.style.display = "none"; // Hide button after success
+    } else {
+      alert(data.error || "Failed to generate AI explanation.");
+      btn.innerText = "✨ Explain with AI";
+      btn.disabled = false;
+    }
+  } catch (err) {
+    alert("Failed to connect to AI.");
+    btn.innerText = "✨ Explain with AI";
+    btn.disabled = false;
+  }
+}
+
+// --- STRIPE UPGRADE / PORTAL LOGIC ---
 async function upgradeToPremium() {
   try {
     const response = await fetch(`${API_URL}/api/stripe/create-checkout`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ origin: window.location.origin })
+    });
+    const data = await response.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Error: " + data.error);
+    }
+  } catch (e) {
+    alert("Could not connect to Stripe.");
+  }
+}
+
+async function manageSubscription() {
+  try {
+    const response = await fetch(`${API_URL}/api/stripe/portal`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -615,7 +712,27 @@ async function checkUserPlan() {
     if (response.ok) {
       const data = await response.json();
       state.isPremium = (data.plan === 'premium');
-      if (!state.isPremium) $("premiumBanner").style.display = 'flex';
+      
+      const banner = $("premiumBanner");
+      if (state.isPremium) {
+          banner.style.display = 'flex';
+          banner.innerHTML = `
+            <div>
+              <h3>Premium Active</h3>
+              <p>You have full access to all CarExplain features.</p>
+            </div>
+            <button class="btn-upgrade" onclick="manageSubscription()">Manage Subscription</button>
+          `;
+      } else {
+          banner.style.display = 'flex';
+          banner.innerHTML = `
+            <div>
+              <h3>Upgrade to CarExplain Premium</h3>
+              <p>Get unlimited AI diagnostics, the Quote Checker, and AI MOT explanations for £4.99/mo.</p>
+            </div>
+            <button class="btn-upgrade" onclick="upgradeToPremium()">Upgrade Now</button>
+          `;
+      }
     }
   } catch (e) { console.log(e); }
 }
