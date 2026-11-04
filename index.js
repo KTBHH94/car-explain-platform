@@ -115,9 +115,7 @@ export default {
           if (profile && profile.plan === 'free') {
             const { count } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
             if (count >= 1) {
-              return new Response(JSON.stringify({ 
-                error: "Free accounts are limited to 1 vehicle. Upgrade to Premium for unlimited vehicles." 
-              }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+              return new Response(JSON.stringify({ error: "Free accounts are limited to 1 vehicle. Upgrade to Premium for unlimited vehicles." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
             }
           }
 
@@ -181,7 +179,7 @@ export default {
           return new Response(JSON.stringify({ mot: mot || null }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // MOT LOOKUP (POST) - UPDATED TO USE ENV VARIABLES FOR SCOPE
+        // MOT LOOKUP (POST)
         if (url.pathname === "/api/user/mot/lookup" && request.method === "POST") {
           const { registration, vehicleId } = await request.json();
           if (!registration) return new Response(JSON.stringify({ error: "Registration is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -245,6 +243,47 @@ export default {
           } catch (err) {
             return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
           }
+        }
+
+        // AI MOT ADVISOR (EXPLAIN ADVISORIES)
+        if (url.pathname === "/api/user/mot/explain" && request.method === "POST") {
+          const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+          if (!profile || profile.plan !== 'premium') {
+             return new Response(JSON.stringify({ error: "Premium Required", message: "The AI MOT Advisor is a Premium feature." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
+
+          const { advisories } = await request.json();
+
+          const systemInstruction = `You are an expert UK mechanic explaining MOT advisories to a customer.
+You must respond in STRICT JSON format with exactly these keys:
+{
+  "summary": "String (1 short sentence summarising what the garage found)",
+  "plainEnglish": "String (explain the technical jargon in plain English)",
+  "urgency": "String (e.g., 'Monitor at next service', 'Needs fixing soon', 'Urgent safety issue')",
+  "estimatedCost": "String (a rough UK price estimate or range for the repair, in GBP £)"
+}`;
+
+          const userPrompt = `Here are the advisories from the DVLA MOT test: ${JSON.stringify(advisories)}. Please explain them.`;
+
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+
+          const aiResponse = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemInstruction }] },
+              contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+              generationConfig: { response_mime_type: "application/json", temperature: 0.2, maxOutputTokens: 1000 }
+            })
+          });
+
+          if (!aiResponse.ok) throw new Error(`Gemini API error`);
+          
+          const aiData = await aiResponse.json();
+          let rawText = aiData.candidates[0].content.parts[0].text;
+          rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+          
+          return new Response(rawText, { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
       }
 
@@ -563,6 +602,36 @@ Please analyse this quote and generate the JSON report.`;
         }
       }
 
+      // --- STRIPE CUSTOMER PORTAL (CANCEL SUBSCRIPTION) ---
+      if (url.pathname === "/api/stripe/portal" && request.method === "POST") {
+        if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+        const { data: profile } = await supabase.from('profiles').select('stripe_customer_id').eq('id', user.id).single();
+        if (!profile || !profile.stripe_customer_id) {
+           return new Response(JSON.stringify({ error: "No active subscription found." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16', httpClient: Stripe.createFetchHttpClient() });
+
+        try {
+          const body = await request.json().catch(() => ({}));
+          const origin = body.origin || 'https://carexplain.co.uk';
+
+          const session = await stripe.billingPortal.sessions.create({
+            customer: profile.stripe_customer_id,
+            return_url: `${origin}/garage.html`,
+          });
+
+          return new Response(JSON.stringify({ url: session.url }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        } catch (err) {
+          return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+      }
+
       // --- STRIPE WEBHOOK ROUTE ---
       if (url.pathname === "/api/stripe/webhook" && request.method === "POST") {
         const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16', httpClient: Stripe.createFetchHttpClient() });
@@ -580,9 +649,13 @@ Please analyse this quote and generate the JSON report.`;
         if (event.type === 'checkout.session.completed') {
           const session = event.data.object;
           const userId = session.client_reference_id;
+          const customerId = session.customer;
           
           if (userId) {
-            await supabase.from('profiles').update({ plan: 'premium' }).eq('id', userId);
+            await supabase.from('profiles').update({ 
+                plan: 'premium',
+                stripe_customer_id: customerId 
+            }).eq('id', userId);
           }
         }
 
