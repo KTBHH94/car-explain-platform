@@ -113,14 +113,7 @@
       <p>Add a vehicle, keep its problems, repairs and history together, and take that context into every diagnostic.</p>
     </section>
 
-    <!-- Premium Banner -->
-    <div class="premium-banner" id="premiumBanner" style="display:none;">
-      <div>
-        <h3>Upgrade to CarExplain Premium</h3>
-        <p>Get unlimited AI diagnostics, the Quote Checker, and AI MOT explanations for £4.99/mo.</p>
-      </div>
-      <button class="btn-upgrade" onclick="upgradeToPremium()">Upgrade Now</button>
-    </div>
+    <div class="premium-banner" id="premiumBanner" style="display:none;"></div>
 
     <section class="garage-section" id="garageContent"></section>
   </div>
@@ -202,7 +195,7 @@
 
 const API_URL = "https://carxplain-api.murningella.workers.dev";
 const token = localStorage.getItem('sb-access-token');
-if (!token) { window.location.href = 'login.html'; }
+if (!token) { window.location.href = 'login.html?mode=login'; }
 
 const state = { cars: [], activeVehicleId: null, activeTab: "overview", problems: [], repairs: [], isPremium: false, motData: null };
 const $ = id => document.getElementById(id);
@@ -215,7 +208,7 @@ const repairFormEl = $("addRepairForm");
 async function loadCars() {
   try {
     const response = await fetch(`${API_URL}/api/user/vehicles`, { headers: { "Authorization": `Bearer ${token}` } });
-    if (response.status === 401) { localStorage.clear(); window.location.href = 'login.html'; return; }
+    if (response.status === 401) { localStorage.clear(); window.location.href = 'login.html?mode=login'; return; }
     const data = await response.json();
     state.cars = data.vehicles || [];
     render();
@@ -260,7 +253,6 @@ async function renderDashboard(){
   const title = `${car.make} ${car.model}`;
   const subline = [car.year, car.registration, car.fuel, car.gearbox].filter(Boolean).join(" • ") || "Details not set";
 
-  // Fetch MOT data first so we can use it across the dashboard
   state.motData = null;
   try {
       const motRes = await fetch(`${API_URL}/api/user/mot?vehicleId=${car.id}`, { headers: { "Authorization": `Bearer ${token}` } });
@@ -348,7 +340,6 @@ function renderTabPanels(car){
       const isPass = test.testResult === 'PASSED';
       const color = isPass ? '#16a34a' : '#dc2626';
       
-      // FIX: DVLA returns dates like "2023.09.09", we need to replace dots with dashes
       const rawDate = test.testDate ? test.testDate.replace(/\./g, '-') : new Date();
       const date = new Date(rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       
@@ -385,7 +376,6 @@ function renderTabPanels(car){
     motHtml += `</div>`;
   }
 
-  // Overview Tab
   let overviewHtml = `<div class="placeholder"><div class="big">📋</div><h3>Overview</h3><p>No summary available yet. Run an MOT check or a diagnostic.</p></div>`;
   if (state.motData && state.motData.raw_data && state.motData.raw_data.motTests && state.motData.raw_data.motTests.length > 0) {
       const latest = state.motData.raw_data.motTests[0];
@@ -526,7 +516,6 @@ async function handleAddSubmit(e){
   const isEdit = !!vehicleId;
 
   const data = { 
-    id: vehicleId,
     make: form.make.value.trim(), 
     model: form.model.value.trim(), 
     year: form.year.value.trim(), 
@@ -536,6 +525,7 @@ async function handleAddSubmit(e){
     mileage: form.mileage.value.trim() 
   };
   
+  if (isEdit) data.id = vehicleId;
   if(!data.make || !data.model){ alert("Please enter at least the make and model."); return; }
   
   try {
@@ -668,42 +658,26 @@ async function upgradeToPremium() {
   try {
     const response = await fetch(`${API_URL}/api/stripe/create-checkout`, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ origin: window.location.origin })
     });
     const data = await response.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Error: " + data.error);
-    }
-  } catch (e) {
-    alert("Could not connect to Stripe.");
-  }
+    if (data.url) window.location.href = data.url;
+    else alert("Error: " + data.error);
+  } catch (e) { alert("Could not connect to Stripe."); }
 }
 
 async function manageSubscription() {
   try {
     const response = await fetch(`${API_URL}/api/stripe/portal`, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ origin: window.location.origin })
     });
     const data = await response.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Error: " + data.error);
-    }
-  } catch (e) {
-    alert("Could not connect to Stripe.");
-  }
+    if (data.url) window.location.href = data.url;
+    else alert("Error: " + data.error);
+  } catch (e) { alert("Could not connect to Stripe."); }
 }
 
 async function checkUserPlan() {

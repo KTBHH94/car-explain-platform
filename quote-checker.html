@@ -191,8 +191,13 @@
 </footer>
 
 <script>
-  // Dynamic Header
+  // --- AUTH GUARD & GLOBAL VARIABLES ---
   const token = localStorage.getItem('sb-access-token');
+  if (!token) { 
+      window.location.href = 'login.html?mode=login'; 
+  }
+  
+  // Dynamic Header
   const headerAuth = document.getElementById('headerAuth');
   if (token && headerAuth) {
     headerAuth.innerHTML = `
@@ -206,8 +211,8 @@
     });
   } else if (headerAuth) {
     headerAuth.innerHTML = `
-      <a href="login.html" class="login-action">Log In</a>
-      <a href="login.html" class="btn btn-primary">Get Started</a>
+      <a href="login.html?mode=login" class="login-action">Log In</a>
+      <a href="login.html?mode=signup" class="btn btn-primary">Get Started</a>
     `;
   }
 
@@ -215,7 +220,7 @@
   async function analyzeQuote() {
     if (!token) {
       alert("You must be logged in to use the Quote Explainer.");
-      window.location.href = 'login.html';
+      window.location.href = 'login.html?mode=login';
       return;
     }
 

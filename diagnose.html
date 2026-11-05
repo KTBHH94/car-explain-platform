@@ -311,6 +311,11 @@ footer{background:var(--navy);color:#fff;padding:50px 0 24px}
   </div>
 </footer>
 <script>
+  // --- AUTH GUARD ---
+const token = localStorage.getItem('sb-access-token');
+if (!token) { 
+    window.location.href = 'login.html?mode=login'; 
+}
 "use strict";
 
 // --- INSTANT UI HIDE ---
