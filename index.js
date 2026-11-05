@@ -52,6 +52,33 @@ export default {
         return new Response(JSON.stringify({ session: data.session }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
+      // --- FORGOT PASSWORD ROUTE ---
+      if (url.pathname === "/api/auth/reset-password" && request.method === "POST") {
+        const { email, origin } = await request.json();
+        
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${origin}/reset-password.html`,
+        });
+
+        if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ success: true, message: "Password reset email sent." }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // --- UPDATE PASSWORD ROUTE ---
+      if (url.pathname === "/api/auth/update-password" && request.method === "POST") {
+        const { newPassword, token } = await request.json();
+        
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) {
+          return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, { password: newPassword });
+        
+        if (updateError) return new Response(JSON.stringify({ error: updateError.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
       // --- GET AUTH HEADER FOR PROTECTED ROUTES ---
       const authHeader = request.headers.get("Authorization");
       

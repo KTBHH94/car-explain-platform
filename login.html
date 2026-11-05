@@ -115,9 +115,10 @@
         window.location.href = 'login.html';
       });
     } else {
+      // CHANGED HERE: Added ?mode=login and ?mode=signup
       headerAuth.innerHTML = `
-        <a href="login.html" class="login-action">Log In</a>
-        <a href="login.html" class="btn btn-primary">Get Started</a>
+        <a href="login.html?mode=login" class="login-action">Log In</a>
+        <a href="login.html?mode=signup" class="btn btn-primary">Get Started</a>
       `;
     }
   }
@@ -161,13 +162,18 @@
     toggleLink.innerText = isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In";
     errorDiv.style.display = 'none';
 
-    // FIX: toggle BOTH the visibility and the required attribute
     usernameGroup.style.display = isLogin ? 'none' : 'block';
     usernameInput.required = !isLogin;
     if (isLogin) usernameInput.value = '';
   });
 
-  // --- 4. FORM SUBMISSION ---
+  // --- 4. READ URL PARAMETER TO SET DEFAULT MODE ---
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('mode') === 'login') {
+    toggleLink.click(); // Automatically switches the page to "Log In"
+  }
+
+  // --- 5. FORM SUBMISSION ---
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorDiv.style.display = 'none';
