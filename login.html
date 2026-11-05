@@ -18,7 +18,10 @@
     .auth-container .btn { width: 100%; padding: 14px; margin-top: 10px; margin-bottom: 20px; font-size: 15px; }
     .toggle-link { text-align: center; font-size: 14px; color: var(--blue); cursor: pointer; font-weight: 700; }
     .toggle-link:hover { text-decoration: underline; }
+    .forgot-link { display: block; text-align: right; font-size: 13px; color: var(--muted); text-decoration: none; margin-top: -8px; margin-bottom: 16px; font-weight: 600; cursor: pointer; }
+    .forgot-link:hover { color: var(--navy); }
     #auth-error { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; text-align: center; }
+    #auth-success { color: #047857; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; text-align: center; }
   </style>
 </head>
 <body>
@@ -44,6 +47,7 @@
     <h2 id="auth-title">Create an Account</h2>
     <p class="sub" id="auth-subtitle">Join CarExplain to save your vehicles and diagnostic history.</p>
     <div id="auth-error"></div>
+    <div id="auth-success"></div>
     
     <form id="auth-form">
       <div class="input-group" id="username-group">
@@ -54,7 +58,7 @@
         <input type="email" id="email" placeholder="Email Address" required>
       </div>
       
-      <div class="input-group">
+      <div class="input-group" id="password-group">
         <input type="password" id="password" placeholder="Password (min 6 characters)" required>
         <button type="button" class="toggle-eye" id="togglePassword" aria-label="Show password">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -63,6 +67,8 @@
           </svg>
         </button>
       </div>
+
+      <a href="#" class="forgot-link" id="forgotLink">Forgot Password?</a>
       
       <button type="submit" class="btn btn-primary" id="submit-btn">Sign Up</button>
     </form>
@@ -99,34 +105,21 @@
 </footer>
 
 <script>
-  // --- 1. DYNAMIC HEADER ---
+  const API_URL = "https://carxplain-api.murningella.workers.dev";
   const token = localStorage.getItem('sb-access-token');
   const headerAuth = document.getElementById('headerAuth');
   
   if (headerAuth) {
     if (token) {
-      headerAuth.innerHTML = `
-        <a href="#" class="login-action" id="logoutBtn">Log Out</a>
-        <a href="garage.html" class="btn btn-primary">My Garage</a>
-      `;
-      document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.clear();
-        window.location.href = 'login.html';
-      });
+      headerAuth.innerHTML = `<a href="#" class="login-action" id="logoutBtn">Log Out</a><a href="garage.html" class="btn btn-primary">My Garage</a>`;
+      document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = 'login.html'; });
     } else {
-      // CHANGED HERE: Added ?mode=login and ?mode=signup
-      headerAuth.innerHTML = `
-        <a href="login.html?mode=login" class="login-action">Log In</a>
-        <a href="login.html?mode=signup" class="btn btn-primary">Get Started</a>
-      `;
+      headerAuth.innerHTML = `<a href="login.html?mode=login" class="login-action">Log In</a><a href="login.html?mode=signup" class="btn btn-primary">Get Started</a>`;
     }
   }
 
-  // --- 2. PASSWORD VISIBILITY TOGGLE ---
   const togglePassword = document.getElementById('togglePassword');
   const passwordInput = document.getElementById('password');
-
   const eyeIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
   const eyeOffIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
@@ -139,80 +132,126 @@
     });
   }
 
-  // --- 3. LOGIN / SIGNUP TOGGLE ---
-  let isLogin = false;
+  let mode = 'signup'; 
   const form = document.getElementById('auth-form');
   const title = document.getElementById('auth-title');
   const subtitle = document.getElementById('auth-subtitle');
   const submitBtn = document.getElementById('submit-btn');
   const toggleLink = document.getElementById('toggle-link');
+  const forgotLink = document.getElementById('forgotLink');
   const errorDiv = document.getElementById('auth-error');
+  const successDiv = document.getElementById('auth-success');
   const usernameGroup = document.getElementById('username-group');
   const usernameInput = document.getElementById('username');
+  const passwordGroup = document.getElementById('password-group');
 
-  // Start in Signup mode — username is required and visible
-  usernameInput.required = true;
-  usernameGroup.style.display = 'block';
-
-  toggleLink.addEventListener('click', () => {
-    isLogin = !isLogin;
-    title.innerText = isLogin ? 'Welcome Back' : 'Create an Account';
-    subtitle.innerText = isLogin ? 'Log in to access your digital garage.' : 'Join CarExplain to save your vehicles and diagnostic history.';
-    submitBtn.innerText = isLogin ? 'Log In' : 'Sign Up';
-    toggleLink.innerText = isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In";
+  function updateUI() {
     errorDiv.style.display = 'none';
-
-    usernameGroup.style.display = isLogin ? 'none' : 'block';
-    usernameInput.required = !isLogin;
-    if (isLogin) usernameInput.value = '';
-  });
-
-  // --- 4. READ URL PARAMETER TO SET DEFAULT MODE ---
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('mode') === 'login') {
-    toggleLink.click(); // Automatically switches the page to "Log In"
+    successDiv.style.display = 'none';
+    
+    if (mode === 'signup') {
+      title.innerText = 'Create an Account';
+      subtitle.innerText = 'Join CarExplain to save your vehicles and diagnostic history.';
+      submitBtn.innerText = 'Sign Up';
+      toggleLink.innerText = "Already have an account? Log In";
+      usernameGroup.style.display = 'block';
+      usernameInput.required = true;
+      passwordGroup.style.display = 'block';
+      passwordInput.required = true;
+      forgotLink.style.display = 'none';
+    } else if (mode === 'login') {
+      title.innerText = 'Welcome Back';
+      subtitle.innerText = 'Log in to access your digital garage.';
+      submitBtn.innerText = 'Log In';
+      toggleLink.innerText = "Don't have an account? Sign Up";
+      usernameGroup.style.display = 'none';
+      usernameInput.required = false;
+      passwordGroup.style.display = 'block';
+      passwordInput.required = true;
+      forgotLink.style.display = 'block';
+    } else if (mode === 'forgot') {
+      title.innerText = 'Reset Password';
+      subtitle.innerText = 'Enter your email and we will send you a reset link.';
+      submitBtn.innerText = 'Send Reset Link';
+      toggleLink.innerText = "Back to Log In";
+      usernameGroup.style.display = 'none';
+      passwordGroup.style.display = 'none';
+      forgotLink.style.display = 'none';
+    }
   }
 
-  // --- 5. FORM SUBMISSION ---
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('mode') === 'login') { mode = 'login'; }
+  updateUI();
+
+  toggleLink.addEventListener('click', () => {
+    if (mode === 'forgot') mode = 'login';
+    else if (mode === 'login') mode = 'signup';
+    else mode = 'login';
+    updateUI();
+  });
+
+  forgotLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    mode = 'forgot';
+    updateUI();
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
     submitBtn.innerText = 'Please wait...';
     submitBtn.disabled = true;
 
     const email = document.getElementById('email').value.trim();
     const password = passwordInput.value;
     const username = usernameInput.value.trim();
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
 
     try {
-      const response = await fetch(`https://carxplain-api.murningella.workers.dev${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email, 
-          password,
-          username: isLogin ? undefined : username 
-        })
-      });
-      
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.error || 'Authentication failed');
-
-      if (isLogin) {
-        localStorage.setItem('sb-access-token', data.session.access_token);
-        localStorage.setItem('sb-refresh-token', data.session.refresh_token);
-        window.location.href = 'garage.html'; 
+      if (mode === 'forgot') {
+        const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, origin: window.location.origin })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to send reset link');
+        
+        successDiv.innerText = "Reset link sent! Please check your email inbox (and spam folder).";
+        successDiv.style.display = 'block';
+        form.reset();
       } else {
-        alert('Account created successfully! You can now log in.');
-        toggleLink.click();
+        const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+        const response = await fetch(`${API_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            email, 
+            password,
+            username: mode === 'login' ? undefined : username 
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Authentication failed');
+
+        if (mode === 'login') {
+          localStorage.setItem('sb-access-token', data.session.access_token);
+          localStorage.setItem('sb-refresh-token', data.session.refresh_token);
+          window.location.href = 'garage.html'; 
+        } else {
+          alert('Account created successfully! You can now log in.');
+          mode = 'login';
+          updateUI();
+        }
       }
     } catch (error) {
       errorDiv.innerText = error.message;
       errorDiv.style.display = 'block';
     } finally {
-      submitBtn.innerText = isLogin ? 'Log In' : 'Sign Up';
+      if (mode === 'forgot') submitBtn.innerText = 'Send Reset Link';
+      else if (mode === 'login') submitBtn.innerText = 'Log In';
+      else submitBtn.innerText = 'Sign Up';
       submitBtn.disabled = false;
     }
   });
